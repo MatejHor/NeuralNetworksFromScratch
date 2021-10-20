@@ -1,14 +1,14 @@
-PV021 project | Deep Learning from Scratch
+# PV021 project | Deep Learning from Scratch
 
-[DEADLINE]
+## [DEADLINE]
 Monday - 6th December 2021 (8 weeks)
 
-[TASK]
+## [TASK]
 1. Implement a feed-forward neural network in C/C++.
 2. Train it on a supplied Fashion-MNIST dataset using a backpropagation
    algorithm.
 
-[REQUIREMENTS]
+## [REQUIREMENTS]
 Your solution must meet ALL of the following requirements:
 1. Your solution must be compilable and runnable on the AISA server.
 2. Your solution achieves at least 88% accuracy.
@@ -27,7 +27,7 @@ Your solution must meet ALL of the following requirements:
       be on i-th line in the associated output file.
     - Each prediction is a single integer 0 - 9.
 
-[SCORING]
+## [SCORING]
 1. All submitted source files will be checked manually.
 2. All submitted solutions will also be checked by an automatic evaluator.
    A similar evaluator is provided to you in the project folder.
@@ -41,7 +41,7 @@ Your solution must meet ALL of the following requirements:
    etc is strictly forbidden. Use of such libraries will be awarded 0 points.
    (Low-level math operations: sqrt, exp, log, rand... is fine)
 
-[DATASET]
+## [DATASET]
 Fashion MNIST (https://arxiv.org/pdf/1708.07747.pdf) a modern version of a
 well-known MNIST (http://yann.lecun.com/exdb/mnist/). It is a dataset of
 Zalando's article images ‒ consisting of a training set of 60,000 examples
@@ -53,7 +53,7 @@ are four data files included:
     - fashion_mnist_train_labels.csv    - training labels
     - fashion_mnist_test_labels.csv     - testing labels
 
-[REMARKS]
+## [REMARKS]
 1. What you do internally with the training dataset is up to you.
 2. Write doc-strings.
 3. Pack all data with your implementations and put them on the right path so
@@ -64,7 +64,7 @@ are four data files included:
    Permissions will be given on a first-come first-served basis. You CANNOT
    submit solution in JAVA unless you have explicit permission first.
 
-[TIPS]
+## [TIPS]
 1. Do not wait until the week before the deadline!
 2. Consider using the suggested folder structure (data, src, etc.)
 3. Execute your RUN script on AISA before your submission. Missing or
@@ -92,7 +92,7 @@ are four data files included:
 12. Adjust hyperparameters to increase your internal validation accuracy.
 13. DO NOT WAIT UNTIL THE WEEK BEFORE THE DEADLINE!
 
-[AISA]
+## [AISA]
 1. .exe files are not runnable on Aisa.
 2. Aisa runs on "Red Hat Enterprise Linux Server release 7.5 (Maipo)"
 3. Aisa has 4×16 cores, OpenMP or similar easy parallelism may help (in case 
@@ -105,22 +105,8 @@ are four data files included:
    them as well, otherwise, the RUN script won't work, and I will have no clue
    what to include.
 
-[FAQ]
-[Q] Can I write in Python, please, please, pretty please?
-[A] No. It's too slow without matrix libs.
- 
-[Q] Can I implement a convolutional neural network instead of the feed-forward
-    neural network?
-[A] Yes, but it might be much harder.
- 
-[Q] Can Java implementations compete with C implementations performance-wise?
-[A]	Yes. At least one of the best performing implementations was written
-    in java.
-
-Best luck with the project!
-
-Matej Gallo
-422328@mail.muni.cz
-PV021 Neural Networks
+## Contributors
+* Matej Horniak
+* Lukas Mikula
 
 
