@@ -30,3 +30,5 @@
 *.exe
 *.out
 *.app
+data/fashion_mnist_train_vectors.csv
+data/fashion_mnist_test_vectors.csv
