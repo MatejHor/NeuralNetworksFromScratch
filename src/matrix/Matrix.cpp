@@ -16,9 +16,9 @@ Matrix::Matrix(int rows, int columns, double **other) : rows(rows), columns(colu
 
 Matrix::Matrix(const Matrix &other)
 {
-    rows = other.rows;
-    columns = other.columns;
-    matrix = other.matrix;
+    rows = other.getRows();
+    columns = other.getColumns();
+    matrix = this->initMatrix(other.getMatrix());
 }
 
 bool Matrix::operator==(const Matrix &other) const
@@ -65,34 +65,33 @@ void Matrix::print()
     {
         for (int column = 0; column < columns; column++)
         {
-            std::cout << matrix[row][column];
+            std::cout << matrix[row][column] << " ";
         }
 
         std::cout << "\n";
     }
+    cout << "\n";
 }
 
-Matrix Matrix::T()
+Matrix* Matrix::T()
 {
-    Matrix transposition = Matrix(rows, columns);
+    cout << "Transpozicia spustena.\n";
+    Matrix* transposition = new Matrix(columns, rows);
 
     for (int row = 0; row < rows; row++)
     {
         for (int column = 0; column < columns; column++)
         {
-            transposition.matrix[column][row] = matrix[row][column];
+            transposition->matrix[column][row] = matrix[row][column];
         }
     }
 
-    this->~Matrix();
+    // this->~Matrix();
     return transposition;
 }
 
-const Matrix &Matrix::operator=(const Matrix &other)
+double** Matrix::initMatrix(double** _matrix)
 {
-    this->rows = other.getRows();
-    this->columns = other.getColumns();
-    double** _matrix = other.getMatrix();
     double** new_matrix = new double*[rows];
 
     for (int row = 0; row < rows; row++) {
@@ -100,7 +99,6 @@ const Matrix &Matrix::operator=(const Matrix &other)
         for (int column = 0; column < columns; column++)
             new_matrix[row][column] = _matrix[row][column];
     }
-    this->matrix = new_matrix;
 
-    return *this;
-}
+    return new_matrix;
+} 

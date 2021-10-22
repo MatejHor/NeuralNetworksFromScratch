@@ -14,12 +14,13 @@ public:
     Matrix(int rows, int columns);
     Matrix(int rows, int columns, double** other);
     Matrix(const Matrix &other);
-    const Matrix &operator=(const Matrix &other);
 
     ~Matrix() {
         for(int i = 0; i < rows; i++)
             delete [] matrix[i];
         delete [] matrix;
+
+        cout << "Destructing Matrix!!!" << rows << " " << columns << endl;
     }
 
     int getRows() const {
@@ -37,9 +38,10 @@ public:
     bool operator==(const Matrix &other) const;
     bool operator!=(const Matrix &other) const;
     // Matrix operator*() const;
+    double** initMatrix(double** _matrix);
 
     void print();
-    Matrix T();
+    Matrix* T();
 };
 
 #endif
