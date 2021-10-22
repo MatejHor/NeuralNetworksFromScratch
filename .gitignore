@@ -30,5 +30,11 @@
 *.exe
 *.out
 *.app
+
+# Data 
 data/fashion_mnist_train_vectors.csv
 data/fashion_mnist_test_vectors.csv
+
+# IDE
+.vscode
+.idea
