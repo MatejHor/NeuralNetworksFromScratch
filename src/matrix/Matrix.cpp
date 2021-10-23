@@ -57,6 +57,16 @@ bool Matrix::operator!=(const Matrix &other) const
     return false;
 }
 
+const void Matrix::operator=(const Matrix &other) {
+    for(int i = 0; i < this->rows; i++)
+            delete [] this->matrix[i];
+    delete [] this->matrix;
+
+    this->rows = other.rows;
+    this->columns = other.columns;
+    this->setMatrix(other.getMatrix());
+}
+
 void Matrix::print()
 {
     cout << "Matrix(rows=" << rows << ", columns=" << columns << ", &=" << (this) << ")" << endl;
@@ -103,12 +113,3 @@ double** Matrix::copyMatrix(double** _matrix)
     return new_matrix;
 } 
 
-const Matrix* &Matrix::operator=(const Matrix &other) {
-    for(int i = 0; i < this->rows; i++)
-            delete [] this->matrix[i];
-    delete [] this->matrix;
-
-    this->rows = other.rows;
-    this->columns = other.columns;
-    this->setMatrix(other.getMatrix());
-}

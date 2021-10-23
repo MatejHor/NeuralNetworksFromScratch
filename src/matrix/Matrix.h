@@ -7,42 +7,47 @@ using namespace std;
 class Matrix
 {
 private:
-    double** matrix;
+    double **matrix;
     int rows;
     int columns;
+
 public:
     Matrix(int rows, int columns);
-    Matrix(int rows, int columns, double** other);
+    Matrix(int rows, int columns, double **other);
     Matrix(const Matrix &other);
 
-    ~Matrix() {
-        for(int i = 0; i < rows; i++)
-            delete [] matrix[i];
-        delete [] matrix;
+    ~Matrix()
+    {
+        for (int i = 0; i < rows; i++)
+            delete[] matrix[i];
+        delete[] matrix;
 
         cout << "Destructing Matrix(row=" << rows << ", column=" << columns << ", &=" << (this) << ")" << endl;
     }
 
-    int getRows() const {
+    int getRows() const
+    {
         return rows;
     }
 
-    int getColumns() const {
+    int getColumns() const
+    {
         return columns;
     }
 
-    double** getMatrix() const {
+    double **getMatrix() const
+    {
         return matrix;
     }
 
     bool operator==(const Matrix &other) const;
     bool operator!=(const Matrix &other) const;
-    double** copyMatrix(double** _matrix);
-    const Matrix* &operator=(const Matrix &other);
+    const void operator=(const Matrix &other);
 
-    void setMatrix(double** _matrix);
+    double **copyMatrix(double **_matrix);
+    void setMatrix(double **_matrix);
     void print();
-    Matrix* T();
+    Matrix *T();
 };
 
 #endif
