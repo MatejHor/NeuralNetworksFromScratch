@@ -81,7 +81,7 @@ static Matrix *multiply(Matrix m1, Matrix m2)
     }
 
     int rows = m1.getRows();
-    int columns = m1.getRows();
+    int columns = m1.getColumns();
     double** new_matrix = new double*[rows];
     double** matrix_1 = m1.getMatrix();
     double** matrix_2 = m2.getMatrix();

@@ -35,6 +35,11 @@
 
 # NOTES
 - class pre Dataset (vstup)
+    - y - pole lablov
+    - Matrix (X) - transponovana matica vstupnych dat
+    - shape pre X a y
+    - print pre vypis (adresu premennej)
+    - getter a setter pre X aj y
 - class pre Matrix
     - pole poli
     - .T transponovanie matice
