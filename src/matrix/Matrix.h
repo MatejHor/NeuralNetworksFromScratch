@@ -20,7 +20,7 @@ public:
             delete [] matrix[i];
         delete [] matrix;
 
-        cout << "Destructing Matrix!!!" << rows << " " << columns << endl;
+        cout << "Destructing Matrix(row=" << rows << ", column=" << columns << ", &=" << (this) << ")" << endl;
     }
 
     int getRows() const {
@@ -37,9 +37,10 @@ public:
 
     bool operator==(const Matrix &other) const;
     bool operator!=(const Matrix &other) const;
-    // Matrix operator*() const;
-    double** initMatrix(double** _matrix);
+    double** copyMatrix(double** _matrix);
+    const Matrix* &operator=(const Matrix &other);
 
+    void setMatrix(double** _matrix);
     void print();
     Matrix* T();
 };

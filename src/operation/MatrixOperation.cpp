@@ -1,12 +1,11 @@
 #include "MatrixOperation.h"
-#include "Matrix.h"
 
 static Matrix *sum(Matrix m1, Matrix m2)
 {
     if ((m1.getRows() == m2.getRows()) && (m1.getColumns() == m2.getColumns()))
     {
         cout << "Matrices don't have the same shape! Please enter valid matrices.\n";
-        return;
+        return NULL;
     }
 
     int rows = m1.getRows();
@@ -25,11 +24,11 @@ static Matrix *sum(Matrix m1, Matrix m2)
     return summed;
 }
 
-static Matrix sumDimension(Matrix m1, Matrix m2)
+static Matrix* sumDimension(Matrix m1, Matrix m2)
 {
 }
 
-static Matrix dot(Matrix m1, Matrix m2)
+static Matrix* dot(Matrix m1, Matrix m2)
 {
 }
 
@@ -38,7 +37,7 @@ static Matrix *multiply(Matrix m1, Matrix m2)
     if ((m1.getColumns() != m2.getRows()))
     {
         cout << "Matrices can't be multiplied!\nPlease enter valid matricies for multiplication.\n";
-        return;
+        return NULL;
     }
 
     int rows = m1.getRows();
@@ -64,6 +63,6 @@ static Matrix *multiply(Matrix m1, Matrix m2)
     return multi;
 }
 
-static Matrix log(Matrix m)
+static Matrix* log(Matrix m)
 {
 }
