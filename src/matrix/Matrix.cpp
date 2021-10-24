@@ -12,6 +12,7 @@ Matrix::Matrix(int rows, int columns) : rows(rows), columns(columns)
 Matrix::Matrix(int rows, int columns, double **other) : rows(rows), columns(columns)
 {
     matrix = other;
+    cout << "Creating Matrix(row=" << rows << ", column=" << columns << ", &=" << (this) << ")" << endl;
 }
 
 Matrix::Matrix(const Matrix &other)
@@ -19,6 +20,14 @@ Matrix::Matrix(const Matrix &other)
     rows = other.getRows();
     columns = other.getColumns();
     matrix = this->copyMatrix(other.getMatrix());
+}
+
+Matrix::Matrix()
+{
+    rows = 1;
+    columns = 1;
+    matrix = new double*[1];
+    matrix[1] = new double[1];
 }
 
 bool Matrix::operator==(const Matrix &other) const

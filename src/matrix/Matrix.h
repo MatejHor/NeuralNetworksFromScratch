@@ -15,6 +15,7 @@ public:
     Matrix(int rows, int columns);
     Matrix(int rows, int columns, double **other);
     Matrix(const Matrix &other);
+    Matrix();
 
     ~Matrix()
     {
