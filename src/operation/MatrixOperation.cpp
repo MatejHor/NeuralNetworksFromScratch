@@ -108,3 +108,115 @@ static Matrix* log(Matrix m)
     
     return new Matrix(m.getRows(), m.getColumns(), new_matrix);
 }
+
+static Matrix* sigmoid(Matrix x){
+    double **matrix = new double*[x.getRows()];
+    double **X = x.getMatrix();
+
+    for (int row = 0; row < x.getRows(); row++)
+    {
+        matrix[row] = new double[x.getColumns()];
+        for (int column=0; column < x.getColumns(); ++column) {
+            matrix[row][column] = 1 / (1.0 + exp(-X[row][column]));
+        }
+    }
+
+    return new Matrix(x.getRows(), x.getColumns(), matrix);
+}
+
+static Matrix* sigmoidDerivative(Matrix x){
+    double **matrix = new double*[x.getRows()];
+    double **X = x.getMatrix();
+
+    for (int row = 0; row < x.getRows(); row++)
+    {
+        matrix[row] = new double[x.getColumns()];
+        for (int column=0; column < x.getColumns(); ++column) {
+            double s = 1 / (1.0 + exp(-X[row][column]));
+            matrix[row][column] = s * (1.0 - s);
+        }
+    }
+
+    return new Matrix(x.getRows(), x.getColumns(), matrix);
+}
+
+static Matrix* softmax(Matrix x){
+    double **matrix = new double*[x.getRows()];
+    double **X = x.getMatrix();
+
+    for (int row = 0; row < x.getRows(); row++)
+    {
+        matrix[row] = new double[x.getColumns()];
+        double sum = 0;
+        for (int column=0; column < x.getColumns(); ++column) {
+            sum += exp(X[row][column]);
+        }
+
+        for (int column=0; column < x.getColumns(); ++column) {
+            double x_exp = exp(X[row][column]);
+            matrix[row][column] = x_exp / sum;
+        }
+    }
+
+    // sum_x.~Matrix();
+    return new Matrix(x.getRows(), x.getColumns(), matrix);
+}
+
+static Matrix* softmaxDerivation(Matrix x){
+    double **matrix = new double*[x.getRows()];
+    double **X = x.getMatrix();
+
+    for (int row = 0; row < x.getRows(); row++)
+    {
+        matrix[row] = new double[x.getColumns()];
+        double sum = 0;
+        for (int column=0; column < x.getColumns(); ++column) {
+            sum += exp(X[row][column]);
+        }
+
+        for (int column=0; column < x.getColumns(); ++column) {
+            double x_softmax = exp(X[row][column]) / sum;
+            matrix[row][column] = x_softmax * (1.0 - x_softmax);
+        }
+    }
+
+    return new Matrix(x.getRows(), x.getColumns(), matrix);
+}
+
+static Matrix* reLu(Matrix x){
+    double **matrix = new double*[x.getRows()];
+    double **X = x.getMatrix();
+
+    for (int row = 0; row < x.getRows(); row++)
+    {
+        matrix[row] = new double[x.getColumns()];
+        for (int column=0; column < x.getColumns(); ++column) {
+            if (X[row][column] <= 0){
+                matrix[row][column]= 0.0;
+            }
+            else {
+                matrix[row][column] = X[row][column];
+            }
+        }
+    }
+    return new Matrix(x.getRows(), x.getColumns(), matrix);
+}
+
+static Matrix* reLuDerivation(Matrix x){
+    double **matrix = new double*[x.getRows()];
+    double **X = x.getMatrix();
+
+    for (int row = 0; row < x.getRows(); row++)
+    {
+        matrix[row] = new double[x.getColumns()];
+        for (int column=0; column < x.getColumns(); ++column) {
+            if (X[row][column] <= 0){
+                matrix[row][column]= 0.0;
+            }
+            else {
+                matrix[row][column] = 1.0;
+            }
+        }
+    }
+    return new Matrix(x.getRows(), x.getColumns(), matrix);
+}

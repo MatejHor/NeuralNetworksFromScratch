@@ -49,7 +49,7 @@
     - dot nad maticou
     - multiple nad maticou
     - log nad maticou
-    - aktivacne funkcie sigmoid/softmax/tanh?/ReLu
+    - aktivacne funkcie sigmoid/softmax/ReLu
 - function forward_propagation(X, weights)
 - function back_propagation( weights, cache, X, Y))
 - function loss_function(A_i(last), Y, weights) cross_entropy_loss

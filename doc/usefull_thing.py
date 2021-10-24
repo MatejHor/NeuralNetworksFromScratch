@@ -1,46 +1,42 @@
 import numpy as np
 
+x = np.array([[0, 1], [2,3], [4,5]])
 def sigmoid(x):
-    """
-    Compute the sigmoid of x
-
-    Arguments:
-    x -- A scalar or numpy array of any size
-
-    Return:
-    s -- sigmoid(x)
-    """
-    
-    ### START CODE HERE ### (≈ 1 line of code)
-    s = 1 / (1 + np.exp(-x))
-    ### END CODE HERE ###
-    
+    s = 1 / (1 + np.exp(-x))    
     return s
-
-x = np.array([1, 2, 3])
-sigmoid(x)
+print("sigmoid(x) = " + str(sigmoid(x)))
 
 def sigmoid_derivative(x):
-    """
-    Compute the gradient (also called the slope or derivative) of the sigmoid function with respect to its input x.
-    You can store the output of the sigmoid function into variables and then use it to calculate the gradient.
-    
-    Arguments:
-    x -- A scalar or numpy array
-
-    Return:
-    ds -- Your computed gradient.
-    """
-    
-    ### START CODE HERE ### (≈ 2 lines of code)
     s = sigmoid(x)
-    ds = s* (1 - s)
-    ### END CODE HERE ###
-    
+    ds = s* (1 - s)    
     return ds
+print("sigmoid_derivative(x) = " + str(sigmoid_derivative(x)))
 
-x = np.array([1, 2, 3])
-print ("sigmoid_derivative(x) = " + str(sigmoid_derivative(x)))
+def softmax(x):
+    x_exp = np.exp(x)
+    # print('exp', x_exp)
+    x_sum = np.sum(x_exp, axis = 1, keepdims = True) 
+    # print('sum',x_sum)
+    s = x_exp / x_sum
+    return s
+print("softmax(x) = " + str(softmax(x)))
+
+def softmax_derivation(x):
+    s = softmax(x)
+    ds = s * (1 - s)
+    return ds
+print("softmax_derivation(x) = " + str(softmax_derivation(x)))
+
+def ReLu(x):
+    func = lambda x: 0.0 if x <= 0.0 else x
+    return np.vectorize(func)(x)
+print("ReLu(x) = " + str(ReLu(x)))
+
+def ReLu_derivation(x):
+    func = lambda x: 0.0 if x <= 0.0 else 1.0
+    return np.vectorize(func)(x)
+print("ReLu_derivation(x) = " + str(ReLu_derivation(x)))
+
 
 def normalizeRows(x):
     """

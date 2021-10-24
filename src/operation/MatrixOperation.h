@@ -13,6 +13,13 @@ public:
     static Matrix* dot(Matrix m1, Matrix m2);
     static Matrix* multiply(Matrix m1, Matrix m2);
     static Matrix* log(Matrix m);
+
+    static Matrix* sigmoid(Matrix x);
+    static Matrix* sigmoidDerivative(Matrix x);
+    static Matrix* softmax(Matrix x);
+    static Matrix* softmaxDerivation(Matrix x);
+    static Matrix* reLu(Matrix x);
+    static Matrix* reLuDerivation(Matrix x);
 };
 
 #endif
