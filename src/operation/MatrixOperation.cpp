@@ -43,6 +43,24 @@ static Matrix *sum(Matrix m, double x)
     return summed;
 }
 
+static Matrix *subtrack(double x, Matrix m)
+{
+    int rows = m.getRows();
+    int columns = m.getColumns();
+
+    Matrix *summed = new Matrix(rows, columns);
+
+    for (int row = 0; row < rows; row++)
+    {
+        for (int column = 0; column < columns; column++)
+        {
+            summed->getMatrix()[row][column] = x - m.getMatrix()[row][column] ;
+        }
+    }
+
+    return summed;
+}
+
 static Matrix* sumDimension(Matrix m)
 {
     double** new_matrix = new double*[m.getRows()];
@@ -120,7 +138,7 @@ static Matrix *multiply(Matrix m1, Matrix m2)
     for (int row = 0; row < rows; row++) {
         new_matrix[row] = new double[columns];
         for (int column = 0; column < columns; column++)
-            new_matrix[row][column] = matrix_1[row][column] *  matrix_2[row][column];
+            new_matrix[row][column] = matrix_1[row][column] * matrix_2[row][column];
     }
     
     return new Matrix(rows, columns, new_matrix);

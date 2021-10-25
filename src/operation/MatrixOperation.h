@@ -10,6 +10,7 @@ class MatrixOperation
 public:
     static Matrix* sum(Matrix m1, Matrix m2);
     static Matrix* sum(Matrix m, double x);
+    static Matrix* subtrack(double x, Matrix m);
     static double sumMatrix(Matrix m);
     static Matrix* sumDimension(Matrix m);
     static Matrix* dot(Matrix m1, Matrix m2);
