@@ -9,9 +9,12 @@ class MatrixOperation
 {
 public:
     static Matrix* sum(Matrix m1, Matrix m2);
+    static Matrix* sum(Matrix m, double x);
+    static double sumMatrix(Matrix m);
     static Matrix* sumDimension(Matrix m);
     static Matrix* dot(Matrix m1, Matrix m2);
     static Matrix* multiply(Matrix m1, Matrix m2);
+    static Matrix *multiply(Matrix m, double x);
     static Matrix* log(Matrix m);
 
     static Matrix* sigmoid(Matrix x);

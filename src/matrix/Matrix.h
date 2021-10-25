@@ -2,6 +2,7 @@
 #define MATRIX_H_
 
 #include <iostream>
+#include <stdlib.h> // rand
 using namespace std;
 
 class Matrix
@@ -13,6 +14,7 @@ private:
 
 public:
     Matrix(int rows, int columns);
+    Matrix(int rows, int columns, double seed);
     Matrix(int rows, int columns, double **other);
     Matrix(const Matrix &other);
     Matrix();

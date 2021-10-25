@@ -25,6 +25,24 @@ static Matrix *sum(Matrix m1, Matrix m2)
     return summed;
 }
 
+static Matrix *sum(Matrix m, double x)
+{
+    int rows = m.getRows();
+    int columns = m.getColumns();
+
+    Matrix *summed = new Matrix(rows, columns);
+
+    for (int row = 0; row < rows; row++)
+    {
+        for (int column = 0; column < columns; column++)
+        {
+            summed->getMatrix()[row][column] = m.getMatrix()[row][column] + x;
+        }
+    }
+
+    return summed;
+}
+
 static Matrix* sumDimension(Matrix m)
 {
     double** new_matrix = new double*[m.getRows()];
@@ -39,6 +57,19 @@ static Matrix* sumDimension(Matrix m)
     }
     
     return new Matrix(m.getRows(), 1, new_matrix);
+}
+
+static double sumMatrix(Matrix m)
+{
+    double** _matrix = m.getMatrix();
+    double sum = 0;
+
+    for (int row = 0; row < m.getRows(); row++) {
+        for (int column = 0; column < m.getColumns(); column++)
+            sum += _matrix[row][column];
+    }
+    
+    return sum;
 }
 
 static Matrix* dot(Matrix m1, Matrix m2)
@@ -95,6 +126,22 @@ static Matrix *multiply(Matrix m1, Matrix m2)
     return new Matrix(rows, columns, new_matrix);
 }
 
+static Matrix *multiply(Matrix m, double x)
+{
+    int rows = m.getRows();
+    int columns = m.getColumns();
+    double** new_matrix = new double*[rows];
+    double** matrix_1 = m.getMatrix();
+
+    for (int row = 0; row < rows; row++) {
+        new_matrix[row] = new double[columns];
+        for (int column = 0; column < columns; column++)
+            new_matrix[row][column] = matrix_1[row][column] * x;
+    }
+    
+    return new Matrix(rows, columns, new_matrix);
+}
+
 static Matrix* log(Matrix m)
 {
     double** new_matrix = new double*[m.getRows()];
@@ -132,7 +179,7 @@ static Matrix* sigmoidDerivative(Matrix x){
     {
         matrix[row] = new double[x.getColumns()];
         for (int column=0; column < x.getColumns(); ++column) {
-            double s = 1 / (1.0 + exp(-X[row][column]));
+            double s = 1 / (1.0 + exp( -( X[row][column]) ) );
             matrix[row][column] = s * (1.0 - s);
         }
     }

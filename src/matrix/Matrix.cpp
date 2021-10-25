@@ -9,6 +9,20 @@ Matrix::Matrix(int rows, int columns) : rows(rows), columns(columns)
     }
 }
 
+Matrix::Matrix(int rows, int columns, double seed): rows(rows), columns(columns)
+{
+    srand(seed * 50684764);
+
+    matrix = new double*[rows];
+    for (int row = 0; row < rows; row++)
+    {
+        matrix[row] = new double[columns];
+        for (int column = 0; column < columns; column++) {
+            matrix[row][column] = ((double)rand() / RAND_MAX) * seed;
+        }
+    }
+}
+
 Matrix::Matrix(int rows, int columns, double **other) : rows(rows), columns(columns)
 {
     matrix = other;
