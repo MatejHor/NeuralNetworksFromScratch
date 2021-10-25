@@ -1,38 +1,3 @@
-# 1. Define the neural network structure ( # of input units,  # of hidden units, etc). 
-
-# 2. Initialize the model's parameters with random values
-
-# 3. Loop:
-
-## Implement forward propagation -> A_i(last), cache
-- compute Z_i = X/Z_i-1 * W_i(vector) + b_i
-- activation function A_i = tanh/sigmoid/ReLu...(Z_i)
-- save cache data (Z_i, A_i ....)
-
-## Compute loss -> cost
-- cross_entropy  
-    logprobs = np.multiply(np.log(A2),Y) + np.multiply((1 - Y), np.log(1 - A2))
-    cost = - np.sum(logprobs) / m
-
-## Implement backward propagation to get the gradients -> dW_i, db_i (every)
-- get params W_i, b_i
-- get cache A_i
-- dZ_i = A_i - Y(only for out layer)/ np.dot( (W_i+1).T, dZ_i+1) * (1 - A_i(vector)^2)
-- dW_i = 1 / m * (np.dot(dZ_i, (A_i-1).T))
-- db_i = 1 / m * np.sum(dZ_i, axis=1, keepdims=True)
-- save derivation
-
-* (np.sum([[1, 2], [3, 4]], axis=1, keepdims=True) -> [[3], [7]])
-* (m - shape of input)
-
-## Update parameters (gradient descent) -> W_i, b_i (every)
-- get params W_i, b_i (forwardprop)
-- get params dW_i, db_i (backprop)
-- learning_rate (alpha=1.2)
-- W_i = W_1 - learning_rate * dW_i
-- b_i = b_1 - learning_rate * db_i
-- save params W_i, b_i
-
 # NOTES
 - class pre Dataset (vstup)
     - y - pole lablov
@@ -55,24 +20,66 @@
 - function loss_function(A_i(last), Y, weights) cross_entropy_loss
 - function update_weights(weights, derivation)
 - function initialize_parameters(n_x, n_h, n_y) random/he
-    n_x -- size of the input layer
-    n_h -- size of the hidden layer
-    n_y -- size of the output layer
 
-## INTEGRATION 
-model(  
-    X(input),   
-    Y(true_labels),   
-    n_h(size_of_hidden_layer),   
-    num_iterations   
-    )  
+# INTEGRATION 
+1. Initialize parameters -> parameters
+### initialize_parameters(layer_dims) -> parameters
+    layer dims list containing the dimension of each layer
+    
+input layer        | hidden layer(dense)| hidden layer(dense)| output layer
+784                | 255                | 200                | 10
+                   | 255rows 784columns | 200rows 255columns | 10rows 200columns  | 1rows 10columns
 
-1. initialize_parameters(n_x, n_h, n_y) -> weights
+    for layer_i in layers
+        W_i = random matrix [len(W_i)][len(W_i-1)] * 0.01
+        b_i = random double [len(W_i)]
+    
 2. Training LOOP -> weights
-- A_i(last), cache = forward_propagation()
-- cost = compute_cost()
-- grads = backward_propagation()
-- weights = update_weights()
-3. Prediction(weights, X) -> Y
-- A_i(last), cache = forward_propagation()
-- Y = round( A_i(last) )
+### forward_propagation(X, parametre) -> AL(last post-activation value), cache(W, A_prev, b, Z)
+    - A = X forloop len(layers)
+        - A_prev = A
+        - Z = np.dot(W, A) + b, cache(W, A, b)
+        - A = activationFunction(Z)(relu and last sigmoid), cache(W, A_prev, b, Z) 
+    - AL, cache
+
+### compute_cost(AL, Y) -> cost(value) (cross-entropy)
+    - m = y.shape
+    - cost = -1/m * np.sum( np.multiply(Y, np.log(AL)) + np.multiply((1-Y), np.log(1-AL)) )
+    - np.squeeze(cost) (only remove useless dimension not needed!)
+
+### backward_propagation(Y, AL, caches) -> dW_temp,db_temp, dA_prev_temp every
+    - dAL = - (np.divide(Y, AL) - np.divide(1 - Y, 1 - AL))
+    - najprv len sigmoid
+    - forloop reverse len(layer)
+        - current cache current layer (Z, W, A_prev)
+        - dZ = relu_backward(dA, activation_cache)
+        - m = A_prev.shape[1]
+        - dW_temp = (1/m) * np.dot(dZ, A_prev.T)
+        - db_temp = (1/m) * np.sum(dZ, axis=1, keepdims=True)
+        - dA_prev_temp = np.dot(W.T, dZ)
+
+### update_weights(parameters, grads, learning_rate) -> parameters
+    - forloop len(layers/2???)
+        - params[W_i] = params[W_i] - learningRate * params[dW_i]
+        - params[b_i] = params[b_i] - learningRate * params[db_i]
+3. Prediction -> Y
+### predict(parameters, X) -> predictions
+- A = forward_propagation(X, parameters)
+- predictions = np.round(A2)
+
+## SUMARIZE WORKFLOW (X, Y, layers_dims, learning_rate, num_iterations) "MAIN"
+layers_dims = [784, 255, 255, 100, 10] // 3 Skryte vrstvy
+learning_rate = 0.0075
+num_iterations = 3000
+
+- parameters = initialize_parameters_deep(layers_dims)
+- forloop len(num_iterations) -> parameters
+    - AL <- forward_propagation(X, parameters) uchovame **cache**
+    - cost <- compute_cost(AL, Y)
+    - gradas(3 derivation per layer) <- backward_propagation(AL, Y, cache)
+    - parameters <- update_parameters(parameters, grads, learning_rate)
+
+    - print ("Cost after iteration %d: %f" %(i, cost))
+
+- predictions = predict(X_test, parameters)
+- print("ACC %f", accuracy(X_test, Y_test))
