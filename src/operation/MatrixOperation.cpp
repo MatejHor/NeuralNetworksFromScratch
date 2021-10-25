@@ -1,5 +1,5 @@
 #include "MatrixOperation.h"
-#include <math.h> 
+#include <math.h>
 
 static Matrix *sum(Matrix m1, Matrix m2)
 {
@@ -19,6 +19,30 @@ static Matrix *sum(Matrix m1, Matrix m2)
         for (int column = 0; column < columns; column++)
         {
             summed->getMatrix()[row][column] = m1.getMatrix()[row][column] + m2.getMatrix()[row][column];
+        }
+    }
+
+    return summed;
+}
+
+static Matrix *subtrack(Matrix m1, Matrix m2)
+{
+    if ((m1.getRows() != m2.getRows()) && (m1.getColumns() != m2.getColumns()))
+    {
+        cout << "Matrices don't have the same shape! Please enter valid matrices.\n";
+        return NULL;
+    }
+
+    int rows = m1.getRows();
+    int columns = m2.getColumns();
+
+    Matrix *summed = new Matrix(rows, columns);
+
+    for (int row = 0; row < rows; row++)
+    {
+        for (int column = 0; column < columns; column++)
+        {
+            summed->getMatrix()[row][column] = m1.getMatrix()[row][column] - m2.getMatrix()[row][column];
         }
     }
 
@@ -54,43 +78,45 @@ static Matrix *subtrack(double x, Matrix m)
     {
         for (int column = 0; column < columns; column++)
         {
-            summed->getMatrix()[row][column] = x - m.getMatrix()[row][column] ;
+            summed->getMatrix()[row][column] = x - m.getMatrix()[row][column];
         }
     }
 
     return summed;
 }
 
-static Matrix* sumDimension(Matrix m)
+static Matrix *sumDimension(Matrix m)
 {
-    double** new_matrix = new double*[m.getRows()];
-    double** _matrix = m.getMatrix();
+    double **new_matrix = new double *[m.getRows()];
+    double **_matrix = m.getMatrix();
 
-    for (int row = 0; row < m.getRows(); row++) {
+    for (int row = 0; row < m.getRows(); row++)
+    {
         new_matrix[row] = new double[1];
         double sum = 0;
         for (int column = 0; column < m.getColumns(); column++)
             sum += _matrix[row][column];
-        *new_matrix[row] = sum;   
+        *new_matrix[row] = sum;
     }
-    
+
     return new Matrix(m.getRows(), 1, new_matrix);
 }
 
 static double sumMatrix(Matrix m)
 {
-    double** _matrix = m.getMatrix();
+    double **_matrix = m.getMatrix();
     double sum = 0;
 
-    for (int row = 0; row < m.getRows(); row++) {
+    for (int row = 0; row < m.getRows(); row++)
+    {
         for (int column = 0; column < m.getColumns(); column++)
             sum += _matrix[row][column];
     }
-    
+
     return sum;
 }
 
-static Matrix* dot(Matrix m1, Matrix m2)
+static Matrix *dot(Matrix m1, Matrix m2)
 {
     if ((m1.getColumns() != m2.getRows()))
     {
@@ -131,16 +157,41 @@ static Matrix *multiply(Matrix m1, Matrix m2)
 
     int rows = m1.getRows();
     int columns = m1.getColumns();
-    double** new_matrix = new double*[rows];
-    double** matrix_1 = m1.getMatrix();
-    double** matrix_2 = m2.getMatrix();
+    double **new_matrix = new double *[rows];
+    double **matrix_1 = m1.getMatrix();
+    double **matrix_2 = m2.getMatrix();
 
-    for (int row = 0; row < rows; row++) {
+    for (int row = 0; row < rows; row++)
+    {
         new_matrix[row] = new double[columns];
         for (int column = 0; column < columns; column++)
             new_matrix[row][column] = matrix_1[row][column] * matrix_2[row][column];
     }
-    
+
+    return new Matrix(rows, columns, new_matrix);
+}
+
+static Matrix *divide(Matrix m1, Matrix m2)
+{
+    if ((m1.getRows() != m2.getRows()) && (m1.getColumns() != m2.getColumns()))
+    {
+        cout << "Matrices don't have the same shape! Please enter valid matrices.\n";
+        return NULL;
+    }
+
+    int rows = m1.getRows();
+    int columns = m1.getColumns();
+    double **new_matrix = new double *[rows];
+    double **matrix_1 = m1.getMatrix();
+    double **matrix_2 = m2.getMatrix();
+
+    for (int row = 0; row < rows; row++)
+    {
+        new_matrix[row] = new double[columns];
+        for (int column = 0; column < columns; column++)
+            new_matrix[row][column] = matrix_1[row][column] / matrix_2[row][column];
+    }
+
     return new Matrix(rows, columns, new_matrix);
 }
 
@@ -148,40 +199,44 @@ static Matrix *multiply(Matrix m, double x)
 {
     int rows = m.getRows();
     int columns = m.getColumns();
-    double** new_matrix = new double*[rows];
-    double** matrix_1 = m.getMatrix();
+    double **new_matrix = new double *[rows];
+    double **matrix_1 = m.getMatrix();
 
-    for (int row = 0; row < rows; row++) {
+    for (int row = 0; row < rows; row++)
+    {
         new_matrix[row] = new double[columns];
         for (int column = 0; column < columns; column++)
             new_matrix[row][column] = matrix_1[row][column] * x;
     }
-    
+
     return new Matrix(rows, columns, new_matrix);
 }
 
-static Matrix* log(Matrix m)
+static Matrix *log(Matrix m)
 {
-    double** new_matrix = new double*[m.getRows()];
-    double** _matrix = m.getMatrix();
+    double **new_matrix = new double *[m.getRows()];
+    double **_matrix = m.getMatrix();
 
-    for (int row = 0; row < m.getRows(); row++) {
+    for (int row = 0; row < m.getRows(); row++)
+    {
         new_matrix[row] = new double[m.getColumns()];
         for (int column = 0; column < m.getColumns(); column++)
             new_matrix[row][column] = log(_matrix[row][column]);
     }
-    
+
     return new Matrix(m.getRows(), m.getColumns(), new_matrix);
 }
 
-static Matrix* sigmoid(Matrix x){
-    double **matrix = new double*[x.getRows()];
+static Matrix *sigmoid(Matrix x)
+{
+    double **matrix = new double *[x.getRows()];
     double **X = x.getMatrix();
 
     for (int row = 0; row < x.getRows(); row++)
     {
         matrix[row] = new double[x.getColumns()];
-        for (int column=0; column < x.getColumns(); ++column) {
+        for (int column = 0; column < x.getColumns(); ++column)
+        {
             matrix[row][column] = 1 / (1.0 + exp(-X[row][column]));
         }
     }
@@ -189,15 +244,17 @@ static Matrix* sigmoid(Matrix x){
     return new Matrix(x.getRows(), x.getColumns(), matrix);
 }
 
-static Matrix* sigmoidDerivative(Matrix x){
-    double **matrix = new double*[x.getRows()];
+static Matrix *sigmoidDerivative(Matrix x)
+{
+    double **matrix = new double *[x.getRows()];
     double **X = x.getMatrix();
 
     for (int row = 0; row < x.getRows(); row++)
     {
         matrix[row] = new double[x.getColumns()];
-        for (int column=0; column < x.getColumns(); ++column) {
-            double s = 1 / (1.0 + exp( -( X[row][column]) ) );
+        for (int column = 0; column < x.getColumns(); ++column)
+        {
+            double s = 1 / (1.0 + exp(-(X[row][column])));
             matrix[row][column] = s * (1.0 - s);
         }
     }
@@ -205,19 +262,22 @@ static Matrix* sigmoidDerivative(Matrix x){
     return new Matrix(x.getRows(), x.getColumns(), matrix);
 }
 
-static Matrix* softmax(Matrix x){
-    double **matrix = new double*[x.getRows()];
+static Matrix *softmax(Matrix x)
+{
+    double **matrix = new double *[x.getRows()];
     double **X = x.getMatrix();
 
     for (int row = 0; row < x.getRows(); row++)
     {
         matrix[row] = new double[x.getColumns()];
         double sum = 0;
-        for (int column=0; column < x.getColumns(); ++column) {
+        for (int column = 0; column < x.getColumns(); ++column)
+        {
             sum += exp(X[row][column]);
         }
 
-        for (int column=0; column < x.getColumns(); ++column) {
+        for (int column = 0; column < x.getColumns(); ++column)
+        {
             double x_exp = exp(X[row][column]);
             matrix[row][column] = x_exp / sum;
         }
@@ -227,19 +287,22 @@ static Matrix* softmax(Matrix x){
     return new Matrix(x.getRows(), x.getColumns(), matrix);
 }
 
-static Matrix* softmaxDerivation(Matrix x){
-    double **matrix = new double*[x.getRows()];
+static Matrix *softmaxDerivation(Matrix x)
+{
+    double **matrix = new double *[x.getRows()];
     double **X = x.getMatrix();
 
     for (int row = 0; row < x.getRows(); row++)
     {
         matrix[row] = new double[x.getColumns()];
         double sum = 0;
-        for (int column=0; column < x.getColumns(); ++column) {
+        for (int column = 0; column < x.getColumns(); ++column)
+        {
             sum += exp(X[row][column]);
         }
 
-        for (int column=0; column < x.getColumns(); ++column) {
+        for (int column = 0; column < x.getColumns(); ++column)
+        {
             double x_softmax = exp(X[row][column]) / sum;
             matrix[row][column] = x_softmax * (1.0 - x_softmax);
         }
@@ -248,18 +311,22 @@ static Matrix* softmaxDerivation(Matrix x){
     return new Matrix(x.getRows(), x.getColumns(), matrix);
 }
 
-static Matrix* reLu(Matrix x){
-    double **matrix = new double*[x.getRows()];
+static Matrix *reLu(Matrix x)
+{
+    double **matrix = new double *[x.getRows()];
     double **X = x.getMatrix();
 
     for (int row = 0; row < x.getRows(); row++)
     {
         matrix[row] = new double[x.getColumns()];
-        for (int column=0; column < x.getColumns(); ++column) {
-            if (X[row][column] <= 0){
-                matrix[row][column]= 0.0;
+        for (int column = 0; column < x.getColumns(); ++column)
+        {
+            if (X[row][column] <= 0)
+            {
+                matrix[row][column] = 0.0;
             }
-            else {
+            else
+            {
                 matrix[row][column] = X[row][column];
             }
         }
@@ -267,18 +334,22 @@ static Matrix* reLu(Matrix x){
     return new Matrix(x.getRows(), x.getColumns(), matrix);
 }
 
-static Matrix* reLuDerivation(Matrix x){
-    double **matrix = new double*[x.getRows()];
+static Matrix *reLuDerivation(Matrix x)
+{
+    double **matrix = new double *[x.getRows()];
     double **X = x.getMatrix();
 
     for (int row = 0; row < x.getRows(); row++)
     {
         matrix[row] = new double[x.getColumns()];
-        for (int column=0; column < x.getColumns(); ++column) {
-            if (X[row][column] <= 0){
-                matrix[row][column]= 0.0;
+        for (int column = 0; column < x.getColumns(); ++column)
+        {
+            if (X[row][column] <= 0)
+            {
+                matrix[row][column] = 0.0;
             }
-            else {
+            else
+            {
                 matrix[row][column] = 1.0;
             }
         }
