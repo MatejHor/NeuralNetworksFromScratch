@@ -19,6 +19,7 @@ public:
     static Matrix *multiply(Matrix m, double x);
     static Matrix *log(Matrix m);
 
+    // ACTIVATION FUNCTION AND DERIVATIVE
     static Matrix *sigmoid(Matrix x);
     static Matrix *sigmoidDerivative(Matrix x);
     static Matrix *softmax(Matrix x);

@@ -45,7 +45,7 @@ public:
 
     bool operator==(const Matrix &other) const;
     bool operator!=(const Matrix &other) const;
-    const void operator=(const Matrix &other);
+    // const void operator=(const Matrix &other);
 
     double **copyMatrix(double **_matrix);
     void setMatrix(double **_matrix);

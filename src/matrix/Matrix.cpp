@@ -2,11 +2,11 @@
 
 Matrix::Matrix(int rows, int columns) : rows(rows), columns(columns)
 {
-    matrix = new double*[rows];
-    for (int row = 0; row < rows; row++)
-    {
-        matrix[row] = new double[columns];
-    }
+
+}
+
+Matrix::Matrix()
+{
 }
 
 Matrix::Matrix(int rows, int columns, double seed): rows(rows), columns(columns)
@@ -34,14 +34,6 @@ Matrix::Matrix(const Matrix &other)
     rows = other.getRows();
     columns = other.getColumns();
     matrix = this->copyMatrix(other.getMatrix());
-}
-
-Matrix::Matrix()
-{
-    rows = 1;
-    columns = 1;
-    matrix = new double*[1];
-    matrix[1] = new double[1];
 }
 
 bool Matrix::operator==(const Matrix &other) const
@@ -80,15 +72,15 @@ bool Matrix::operator!=(const Matrix &other) const
     return false;
 }
 
-const void Matrix::operator=(const Matrix &other) {
-    for(int i = 0; i < this->rows; i++)
-            delete [] this->matrix[i];
-    delete [] this->matrix;
+// const void Matrix::operator=(const Matrix &other) {
+//     for(int i = 0; i < this->rows; i++)
+//             delete [] this->matrix[i];
+//     delete [] this->matrix;
 
-    this->rows = other.rows;
-    this->columns = other.columns;
-    this->setMatrix(other.getMatrix());
-}
+//     this->rows = other.rows;
+//     this->columns = other.columns;
+//     this->setMatrix(other.getMatrix());
+// }
 
 void Matrix::print()
 {
