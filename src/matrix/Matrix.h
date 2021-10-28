@@ -1,6 +1,14 @@
 #ifndef MATRIX_H_
 #define MATRIX_H_
 
+#include <chrono>
+#include <random>
+
+#include <cstdlib>
+// #include <iostream>
+// #include <random>
+#include <limits>
+
 #include <iostream>
 #include <stdlib.h> // rand
 using namespace std;

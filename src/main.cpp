@@ -10,14 +10,16 @@
 static double layer_dims[] = {784, 255, 225, 200, 10};
 static int len_layer = 4;
 static double learning_rate = 0.0075;
-static int num_iterations = 3000;
+// static int num_iterations = 3000;
+static int num_iterations = 1;
+bool TEST = 0;
 
-Matrix *A_cache = new Matrix[len_layer];
-Matrix *Z_cache = new Matrix[len_layer];
+Matrix **A_cache = new Matrix*[len_layer];
+Matrix **Z_cache = new Matrix*[len_layer];
 
-Matrix *dA_cache = new Matrix[len_layer];
-Matrix *dW_cache = new Matrix[len_layer];
-Matrix *db_cache = new Matrix[len_layer];
+Matrix **dA_cache = new Matrix*[len_layer];
+Matrix **dW_cache = new Matrix*[len_layer];
+Matrix **db_cache = new Matrix*[len_layer];
 
 Matrix *initializeBias()
 {
@@ -25,7 +27,7 @@ Matrix *initializeBias()
     for (int layer = 0; layer < len_layer; layer++)
     {
         bias[layer] = *(new Matrix(layer_dims[layer + 1], 1, 0.0));
-        cout << "Initialize bias " << bias << " (" << layer_dims[layer + 1] << "x" << 1 << ") " << endl;
+        cout << "Initialize bias (rows=" << layer_dims[layer + 1] << ", columns=" << 1 << ", &=" << (&bias[layer]) << ")" << endl;
         // bias[layer].print();
     }
     return bias;
@@ -37,68 +39,75 @@ Matrix *initializeWeights()
     for (int layer = 0; layer < len_layer; layer++)
     {
         weights[layer] = *(new Matrix(layer_dims[layer + 1], layer_dims[layer], 0.01));
-        cout << "Initialize weights " << weights << " (" << layer_dims[layer + 1] << "x" << layer_dims[layer] << ") " << endl;
+        cout << "Initialize weights (rows=" << weights[layer].getRows() << ", columns=" << weights[layer].getColumns() << ", &=" << (&weights[layer]) << ")" << endl;
         // weights[layer].print();
     }
     return weights;
 }
 
-Matrix *forwardPropagation(Matrix X, Matrix *weights, Matrix *bias)
+Matrix *forwardPropagation(Matrix* X, Matrix *weights, Matrix *bias)
 {
-    Matrix A_prev = X;
+    Matrix* A_prev = X;
+    Matrix* Z = NULL;
     for (int hidden_layer = 0; hidden_layer < (len_layer - 1); hidden_layer++)
     {
-        A_prev.printParams();
-        weights[hidden_layer].printParams();
+        // Matrix* dot_ = dot(&weights[hidden_layer], A_prev);
+        // cout << "DOT_ ";
+        // dot_->printParams();
+        // bias[hidden_layer].printParams();
 
-        Matrix dotm = *dot(weights[hidden_layer], A_prev);
-        Matrix Z = *sum(*dot(weights[hidden_layer], A_prev), bias[hidden_layer]);
+        Z = sumVector(dot(&weights[hidden_layer], A_prev), &bias[hidden_layer]);
         A_cache[hidden_layer] = A_prev;
-        A_prev = *reLu(Z);
+        A_prev = reLu(Z);
     }
 
-    Matrix Z = *sum(*dot(weights[len_layer - 1], A_prev), bias[len_layer - 1]);
+    Z = sumVector(dot(&weights[(len_layer - 1)], A_prev), &bias[len_layer - 1]);
+    Z->print();
     A_cache[len_layer - 1] = A_prev;
-    Matrix *AL = softmax(Z);
-    return AL;
+    A_prev = softmax(Z);
+    
+    // Z->print();
+    // A_prev->print();
+
+    return A_prev;
 }
 
 void backwardPropagation(Matrix AL, Matrix Y, Matrix *weights)
 {
     double m = AL.getColumns();
     Matrix dAL = *multiply(
-        *subtrack(
-            *divide(Y, AL),
-            *divide(*subtrack(1, Y), *subtrack(1, AL))),
+        subtrack(
+            divide(&Y, &AL),
+            divide(subtrack(1, &Y), subtrack(1, &AL))),
         -1);
 
-    Matrix dZ = *softmaxDerivation(dAL);
+    Matrix dZ = *softmaxDerivation(&dAL);
     Matrix dW = *multiply(
-        *dot(
-            dZ,
-            *(A_cache[len_layer - 1].T())),
+        dot(
+            &dZ,
+            (A_cache[len_layer - 1]->T())),
         (1 / m));
-    Matrix db = *multiply(*sumDimension(dZ), (1 / m));
-    Matrix dA_prev = *dot(*weights[len_layer - 1].T(), dZ);
+    Matrix db = *multiply(sumDimension(&dZ), (1 / m));
+    Matrix dA_prev = *dot((weights[len_layer - 1].T()), &dZ);
 
-    dA_cache[len_layer - 1] = dA_prev;
-    dW_cache[len_layer - 1] = dW;
-    db_cache[len_layer - 1] = db;
+    dA_cache[len_layer - 1] = &dA_prev;
+    dW_cache[len_layer - 1] = &dW;
+    db_cache[len_layer - 1] = &db;
 
     for (int hidden_layer = (len_layer - 2); hidden_layer >= 0; hidden_layer--)
     {
-        Matrix dZ = *reLuDerivation(dAL);
+        Matrix dZ = *reLuDerivation(&dAL);
         Matrix dW = *multiply(
-            *dot(
-                dZ,
-                *(A_cache[hidden_layer].T())),
+            dot(
+                &dZ,
+                (A_cache[hidden_layer]->T())),
             (1 / m));
-        Matrix db = *multiply(*sumDimension(dZ), (1 / m));
-        Matrix dA_prev = *dot(*weights[hidden_layer].T(), dZ);
+        Matrix db = *multiply(sumDimension(&dZ), (1 / m));
+        Matrix dA_prev = *dot((weights[hidden_layer].T()), &dZ);
 
-        dA_cache[hidden_layer] = dA_prev;
-        dW_cache[hidden_layer] = dW;
-        db_cache[hidden_layer] = db;
+        dA_cache[hidden_layer] = &dA_prev;
+        dW_cache[hidden_layer] = &dW;
+        db_cache[hidden_layer] = &db;
     }
 }
 
@@ -107,8 +116,8 @@ Matrix *updateWeights(Matrix *weights)
     for (int hidden_layer = 0; hidden_layer < len_layer; hidden_layer++)
     {
         weights[hidden_layer] = *subtrack(
-            weights[hidden_layer],
-            *multiply(dW_cache[hidden_layer], learning_rate));
+            &weights[hidden_layer],
+            multiply(dW_cache[hidden_layer], learning_rate));
     }
     return weights;
 }
@@ -118,27 +127,28 @@ Matrix *updateBias(Matrix *bias)
     for (int hidden_layer = 0; hidden_layer < len_layer; hidden_layer++)
     {
         bias[hidden_layer] = *subtrack(
-            bias[hidden_layer],
-            *multiply(db_cache[hidden_layer], learning_rate));
+            &bias[hidden_layer],
+            multiply(db_cache[hidden_layer], learning_rate));
     }
     return bias;
 }
 
-double computeCostCrossEntropy(Matrix AL, Matrix Y)
+double computeCostCrossEntropy(Matrix* AL, Matrix* Y)
 {
-    int m = Y.getColumns();
-    double sum_matrix = sumMatrix(
-        *sum(
-            *multiply(
-                Y,
-                *log(AL)),
-            *multiply(
-                *subtrack(1, Y),
-                *log(*subtrack(1, AL)))));
-    return (-1 / m) * sum_matrix;
+    int m = Y->getColumns();
+    Matrix* logAL = log(AL);
+    Matrix* multiply_Y_logAL = multiply(Y, logAL);
+    Matrix* subtrackY = subtrack(1, Y);
+    Matrix* log_SubtrackAL = log(subtrack(1, AL));
+    Matrix* multiply_SubtrackY_log_SubtrackAL = multiply(subtrackY, log_SubtrackAL);
+    Matrix* sumMatrix_ = sum(multiply_Y_logAL, multiply_SubtrackY_log_SubtrackAL);
+
+    double sumMatrixVal = sumMatrix(sumMatrix_);
+    cout << "sum_matrix: " << sumMatrixVal;
+    return (-1 / m) * sumMatrixVal;
 }
 
-Matrix *predict(Matrix X, Matrix *weights, Matrix *bias)
+Matrix *predict(Matrix* X, Matrix *weights, Matrix *bias)
 {
     return forwardPropagation(X, weights, bias);
 }
@@ -224,17 +234,26 @@ int main()
     for (int iteration = 0; iteration < num_iterations; iteration++)
     {
         cout << "2.1 FORWARD PROPAGATION" << endl;
-        Matrix AL = *forwardPropagation(train.getX(), weights, bias);
+        Matrix* AL = forwardPropagation(train.getX(), weights, bias);
+
+        // cout << "[+] FINISHED FORWARD PROPAGATION" << endl;
+        // for (int i = 0; i < len_layer; i++)
+        // {
+        //     cout << "BIAS ";
+        //     bias[i].printParams();
+        //     cout << "WEIGHT ";
+        //     weights[i].printParams();
+        // }
 
         cout << "2.2 COMPUTE COST" << endl;
         double cost = computeCostCrossEntropy(AL, train.getY());
 
-        cout << "2.3 BACKWARD PROPAGATION" << endl;
-        backwardPropagation(AL, train.getY(), weights);
+        // cout << "2.3 BACKWARD PROPAGATION" << endl;
+        // backwardPropagation(AL, train.getY(), weights);
 
-        cout << "2.4 UPDATE PARAMETERS" << endl;
-        weights = updateWeights(weights);
-        bias = updateBias(bias);
+        // cout << "2.4 UPDATE PARAMETERS" << endl;
+        // weights = updateWeights(weights);
+        // bias = updateBias(bias);
 
         if (iteration % 100 == 0)
         {

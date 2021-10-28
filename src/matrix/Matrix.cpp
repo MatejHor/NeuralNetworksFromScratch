@@ -2,7 +2,13 @@
 
 Matrix::Matrix(int rows, int columns) : rows(rows), columns(columns)
 {
+    double** new_matrix = new double*[rows];
+    for (int row = 0; row < rows; row++)
+    {
+        new_matrix[row] = new double[columns];
+    }
 
+    this->matrix = new_matrix;
 }
 
 Matrix::Matrix()
@@ -11,14 +17,27 @@ Matrix::Matrix()
 
 Matrix::Matrix(int rows, int columns, double seed): rows(rows), columns(columns)
 {
-    srand(seed * 50684764);
+    // unsigned seed = 1;
+    // std::mt19937 generator1(1);
+    // static_cast<double>(generator1()) / numeric_limits<uint32_t>::max();
+
+    // srand(seed * 50684764);
+    // std::default_random_engine generator();
+    // std::chrono::system_clock::now().time_since_epoch().count();
+    // std::uniform_real_distribution<double> distribution(-1.0, 1.0);
+    // std::normal_distribution<double> distribution(0.0, 1.0);
+
+    std::random_device rd{};
+    std::mt19937 gen{rd()};
+    std::normal_distribution<> d{0, 1};
 
     double** new_matrix = new double*[rows];
     for (int row = 0; row < rows; row++)
     {
         new_matrix[row] = new double[columns];
         for (int column = 0; column < columns; column++) {
-            new_matrix[row][column] = ((double)rand() / RAND_MAX) * seed;
+            
+            new_matrix[row][column] = d(gen) * seed;
         }
     }
 
@@ -109,7 +128,7 @@ void Matrix::setMatrix(double** _matrix) {
 
 Matrix* Matrix::T()
 {
-    cout << "Transpose matrix(&=" << (this) << ")" << endl;
+    cout << "Transpose matrix(old&=" << (this);
     Matrix* transposition = new Matrix(columns, rows);
 
     for (int row = 0; row < rows; row++)
@@ -119,6 +138,7 @@ Matrix* Matrix::T()
             transposition->matrix[column][row] = matrix[row][column];
         }
     }
+    cout << ",new&=" << transposition << ")" << endl;
     return transposition;
 }
 

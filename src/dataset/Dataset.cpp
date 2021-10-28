@@ -6,11 +6,15 @@ Dataset::Dataset(string xFileName, string yFileName)
     int columns = getColumns(xFileName);
 
     double** xData = readData(xFileName, rows, columns);
-    X = new Matrix(rows, columns, xData);
-    // X = (*X).T();
+    X = Matrix(rows, columns, xData).T();
 
     double** yData = readData(yFileName, rows, 1);
     Y = new Matrix(rows, 1, yData);
+
+    cout << "[+] DATASET WITH X,Y" << endl;
+    X->printParams();
+    Y->printParams();
+    cout << "[+] END DATASET PRINT" << endl;
 }
 
 int Dataset::getRows(string file)

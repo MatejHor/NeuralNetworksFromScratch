@@ -24,14 +24,14 @@ public:
 
     int getColumns(string file);
 
-    Matrix getX() const
+    Matrix* getX() const
     {
-        return *X;
+        return X;
     }
 
-    Matrix getY() const
+    Matrix* getY() const
     {
-        return *Y;
+        return Y;
     }
 
     double **readData(string file, int rows, int columns);
