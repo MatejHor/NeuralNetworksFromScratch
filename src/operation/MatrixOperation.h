@@ -27,6 +27,9 @@ public:
     static Matrix *softmaxDerivation(Matrix* x);
     static Matrix *reLu(Matrix* x);
     static Matrix *reLuDerivation(Matrix* x);
+
+    // UPDATE PRED MATRIX
+    static Matrix* squeeze(Matrix* Y, string func);
 };
 
 #endif

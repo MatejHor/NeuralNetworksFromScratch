@@ -3,11 +3,7 @@
 
 #include <chrono>
 #include <random>
-
-#include <cstdlib>
-// #include <iostream>
-// #include <random>
-#include <limits>
+#include <iomanip>
 
 #include <iostream>
 #include <stdlib.h> // rand
@@ -58,6 +54,7 @@ public:
     double **copyMatrix(double **_matrix);
     void setMatrix(double **_matrix);
     void print();
+    void print(string name);
     void printParams();
     Matrix *T();
 };

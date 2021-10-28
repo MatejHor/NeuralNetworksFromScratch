@@ -34,7 +34,7 @@ public:
         return Y;
     }
 
-    double **readData(string file, int rows, int columns);
+    double **readData(string file, int rows, int columns, bool X);
     
     void print(int limit);
 };

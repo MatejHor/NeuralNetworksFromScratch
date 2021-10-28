@@ -17,19 +17,9 @@ Matrix::Matrix()
 
 Matrix::Matrix(int rows, int columns, double seed): rows(rows), columns(columns)
 {
-    // unsigned seed = 1;
-    // std::mt19937 generator1(1);
-    // static_cast<double>(generator1()) / numeric_limits<uint32_t>::max();
-
-    // srand(seed * 50684764);
-    // std::default_random_engine generator();
-    // std::chrono::system_clock::now().time_since_epoch().count();
-    // std::uniform_real_distribution<double> distribution(-1.0, 1.0);
-    // std::normal_distribution<double> distribution(0.0, 1.0);
-
-    std::random_device rd{};
-    std::mt19937 gen{rd()};
-    std::normal_distribution<> d{0, 1};
+    random_device rd{};
+    mt19937 gen{rd()};
+    normal_distribution<> d{0, 1};
 
     double** new_matrix = new double*[rows];
     for (int row = 0; row < rows; row++)
@@ -105,16 +95,34 @@ bool Matrix::operator!=(const Matrix &other) const
 
 void Matrix::print()
 {
-    cout << "Matrix(rows=" << rows << ", columns=" << columns << ", &=" << (this) << ")" << endl;
+    cout << "Matrix(rows=" << rows << ", columns=" << columns << ", &=" << (this) << ")" << endl << "[\n";
     for (int row = 0; row < rows; row++)
     {
+        cout << " [ ";
         for (int column = 0; column < columns; column++)
         {
-            cout << matrix[row][column] << " ";
+            cout << std::fixed << std::setprecision(8) << matrix[row][column] << " ";
         }
 
-        cout << endl;
+        cout << "]" << endl;
     }
+    cout << "]" << endl;
+}
+
+void Matrix::print(string name)
+{
+    cout << name << " Matrix(rows=" << rows << ", columns=" << columns << ", &=" << (this) << ")" << endl << "[\n";
+    for (int row = 0; row < rows; row++)
+    {
+        cout << " [ ";
+        for (int column = 0; column < columns; column++)
+        {
+            cout << std::fixed << std::setprecision(8) << matrix[row][column] << " ";
+        }
+
+        cout << "]" << endl;
+    }
+    cout << "]" << endl;
 }
 
 void Matrix::printParams()

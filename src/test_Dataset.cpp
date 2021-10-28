@@ -11,7 +11,7 @@ int main()
     std::string yFileName = "../data/fashion_mnist_sample_labels.csv";
 
     Dataset datenkaplsky = Dataset(xFileName, yFileName);
-    datenkaplsky.getX()->T()->print();
-
+    // datenkaplsky.getX()->T()->print();
+    
     datenkaplsky.print(5);
 }

@@ -5,11 +5,11 @@ Dataset::Dataset(string xFileName, string yFileName)
     int rows = getRows(xFileName);
     int columns = getColumns(xFileName);
 
-    double** xData = readData(xFileName, rows, columns);
+    double** xData = readData(xFileName, rows, columns, true);
     X = Matrix(rows, columns, xData).T();
 
-    double** yData = readData(yFileName, rows, 1);
-    Y = new Matrix(rows, 1, yData);
+    double** yData = readData(yFileName, rows, 10, false);
+    Y = new Matrix(rows, 10, yData);
 
     cout << "[+] DATASET WITH X,Y" << endl;
     X->printParams();
@@ -59,7 +59,7 @@ int Dataset::getColumns(string file)
     return count_values;
 }
 
-double** Dataset::readData(string file, int rows, int columns)
+double** Dataset::readData(string file, int rows, int columns, bool X)
 {
     ifstream read_vectors(file);
     string myText;
@@ -77,7 +77,7 @@ double** Dataset::readData(string file, int rows, int columns)
         stringstream one_line(myText);
         string value;
         j = 0;
-        if (columns > 1)
+        if (X)
         {
             while (getline(one_line, value, ','))
             {
@@ -86,7 +86,10 @@ double** Dataset::readData(string file, int rows, int columns)
         }
         else
         {
-            _matrix[i][0] = stod(myText);
+            for (int j= 0; j < columns; j++) {
+                _matrix[i][j] = 0;
+            }
+            _matrix[i][stoi(myText)] = 1;
         }
         i++;
     }
@@ -116,7 +119,9 @@ void Dataset::print(int limit)
     }
 
     for (int i = 0; i < limit; i++) {
-        cout << Y->getMatrix()[i][0] << " ";
+        for (int j = 0; j < Y->getColumns(); j++) {
+            cout << Y->getMatrix()[i][j] << " ";
+        }
         cout << endl;
-    }    
+    }
 }

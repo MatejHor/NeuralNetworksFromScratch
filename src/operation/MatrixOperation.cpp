@@ -380,3 +380,24 @@ static Matrix *reLuDerivation(Matrix* x)
     }
     return new Matrix(x->getRows(), x->getColumns(), matrix);
 }
+
+static Matrix* squeeze(Matrix* Y, string func) {
+    Matrix* new_Y = new Matrix(Y->getRows(), 1);
+    for (int row = 0; row < Y->getRows(); row++)
+    {
+        double comperator = 0.0;
+        double foundedValue = 0.0;
+        for (int column = 0; column < Y->getColumns(); column++)
+        {
+            if (func.compare("max") == 0 && Y->getMatrix()[row][column] > comperator){
+                comperator = Y->getMatrix()[row][column];
+                foundedValue = column * 1.0;
+            }
+            if (func.compare("category") == 0 && Y->getMatrix()[row][column] == 1.0) {
+                foundedValue = column * 1.0;
+            }
+        }
+        new_Y->getMatrix()[row][0] = foundedValue; 
+    }
+    return new_Y;
+}

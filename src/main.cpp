@@ -51,25 +51,35 @@ Matrix *forwardPropagation(Matrix* X, Matrix *weights, Matrix *bias)
     Matrix* Z = NULL;
     for (int hidden_layer = 0; hidden_layer < (len_layer - 1); hidden_layer++)
     {
-        // Matrix* dot_ = dot(&weights[hidden_layer], A_prev);
-        // cout << "DOT_ ";
-        // dot_->printParams();
-        // bias[hidden_layer].printParams();
-
         Z = sumVector(dot(&weights[hidden_layer], A_prev), &bias[hidden_layer]);
         A_cache[hidden_layer] = A_prev;
         A_prev = reLu(Z);
     }
 
     Z = sumVector(dot(&weights[(len_layer - 1)], A_prev), &bias[len_layer - 1]);
-    Z->print();
     A_cache[len_layer - 1] = A_prev;
     A_prev = softmax(Z);
-    
-    // Z->print();
-    // A_prev->print();
-
     return A_prev;
+}
+
+double computeCostCrossEntropy(Matrix* AL, Matrix* Y)
+{
+    int m = Y->getColumns();
+    Matrix* logAL = log(AL);
+    Matrix* multiply_Y_logAL = multiply(Y, logAL);
+
+    Matrix* subtrackY = subtrack(1, Y);
+    Matrix* log_SubtrackAL = log(subtrack(1, AL));
+    Matrix* multiply_SubtrackY_log_SubtrackAL = multiply(subtrackY, log_SubtrackAL);
+
+    Matrix* sumMatrix_ = sum(multiply_Y_logAL, multiply_SubtrackY_log_SubtrackAL);
+    double sumMatrixVal = sumMatrix(sumMatrix_);
+
+    // Y->print("Y");
+    // AL->print("AL");
+    // cout << "sum_matrix: " << sumMatrixVal << endl;
+    // cout << "-1/m: " << (-1.0 / m) << endl;
+    return (-1.0 / m) * sumMatrixVal;
 }
 
 void backwardPropagation(Matrix AL, Matrix Y, Matrix *weights)
@@ -115,9 +125,8 @@ Matrix *updateWeights(Matrix *weights)
 {
     for (int hidden_layer = 0; hidden_layer < len_layer; hidden_layer++)
     {
-        weights[hidden_layer] = *subtrack(
-            &weights[hidden_layer],
-            multiply(dW_cache[hidden_layer], learning_rate));
+        Matrix* multiplydWLearningRate = multiply(dW_cache[hidden_layer], learning_rate);
+        weights[hidden_layer] = *subtrack(&weights[hidden_layer], multiplydWLearningRate);
     }
     return weights;
 }
@@ -126,26 +135,10 @@ Matrix *updateBias(Matrix *bias)
 {
     for (int hidden_layer = 0; hidden_layer < len_layer; hidden_layer++)
     {
-        bias[hidden_layer] = *subtrack(
-            &bias[hidden_layer],
-            multiply(db_cache[hidden_layer], learning_rate));
+        Matrix* multiplydBLearningRate = multiply(db_cache[hidden_layer], learning_rate);
+        bias[hidden_layer] = *subtrack(&bias[hidden_layer], multiplydBLearningRate);
     }
     return bias;
-}
-
-double computeCostCrossEntropy(Matrix* AL, Matrix* Y)
-{
-    int m = Y->getColumns();
-    Matrix* logAL = log(AL);
-    Matrix* multiply_Y_logAL = multiply(Y, logAL);
-    Matrix* subtrackY = subtrack(1, Y);
-    Matrix* log_SubtrackAL = log(subtrack(1, AL));
-    Matrix* multiply_SubtrackY_log_SubtrackAL = multiply(subtrackY, log_SubtrackAL);
-    Matrix* sumMatrix_ = sum(multiply_Y_logAL, multiply_SubtrackY_log_SubtrackAL);
-
-    double sumMatrixVal = sumMatrix(sumMatrix_);
-    cout << "sum_matrix: " << sumMatrixVal;
-    return (-1 / m) * sumMatrixVal;
 }
 
 Matrix *predict(Matrix* X, Matrix *weights, Matrix *bias)
@@ -153,10 +146,10 @@ Matrix *predict(Matrix* X, Matrix *weights, Matrix *bias)
     return forwardPropagation(X, weights, bias);
 }
 
-double f1_mikro(Matrix Y, Matrix AL)
+double f1_mikro(Matrix *Y, Matrix *AL)
 {
-    double **y = Y.getMatrix();
-    double **al = AL.getMatrix();
+    double **y = Y->getMatrix();
+    double **al = AL->getMatrix();
 
     double TP = 0;
     double TN = 0;
@@ -165,7 +158,7 @@ double f1_mikro(Matrix Y, Matrix AL)
 
     for (int i = 0; i < 10; i++)
     {
-        for (int row = 0; row < Y.getRows(); row++)
+        for (int row = 0; row < Y->getRows(); row++)
         {
             (al[row][0] == i && y[row][0] == i && ++TP);
             (al[row][0] != i && y[row][0] != i && ++TN);
@@ -184,7 +177,7 @@ void saveParameters(Matrix *weights, Matrix *bias)
     ofstream weights_file;
     ofstream bias_file;
     weights_file.open("weights.txt");
-    bias_file.open("weights.txt");
+    bias_file.open("bias.txt");
 
     for (int hidden_layer = 0; hidden_layer < len_layer; hidden_layer++)
     {
@@ -229,21 +222,13 @@ int main()
     cout << "1. INITIALIZE PARAMETERS" << endl;
     Matrix *weights = initializeWeights();
     Matrix *bias = initializeBias();
+    Matrix* AL;
 
     cout << "2. LOOP" << endl;
     for (int iteration = 0; iteration < num_iterations; iteration++)
     {
         cout << "2.1 FORWARD PROPAGATION" << endl;
-        Matrix* AL = forwardPropagation(train.getX(), weights, bias);
-
-        // cout << "[+] FINISHED FORWARD PROPAGATION" << endl;
-        // for (int i = 0; i < len_layer; i++)
-        // {
-        //     cout << "BIAS ";
-        //     bias[i].printParams();
-        //     cout << "WEIGHT ";
-        //     weights[i].printParams();
-        // }
+        AL = forwardPropagation(train.getX(), weights, bias);
 
         cout << "2.2 COMPUTE COST" << endl;
         double cost = computeCostCrossEntropy(AL, train.getY());
@@ -260,25 +245,26 @@ int main()
             cout << "Cost after iteration " << iteration << ": " << cost << endl;
         }
     }
-    // Matrix result = *predict(train.getX(), weights, bias);
-    // cout << "F1_Mikro: " << f1_mikro(train.getY(), result);
+    Matrix* TrueLabel = squeeze(train.getY(), "category");
+    Matrix* PrediLabel = squeeze(AL, "max");
+    cout << "Train F1_Mikro: " << f1_mikro(TrueLabel, PrediLabel);
 
     // cout << "3. PREDICTION" << endl;
     // Dataset test = Dataset(
     //     "../data/fashion_mnist_test_vectors.csv",
     //     "../data/fashion_mnist_test_labels.csv");
 
-    // Matrix result = *predict(test.getX(), weights, bias);
-    // cout << "F1_Mikro: " << f1_mikro(test.getY(), result);
+    // AL = predict(test.getX(), weights, bias);
+    // TrueLabel = squeeze(test.getY(), "category");
+    // PrediLabel = squeeze(AL, "max");
+    // cout << "Test F1_Mikro: " << f1_mikro(TrueLabel, PrediLabel);
 
     // cout << "4. SAVE PARAMETERS" << endl;
     // saveParameters(weights, bias);
 
-    cout << "-1. FREE BIAS & WEIGHTS" << endl;
+    cout << "5. FREE BIAS & WEIGHTS" << endl;
     for (int i = 0; i < len_layer; i++)
     {
-        // cout << &bias[i] << " (" << bias[i].getRows() << ", " << bias[i].getColumns() << ")" << endl;
-        // cout << &weights[i] << " (" << weights[i].getRows() << ", " << weights[i].getColumns() << ")" << endl;
         bias[i].~Matrix();
         weights[i].~Matrix();
     }
