@@ -98,6 +98,11 @@ void Matrix::print()
     }
 }
 
+void Matrix::printParams()
+{
+    cout << "Matrix(rows=" << rows << ", columns=" << columns << ", &=" << (this) << ")" << endl;
+}
+
 void Matrix::setMatrix(double** _matrix) {
     matrix = this->copyMatrix(_matrix);
 }

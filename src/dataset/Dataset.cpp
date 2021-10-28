@@ -7,6 +7,8 @@ Dataset::Dataset(string xFileName, string yFileName)
 
     double** xData = readData(xFileName, rows, columns);
     X = new Matrix(rows, columns, xData);
+    // X = (*X).T();
+
     double** yData = readData(yFileName, rows, 1);
     Y = new Matrix(rows, 1, yData);
 }

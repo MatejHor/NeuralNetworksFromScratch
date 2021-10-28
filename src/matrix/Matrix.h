@@ -50,6 +50,7 @@ public:
     double **copyMatrix(double **_matrix);
     void setMatrix(double **_matrix);
     void print();
+    void printParams();
     Matrix *T();
 };
 

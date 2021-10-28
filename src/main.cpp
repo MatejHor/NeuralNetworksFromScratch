@@ -45,14 +45,16 @@ Matrix *initializeWeights()
 
 Matrix *forwardPropagation(Matrix X, Matrix *weights, Matrix *bias)
 {
-    Matrix A = X;
-    Matrix A_prev;
+    Matrix A_prev = X;
     for (int hidden_layer = 0; hidden_layer < (len_layer - 1); hidden_layer++)
     {
-        A_prev = A;
+        A_prev.printParams();
+        weights[hidden_layer].printParams();
+
+        Matrix dotm = *dot(weights[hidden_layer], A_prev);
         Matrix Z = *sum(*dot(weights[hidden_layer], A_prev), bias[hidden_layer]);
         A_cache[hidden_layer] = A_prev;
-        A = *reLu(Z);
+        A_prev = *reLu(Z);
     }
 
     Matrix Z = *sum(*dot(weights[len_layer - 1], A_prev), bias[len_layer - 1]);
