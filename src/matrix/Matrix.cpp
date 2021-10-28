@@ -13,14 +13,16 @@ Matrix::Matrix(int rows, int columns, double seed): rows(rows), columns(columns)
 {
     srand(seed * 50684764);
 
-    matrix = new double*[rows];
+    double** new_matrix = new double*[rows];
     for (int row = 0; row < rows; row++)
     {
-        matrix[row] = new double[columns];
+        new_matrix[row] = new double[columns];
         for (int column = 0; column < columns; column++) {
-            matrix[row][column] = ((double)rand() / RAND_MAX) * seed;
+            new_matrix[row][column] = ((double)rand() / RAND_MAX) * seed;
         }
     }
+
+    this->matrix = new_matrix;
 }
 
 Matrix::Matrix(int rows, int columns, double **other) : rows(rows), columns(columns)
@@ -89,10 +91,10 @@ void Matrix::print()
     {
         for (int column = 0; column < columns; column++)
         {
-            std::cout << matrix[row][column] << " ";
+            cout << matrix[row][column] << " ";
         }
 
-        std::cout << endl;
+        cout << endl;
     }
 }
 

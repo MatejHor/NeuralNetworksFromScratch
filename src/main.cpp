@@ -7,8 +7,8 @@
 #include <fstream>
 #include <string.h>
 
-static double layer_dims[] = {784, 255, 255, 200, 10};
-static int len_layer = sizeof(layer_dims - 1);
+static double layer_dims[] = {784, 255, 225, 200, 10};
+static int len_layer = 4;
 static double learning_rate = 0.0075;
 static int num_iterations = 3000;
 
@@ -21,20 +21,24 @@ Matrix *db_cache = new Matrix[len_layer];
 
 Matrix *initializeBias()
 {
-    Matrix *bias = new Matrix[len_layer];
-    for (int layer = 1; layer < len_layer; layer++)
+    Matrix *bias = new Matrix[len_layer + 1];
+    for (int layer = 0; layer < len_layer; layer++)
     {
-        bias[layer] = Matrix(layer_dims[layer], 1, 0.0);
+        bias[layer] = *(new Matrix(layer_dims[layer + 1], 1, 0.0));
+        cout << "Initialize bias " << bias << " (" << layer_dims[layer + 1] << "x" << 1 << ") " << endl;
+        // bias[layer].print();
     }
     return bias;
 }
 
 Matrix *initializeWeights()
 {
-    Matrix *weights = new Matrix[len_layer];
-    for (int layer = 1; layer < len_layer; layer++)
+    Matrix *weights = new Matrix[len_layer + 1];
+    for (int layer = 0; layer < len_layer; layer++)
     {
-        weights[layer] = Matrix(layer_dims[layer], layer_dims[layer - 1], 0.01);
+        weights[layer] = *(new Matrix(layer_dims[layer + 1], layer_dims[layer], 0.01));
+        cout << "Initialize weights " << weights << " (" << layer_dims[layer + 1] << "x" << layer_dims[layer] << ") " << endl;
+        // weights[layer].print();
     }
     return weights;
 }
@@ -158,18 +162,20 @@ double f1_mikro(Matrix Y, Matrix AL)
         }
     }
 
-    double precision = TP/(TP + FP);
-    double recall = TP/(TP + FN);
-    return 2 *( (precision * recall) / (precision + recall) );
+    double precision = TP / (TP + FP);
+    double recall = TP / (TP + FN);
+    return 2 * ((precision * recall) / (precision + recall));
 }
 
-void saveParameters(Matrix* weights, Matrix *bias) {
+void saveParameters(Matrix *weights, Matrix *bias)
+{
     ofstream weights_file;
     ofstream bias_file;
-    weights_file.open ("weights.txt");
-    bias_file.open ("weights.txt");
+    weights_file.open("weights.txt");
+    bias_file.open("weights.txt");
 
-    for (int hidden_layer = 0; hidden_layer < len_layer; hidden_layer++) {
+    for (int hidden_layer = 0; hidden_layer < len_layer; hidden_layer++)
+    {
         string weights_value = "";
         string bias_value = "";
         double **matrix_weights = weights[hidden_layer].getMatrix();
@@ -181,15 +187,17 @@ void saveParameters(Matrix* weights, Matrix *bias) {
         {
             for (int column = 0; column < columns; column++)
             {
-               weights_value += to_string(matrix_weights[row][column]);
+                weights_value += to_string(matrix_weights[row][column]);
             }
             bias_value += to_string(matrix_bias[row][0]);
 
             weights_value += "\n";
             bias_value += "\n";
         }
-        weights_file << weights_value << endl << endl;
-        bias_file << bias_value << endl << endl;
+        weights_file << weights_value << endl
+                     << endl;
+        bias_file << bias_value << endl
+                  << endl;
     }
     weights_file.close();
     bias_file.close();
@@ -197,28 +205,32 @@ void saveParameters(Matrix* weights, Matrix *bias) {
 
 int main()
 {
-    // 0. LOAD DATASET
+    cout << "0. LOAD DATASET" << endl;
     Dataset train = Dataset(
-        "../data/fashion_mnist_train_vectors.csv",
-        "../data/fashion_mnist_train_labels.csv");
+        "../data/fashion_mnist_sample_vectors.csv",
+        "../data/fashion_mnist_sample_labels.csv");
 
-    // 1.INITIALIZE PARAMETERS
+    // Dataset train = Dataset(
+    //     "../data/fashion_mnist_train_vectors.csv",
+    //     "../data/fashion_mnist_train_labels.csv");
+
+    cout << "1. INITIALIZE PARAMETERS" << endl;
     Matrix *weights = initializeWeights();
     Matrix *bias = initializeBias();
 
-    // 2. LOOP
+    cout << "2. LOOP" << endl;
     for (int iteration = 0; iteration < num_iterations; iteration++)
     {
-        // 2.1 FORWARD PROPAGATION
+        cout << "2.1 FORWARD PROPAGATION" << endl;
         Matrix AL = *forwardPropagation(train.getX(), weights, bias);
 
-        // 2.2 COMPUTE COST
+        cout << "2.2 COMPUTE COST" << endl;
         double cost = computeCostCrossEntropy(AL, train.getY());
 
-        // 2.3 BACKWARD PROPAGATION
+        cout << "2.3 BACKWARD PROPAGATION" << endl;
         backwardPropagation(AL, train.getY(), weights);
 
-        // 2.4 UPDATE PARAMETERS
+        cout << "2.4 UPDATE PARAMETERS" << endl;
         weights = updateWeights(weights);
         bias = updateBias(bias);
 
@@ -227,16 +239,27 @@ int main()
             cout << "Cost after iteration " << iteration << ": " << cost << endl;
         }
     }
+    // Matrix result = *predict(train.getX(), weights, bias);
+    // cout << "F1_Mikro: " << f1_mikro(train.getY(), result);
 
-    // 3. PREDICTION
-    Dataset test = Dataset(
-        "../data/fashion_mnist_test_vectors.csv",
-        "../data/fashion_mnist_test_labels.csv");
+    // cout << "3. PREDICTION" << endl;
+    // Dataset test = Dataset(
+    //     "../data/fashion_mnist_test_vectors.csv",
+    //     "../data/fashion_mnist_test_labels.csv");
 
-    Matrix result = *predict(test.getX(), weights, bias);
-    cout << "F1_Mikro: " << f1_mikro(test.getY(), result);
+    // Matrix result = *predict(test.getX(), weights, bias);
+    // cout << "F1_Mikro: " << f1_mikro(test.getY(), result);
 
-    // 4. SAVE PARAMETERS
-    saveParameters(weights, bias);
+    // cout << "4. SAVE PARAMETERS" << endl;
+    // saveParameters(weights, bias);
+
+    cout << "-1. FREE BIAS & WEIGHTS" << endl;
+    for (int i = 0; i < len_layer; i++)
+    {
+        // cout << &bias[i] << " (" << bias[i].getRows() << ", " << bias[i].getColumns() << ")" << endl;
+        // cout << &weights[i] << " (" << weights[i].getRows() << ", " << weights[i].getColumns() << ")" << endl;
+        bias[i].~Matrix();
+        weights[i].~Matrix();
+    }
     return 0;
 }
