@@ -1,7 +1,7 @@
 #include "./matrix/Matrix.cpp"
 #include "./operation/MatrixOperation.cpp"
 
-int test() {
+int main() {
     int rows = 3;
     int cols = 2;
     int iter = 0;

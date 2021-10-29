@@ -9,7 +9,7 @@ Dataset::Dataset(string xFileName, string yFileName)
     X = Matrix(rows, columns, xData).T();
 
     double** yData = readData(yFileName, rows, 10, false);
-    Y = new Matrix(rows, 10, yData);
+    Y = Matrix(rows, 10, yData).T();
 
     cout << "[+] DATASET WITH X,Y" << endl;
     X->printParams();

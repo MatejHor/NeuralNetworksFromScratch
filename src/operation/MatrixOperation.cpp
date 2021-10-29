@@ -144,7 +144,8 @@ static Matrix *dot(Matrix* m1, Matrix* m2)
 {
     if ((m1->getColumns() != m2->getRows()))
     {
-        cout << "Matrices can't be multiplied!\nPlease enter valid matricies for multiplication->\n";
+        cout << "[-] CAN NOT DOT MATRIX(NOT HAVE SHAPE TO SUM) m1&=" << (m1) << " m2&=" << (m2) << " Shape(m1_columns=" << m1->getColumns() << ", m2_rows=" << m2->getRows() << ")" << endl;
+        cout << "Shape(m1_rows=" << m1->getRows() << ", m2_columns=" << m2->getColumns() << endl;
         return NULL;
     }
 
@@ -381,23 +382,26 @@ static Matrix *reLuDerivation(Matrix* x)
     return new Matrix(x->getRows(), x->getColumns(), matrix);
 }
 
+// TODO upravit naopak nech berie riadky ako stlpce a stlpce ako riadky
 static Matrix* squeeze(Matrix* Y, string func) {
+    Matrix* Y_T = Y->T();
     Matrix* new_Y = new Matrix(Y->getRows(), 1);
-    for (int row = 0; row < Y->getRows(); row++)
+    for (int row = 0; row < Y_T->getRows(); row++)
     {
         double comperator = 0.0;
         double foundedValue = 0.0;
-        for (int column = 0; column < Y->getColumns(); column++)
+        for (int column = 0; column < Y_T->getColumns(); column++)
         {
-            if (func.compare("max") == 0 && Y->getMatrix()[row][column] > comperator){
-                comperator = Y->getMatrix()[row][column];
+            if (func.compare("max") == 0 && Y_T->getMatrix()[row][column] > comperator){
+                comperator = Y_T->getMatrix()[row][column];
                 foundedValue = column * 1.0;
             }
-            if (func.compare("category") == 0 && Y->getMatrix()[row][column] == 1.0) {
+            if (func.compare("category") == 0 && Y_T->getMatrix()[row][column] == 1.0) {
                 foundedValue = column * 1.0;
             }
         }
         new_Y->getMatrix()[row][0] = foundedValue; 
     }
+    Y_T->~Matrix();
     return new_Y;
 }

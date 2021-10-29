@@ -38,3 +38,5 @@ data/fashion_mnist_test_vectors.csv
 # IDE
 .vscode
 .idea
+src/weights.txt
+src/bias.txt

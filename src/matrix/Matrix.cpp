@@ -9,10 +9,12 @@ Matrix::Matrix(int rows, int columns) : rows(rows), columns(columns)
     }
 
     this->matrix = new_matrix;
+    cout << "Creating Matrix(rows, columns)(row=" << rows << ", column=" << columns << ", &=" << (this) << ")" << endl;
 }
 
 Matrix::Matrix()
 {
+    cout << "Creating Matrix()" << endl;
 }
 
 Matrix::Matrix(int rows, int columns, double seed): rows(rows), columns(columns)
@@ -32,12 +34,13 @@ Matrix::Matrix(int rows, int columns, double seed): rows(rows), columns(columns)
     }
 
     this->matrix = new_matrix;
+    cout << "Creating Matrix(rows, columns, seed)(row=" << rows << ", column=" << columns << ", &=" << (this) << ")" << endl;
 }
 
 Matrix::Matrix(int rows, int columns, double **other) : rows(rows), columns(columns)
 {
     matrix = other;
-    cout << "Creating Matrix(row=" << rows << ", column=" << columns << ", &=" << (this) << ")" << endl;
+    cout << "Creating Matrix(rows, columns, other)(row=" << rows << ", column=" << columns << ", &=" << (this) << ")" << endl;
 }
 
 Matrix::Matrix(const Matrix &other)
@@ -45,6 +48,7 @@ Matrix::Matrix(const Matrix &other)
     rows = other.getRows();
     columns = other.getColumns();
     matrix = this->copyMatrix(other.getMatrix());
+    cout << "Creating Matrix(rows, columns, other)(row=" << rows << ", column=" << columns << ", &=" << (this) << ")" << endl;
 }
 
 bool Matrix::operator==(const Matrix &other) const
@@ -136,7 +140,6 @@ void Matrix::setMatrix(double** _matrix) {
 
 Matrix* Matrix::T()
 {
-    cout << "Transpose matrix(old&=" << (this);
     Matrix* transposition = new Matrix(columns, rows);
 
     for (int row = 0; row < rows; row++)
@@ -146,7 +149,6 @@ Matrix* Matrix::T()
             transposition->matrix[column][row] = matrix[row][column];
         }
     }
-    cout << ",new&=" << transposition << ")" << endl;
     return transposition;
 }
 

@@ -1,7 +1,7 @@
 #include "./matrix/Matrix.cpp"
 #include "./operation/MatrixOperation.cpp"
 
-int test() {
+int main() {
     // std::cout << "hello wrld! juice world is dead Sad UwU." << "\n";
     std::cout << "Testing Matrix" << "\n";
 
