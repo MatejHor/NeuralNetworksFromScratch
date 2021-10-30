@@ -56,6 +56,7 @@ public:
     void print();
     void print(string name);
     void printParams();
+    void printParams(string name);
     Matrix *T();
 };
 
