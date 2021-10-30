@@ -174,9 +174,9 @@ vector<Matrix> updateWeights(vector<Matrix> weights)
         new_weights.at(hidden_layer) = *subtrack((&weights.at(hidden_layer)), multiplydWLearningRate);
 
         // Destruct computed values
-        weights.at(hidden_layer).~Matrix();
         multiplydWLearningRate->~Matrix();
     }
+    weights.clear();
     return new_weights;
 }
 
@@ -201,10 +201,12 @@ vector<Matrix> updateBias(Matrix **bias)
 
 void freeCache(){
     for (int hidden_layer = 0; hidden_layer < len_layer; hidden_layer++){
-        A_cache.at(hidden_layer).~Matrix();
         dA_cache[hidden_layer]->~Matrix();
         dW_cache[hidden_layer]->~Matrix();
         db_cache[hidden_layer]->~Matrix();
+        // TODO: change to clear
+        A_cache.clear();
+
     }
 }
 
@@ -351,11 +353,8 @@ int main()
     // cout << "4. SAVE PARAMETERS" << endl;
     // saveParameters(weights, bias);
 
-    cout << "5. FREE BIAS & WEIGHTS" << endl;
-    for (int i = 0; i < len_layer; i++)
-    {
-        bias.at(i).~Matrix();
-        weights[i]->~Matrix();
-    }
+    cout << "5. FREE BIAS & WEIGHTS VECTOR" << endl;
+    bias.clear();
+    weights.clear();
     return 0;
 }
