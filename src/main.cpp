@@ -118,17 +118,17 @@ void backwardPropagation(Matrix *AL, Matrix *Y, vector<Matrix> weights)
 
     Matrix *dZ = softmaxDerivation(dAL);
 
-    Matrix *trans_A_cache = A_cache[len_layer - 1].T();
+    Matrix *trans_A_cache = (A_cache.at(len_layer - 1)).T();
     Matrix *dot_dZ_AprevT = dot(dZ, trans_A_cache);
     Matrix *dW = multiply(dot_dZ_AprevT, (1.0 / m));
     Matrix *sumDimension_dZ = sumDimension(dZ);
     Matrix *db = multiply(sumDimension_dZ, (1.0 / m));
-    Matrix *trans_weight = weights[len_layer - 1].T();
+    Matrix *trans_weight = (weights.at(len_layer - 1)).T();
     Matrix *dA_prev = dot(trans_weight, dZ);
 
     dA_cache.at(len_layer - 1) = *dA_prev;
-    dW_cache[len_layer - 1] = dW;
-    db_cache[len_layer - 1] = db;
+    dW_cache.at(len_layer - 1) = *dW;
+    db_cache.at(len_layer - 1) = *db;
 
     // Destruct computed values
     dAL->~Matrix();
@@ -144,17 +144,17 @@ void backwardPropagation(Matrix *AL, Matrix *Y, vector<Matrix> weights)
         // cout << "Hidden layer " << hidden_layer << endl;
         dZ = reLuDerivation(dA_prev);
 
-        trans_A_cache = A_cache.at(hidden_layer).T();
+        trans_A_cache = (A_cache.at(hidden_layer)).T();
         dot_dZ_AprevT = dot(dZ, trans_A_cache);
         dW = multiply(dot_dZ_AprevT, (1.0 / m));
         sumDimension_dZ = sumDimension(dZ);
         db = multiply(sumDimension_dZ, (1.0 / m));
-        trans_weight = weights[hidden_layer]->T();
+        trans_weight = (weights.at(hidden_layer)).T();
         dA_prev = dot(trans_weight, dZ);
 
-        dA_cache[hidden_layer] = dA_prev;
-        dW_cache[hidden_layer] = dW;
-        db_cache[hidden_layer] = db;
+        dA_cache.at(hidden_layer) = *dA_prev;
+        dW_cache.at(hidden_layer) = *dW;
+        db_cache.at(hidden_layer) = *db;
 
         // Destruct computed values
         trans_weight->~Matrix();
@@ -180,37 +180,29 @@ vector<Matrix> updateWeights(vector<Matrix> weights)
     return new_weights;
 }
 
-vector<Matrix> updateBias(Matrix **bias)
+vector<Matrix> updateBias(vector<Matrix> bias)
 {
-    Matrix **new_bias = new Matrix*[len_layer - 1];
+    vector<Matrix> new_bias;
     for (int hidden_layer = 0; hidden_layer < len_layer; hidden_layer++)
     {
-        db_cache[hidden_layer]->printParams("[+] db_cache[hidden_layer]");
-        Matrix *multiplydBLearningRate = multiply(db_cache[hidden_layer], learning_rate);
-
-        multiplydBLearningRate->printParams("[+] multiplydBLearningRate");
-        bias[hidden_layer]->printParams("[+] bias[hidden_layer]");
-        new_bias[hidden_layer] = subtrack(bias[hidden_layer], multiplydBLearningRate);
+        Matrix *multiplydBLearningRate = multiply(&db_cache.at(hidden_layer), learning_rate);
+        new_bias.at(hidden_layer) = *subtrack(&bias.at(hidden_layer), multiplydBLearningRate);
 
         // Destruct computed values
-        bias[hidden_layer]->~Matrix();
         multiplydBLearningRate->~Matrix();
     }
+    bias.clear();
     return new_bias;
 }
 
 void freeCache(){
-    for (int hidden_layer = 0; hidden_layer < len_layer; hidden_layer++){
-        dA_cache[hidden_layer]->~Matrix();
-        dW_cache[hidden_layer]->~Matrix();
-        db_cache[hidden_layer]->~Matrix();
-        // TODO: change to clear
-        A_cache.clear();
-
-    }
+    A_cache.clear();
+    dA_cache.clear();
+    dW_cache.clear();
+    db_cache.clear();
 }
 
-Matrix *predict(Matrix *X, Matrix **weights, Matrix **bias)
+Matrix *predict(Matrix *X, vector<Matrix> weights, vector<Matrix> bias)
 {
     return forwardPropagation(X, weights, bias);
 }
@@ -256,7 +248,7 @@ double accuracy(Matrix *Y, Matrix *AL)
     return TP / (Y->getRows());
 }
 
-void saveParameters(Matrix *weights, Matrix *bias)
+void saveParameters(vector<Matrix> weights, vector<Matrix> bias)
 {
     ofstream weights_file;
     ofstream bias_file;
@@ -267,10 +259,10 @@ void saveParameters(Matrix *weights, Matrix *bias)
     {
         string weights_value = "";
         string bias_value = "";
-        double **matrix_weights = weights[hidden_layer].getMatrix();
-        double **matrix_bias = bias[hidden_layer].getMatrix();
-        int rows = weights[hidden_layer].getRows();
-        int columns = weights[hidden_layer].getColumns();
+        double **matrix_weights = (weights.at(hidden_layer)).getMatrix();
+        double **matrix_bias = (bias.at(hidden_layer)).getMatrix();
+        int rows = (weights.at(hidden_layer)).getRows();
+        int columns = (weights.at(hidden_layer)).getColumns();
 
         for (int row = 0; row < rows; row++)
         {
