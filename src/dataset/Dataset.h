@@ -2,41 +2,42 @@
 #define DATASET_H_
 
 #include "../matrix/Matrix.h"
+#include "../operation/MatrixOperation.h"
 #include <fstream>
 #include <string>
 #include <sstream>
 
-class Dataset {
+class Dataset
+{
 private:
     Matrix *X;
     Matrix *Y;
 
 public:
-    Dataset(string vectors, string labels);
+    Dataset(string vectors, string labels, int maxRow, bool verbose);
 
     ~Dataset()
     {
-        (*X).~Matrix();
-        (*Y).~Matrix();
+        X->~Matrix();
+        Y->~Matrix();
     }
 
-    int getRows(string file);
-
-    int getColumns(string file);
-
-    Matrix* getX() const
+    Matrix *getX() const
     {
         return X;
     }
 
-    Matrix* getY() const
+    Matrix *getY() const
     {
         return Y;
     }
 
+    int getRows(string file);
+    int getColumns(string file);
     double **readData(string file, int rows, int columns, bool X);
-    
     void print(int limit);
+    double f1_mikro(Matrix *AL);
+    double accuracy(Matrix *AL);
 };
 
 #endif

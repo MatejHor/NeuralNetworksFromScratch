@@ -382,7 +382,6 @@ static Matrix *reLuDerivation(Matrix* x)
     return new Matrix(x->getRows(), x->getColumns(), matrix);
 }
 
-// TODO upravit naopak nech berie riadky ako stlpce a stlpce ako riadky
 static Matrix* squeeze(Matrix* Y, string func) {
     Matrix* Y_T = Y->T();
     Matrix* new_Y = new Matrix(Y_T->getRows(), 1);

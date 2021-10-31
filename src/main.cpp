@@ -3,20 +3,23 @@
 #include "./dataset/Dataset.cpp"
 #include <stdlib.h> // RAND
 
+// SIZE of double[]
+#include <bits/stdc++.h>
+
 #include <iostream>
 #include <fstream>
 #include <string.h>
 #include <vector>
 
+// TIME
 #include <chrono>
 using namespace chrono;
 
-static double layer_dims[] = {784, 255, 225, 200, 10};
-static int len_layer = 4;
-static double learning_rate = 0.05;
-static int num_iterations = 500;
-// static int num_iterations = 2;
-bool TEST = 0;
+static double layer_dims[] = {784, 255, 200, 10};
+static int len_layer = (*(&layer_dims + 1) - layer_dims) - 1;
+static double learning_rate = 0.0075;
+static int num_iterations = 100;
+bool VERBOSE = true;
 
 Matrix *AL = NULL;
 vector<Matrix *> A_cache;
@@ -169,7 +172,7 @@ void backwardPropagation(Matrix *AL, Matrix *Y, vector<Matrix *> weights)
     }
 }
 
-void updateParameters(vector<Matrix *> &bias, vector<Matrix *> &weights)
+void updateParametersGradientDescend(vector<Matrix *> &bias, vector<Matrix *> &weights)
 {
     for (int hidden_layer = 0; hidden_layer < len_layer; hidden_layer++)
     {
@@ -191,29 +194,14 @@ void updateParameters(vector<Matrix *> &bias, vector<Matrix *> &weights)
     }
 }
 
-void freeCache()
+double predict(Dataset *data, vector<Matrix *> weights, vector<Matrix *> bias, string measure, bool verbose)
 {
-    for (int layer = 0; layer < len_layer; layer++)
-    {
-        if (layer != 0)
-            A_cache.at(layer)->~Matrix();
-        dA_cache.at(layer)->~Matrix();
-        dW_cache.at(layer)->~Matrix();
-        db_cache.at(layer)->~Matrix();
-    }
-    A_cache.clear();
-    dA_cache.clear();
-    dW_cache.clear();
-    db_cache.clear();
-}
-
-Matrix *predict(Matrix *X, vector<Matrix *> weights, vector<Matrix *> bias)
-{
-    Matrix *A_prev = X;
+    Matrix *A_prev = data->getX();
     Matrix *A_free = NULL;
     Matrix *Z = NULL;
     Matrix *dot_W_A_prev;
 
+    auto pred_start = high_resolution_clock::now();
     for (int layer = 0; layer < (len_layer - 1); layer++)
     {
         dot_W_A_prev = dot(weights.at(layer), A_prev);
@@ -221,63 +209,44 @@ Matrix *predict(Matrix *X, vector<Matrix *> weights, vector<Matrix *> bias)
         A_free = A_prev;
         A_prev = reLu(Z);
 
-        // Destruct computed values
-        dot_W_A_prev->~Matrix();
-        Z->~Matrix();
-        if (layer != 0)
-            A_free->~Matrix();
+        // Destruct
+        {
+            dot_W_A_prev->~Matrix();
+            Z->~Matrix();
+            if (layer != 0)
+                A_free->~Matrix();
+        }
     }
     dot_W_A_prev = dot(weights.at(len_layer - 1), A_prev);
     Z = sumVector(dot_W_A_prev, bias.at(len_layer - 1));
-    A_free = A_prev;
-    A_prev = softmax(Z);
+    Matrix *A_predict = softmax(Z);
+    auto pred_stop = high_resolution_clock::now();
 
-    // Destruct computed values
-    dot_W_A_prev->~Matrix();
-    Z->~Matrix();
-    A_free->~Matrix();
-    return A_prev;
-}
-
-double f1_mikro(Matrix *Y, Matrix *AL)
-{
-    double **y = Y->getMatrix();
-    double **al = AL->getMatrix();
-
-    double TP = 0;
-    double TN = 0;
-    double FP = 0;
-    double FN = 0;
-
-    for (int i = 0; i < 10; i++)
+    // Destruct
     {
-        for (int row = 0; row < Y->getRows(); row++)
-        {
-            (al[row][0] == i && y[row][0] == i && ++TP);
-            (al[row][0] != i && y[row][0] != i && ++TN);
-            (al[row][0] == i && y[row][0] != i && ++FP);
-            (al[row][0] != i && y[row][0] == i && ++FN);
-        }
+        A_prev->~Matrix();
+        dot_W_A_prev->~Matrix();
+        Z->~Matrix();
     }
 
-    double precision = TP / (TP + FP);
-    double recall = TP / (TP + FN);
-    return 2 * ((precision * recall) / (precision + recall));
-}
+    Matrix *PrediLabel = squeeze(A_predict, "max");
+    double measureVal;
+    if (measure.compare("accuracy") == 0)
+        measureVal = data->accuracy(PrediLabel);
+    else
+        measureVal = data->f1_mikro(PrediLabel);
 
-double accuracy(Matrix *Y, Matrix *AL)
-{
-    double **y = Y->getMatrix();
-    double **al = AL->getMatrix();
+    if (verbose)
+        cout << "Predict Time " << duration_cast<milliseconds>(pred_stop - pred_start).count() << " milliseconds" << endl;
+    if (verbose)
+        cout << measure << ": " << measureVal << endl;
 
-    double TP = 0;
-
-    for (int row = 0; row < Y->getRows(); row++)
+    // destruct
     {
-        (al[row][0] == y[row][0] && ++TP);
+        PrediLabel->~Matrix();
+        A_predict->~Matrix();
     }
-
-    return TP / (Y->getRows());
+    return measureVal;
 }
 
 void saveParameters(vector<Matrix *> weights, vector<Matrix *> bias)
@@ -329,23 +298,37 @@ void freeParameters(vector<Matrix *> &weights, vector<Matrix *> &bias)
     weights.clear();
 }
 
+void freeCache()
+{
+    for (int layer = 0; layer < len_layer; layer++)
+    {
+        if (layer != 0)
+            A_cache.at(layer)->~Matrix();
+        dA_cache.at(layer)->~Matrix();
+        dW_cache.at(layer)->~Matrix();
+        db_cache.at(layer)->~Matrix();
+    }
+    A_cache.clear();
+    dA_cache.clear();
+    dW_cache.clear();
+    db_cache.clear();
+}
+
 int main()
 {
     cout << "0. LOAD DATASET" << endl;
-    // Dataset train = Dataset(
-    //     "../data/fashion_mnist_sample_vectors.csv",
-    //     "../data/fashion_mnist_sample_labels.csv");
-
     Dataset train = Dataset(
         "../data/fashion_mnist_train_vectors.csv",
-        "../data/fashion_mnist_train_labels.csv");
+        "../data/fashion_mnist_train_labels.csv",
+        100,
+        VERBOSE);
 
     cout << "1. INITIALIZE PARAMETERS" << endl;
     vector<Matrix *> weights = initializeWeights();
     vector<Matrix *> bias = initializeBias();
 
+    cout << "2. LOOP " << endl;
     auto start = high_resolution_clock::now();
-    cout << "2. LOOP" << endl;
     for (int iteration = 0; iteration < num_iterations; iteration++)
     {
         if (AL != NULL)
@@ -360,9 +343,11 @@ int main()
         backwardPropagation(AL, train.getY(), weights);
 
         // cout << "2.4 UPDATE PARAMETERS" << endl;
-        updateParameters(bias, weights);
+        updateParametersGradientDescend(bias, weights);
 
-        if (iteration % 50 == 0)
+        if (iteration % 10 == 0)
+        // if (true)
+        // if (iteration % 50 == 0 || true)
         {
             cout << "Cost after iteration " << iteration << ": " << cost << endl;
         }
@@ -371,51 +356,26 @@ int main()
         freeCache();
     }
     auto stop = high_resolution_clock::now();
-    cout << "Time for training " << duration_cast<milliseconds>(stop - start).count() << " milliseconds" <<  endl;
-    
-    cout << "3. PREDICTION TRAIN" << endl;
-    {
-        start = high_resolution_clock::now();
-        AL = predict(train.getX(), weights, bias);
-        stop = high_resolution_clock::now();
+    if (VERBOSE) cout << "Time for training " << duration_cast<milliseconds>(stop - start).count() << " milliseconds" << endl;
 
-        Matrix *TrueLabel = squeeze(train.getY(), "category");
-        Matrix *PrediLabel = squeeze(AL, "max");
-        cout << "Train f1_mikro: " << f1_mikro(TrueLabel, PrediLabel) << endl;
-        cout << "Train accuracy: " << accuracy(TrueLabel, PrediLabel) << endl;
-        cout << "Time for train predict " << duration_cast<milliseconds>(stop - start).count() << " milliseconds" << endl;
-        
-        // clear predict
-        AL->~Matrix();
-        PrediLabel->~Matrix();
-        TrueLabel->~Matrix();
-    }
+    cout << "3.1 PREDICTION TRAIN" << endl;
+    double test_acc = predict(&train, weights, bias, "accuracy", VERBOSE);
 
-    cout << "3. PREDICTION TEST" << endl;
+    cout << "3.2 PREDICTION TEST" << endl;
     {
         Dataset test = Dataset(
             "../data/fashion_mnist_test_vectors.csv",
-            "../data/fashion_mnist_test_labels.csv");
+            "../data/fashion_mnist_test_labels.csv",
+            100,
+            VERBOSE);
 
-        start = high_resolution_clock::now();
-        AL = predict(test.getX(), weights, bias);
-        stop = high_resolution_clock::now();
-        Matrix *TrueLabel = squeeze(test.getY(), "category");
-        Matrix *PrediLabel = squeeze(AL, "max");
-        cout << "Test f1_mikro: " << f1_mikro(TrueLabel, PrediLabel) << endl;
-        cout << "Test accuracy: " << accuracy(TrueLabel, PrediLabel) << endl;
-        cout << "Time for test predict " << duration_cast<seconds>(stop - start).count() << " sec" << endl;
-
-        // clear predict
-        AL->~Matrix();
-        PrediLabel->~Matrix();
-        TrueLabel->~Matrix();
+        double test_acc = predict(&test, weights, bias, "accuracy", VERBOSE);
     }
 
-    cout << "4. SAVE PARAMETERS" << endl;
+    if (VERBOSE) cout << "4. SAVE PARAMETERS" << endl;
     saveParameters(weights, bias);
 
-    cout << "5. FREE BIAS && WEIGHTS VECTOR" << endl;
+    if (VERBOSE) cout << "5. FREE BIAS && WEIGHTS VECTOR" << endl;
     freeParameters(weights, bias);
     return 0;
 }
