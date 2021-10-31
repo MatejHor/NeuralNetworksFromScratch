@@ -10,7 +10,7 @@ static Matrix *sum(Matrix* m1, Matrix* m2)
     }
 
     int rows = m1->getRows();
-    int columns = m2->getColumns();
+    int columns = m1->getColumns();
 
     Matrix *summed = new Matrix(rows, columns);
 
@@ -58,7 +58,7 @@ static Matrix *subtrack(Matrix* m1, Matrix* m2)
     }
 
     int rows = m1->getRows();
-    int columns = m2->getColumns();
+    int columns = m1->getColumns();
 
     Matrix *summed = new Matrix(rows, columns);
 

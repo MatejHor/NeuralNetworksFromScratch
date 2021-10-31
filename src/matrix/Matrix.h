@@ -25,11 +25,12 @@ public:
 
     ~Matrix()
     {
+        // cout << "Destructing Matrix(row=" << rows << ", column=" << columns << ", &=" << (this) << ")" << endl;
+        
         for (int i = 0; i < rows; i++)
             delete[] matrix[i];
         delete[] matrix;
 
-        cout << "Destructing Matrix(row=" << rows << ", column=" << columns << ", &=" << (this) << ")" << endl;
     }
 
     int getRows() const

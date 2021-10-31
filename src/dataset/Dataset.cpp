@@ -11,10 +11,8 @@ Dataset::Dataset(string xFileName, string yFileName)
     double** yData = readData(yFileName, rows, 10, false);
     Y = Matrix(rows, 10, yData).T();
 
-    cout << "[+] DATASET WITH X,Y" << endl;
-    X->printParams();
-    Y->printParams();
-    cout << "[+] END DATASET PRINT" << endl;
+    X->printParams("X:");
+    Y->printParams("Y:");
 }
 
 int Dataset::getRows(string file)
