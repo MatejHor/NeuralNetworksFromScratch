@@ -133,8 +133,8 @@ void Dataset::print(int limit)
 
 double Dataset::f1_mikro(Matrix *AL)
 {
-    Matrix *squeezeY = squeeze(getY(), "category");
-    double **y = squeezeY->getMatrix();
+    Matrix *yMatrix = squeeze(getY(), "category");
+    double **y = yMatrix->getMatrix();
     double **al = AL->getMatrix();
 
     double TP = 0;
@@ -155,14 +155,14 @@ double Dataset::f1_mikro(Matrix *AL)
 
     double precision = TP / (TP + FP);
     double recall = TP / (TP + FN);
-    squeezeY->~Matrix();
+    yMatrix->~Matrix();
     return 2 * ((precision * recall) / (precision + recall));
 }
 
 double Dataset::accuracy(Matrix *AL)
 {
-    Matrix *squeezeY = squeeze(getY(), "category");
-    double **y = squeezeY->getMatrix();
+    Matrix *yMatrix = squeeze(getY(), "category");
+    double **y = yMatrix->getMatrix();
     double **al = AL->getMatrix();
 
     double TP = 0;
@@ -172,6 +172,6 @@ double Dataset::accuracy(Matrix *AL)
         (al[row][0] == y[row][0] && ++TP);
     }
 
-    squeezeY->~Matrix();
+    yMatrix->~Matrix();
     return TP / (Y->getRows());
 }

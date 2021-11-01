@@ -47,8 +47,16 @@ Matrix::Matrix(const Matrix &other)
 {
     rows = other.getRows();
     columns = other.getColumns();
-    matrix = this->copyMatrix(other.getMatrix());
+    matrix = this->copyMatrix(other.getMatrix(), columns);
     // cout << "Creating Matrix(rows, columns, other)(row=" << rows << ", column=" << columns << ", &=" << (this) << ")" << endl;
+}
+
+Matrix::Matrix(Matrix *other, int batchSize)
+{
+    rows = other->getRows();
+    columns = batchSize;
+    matrix = this->copyMatrix(other->getMatrix(), columns);
+    // cout << "Creating Matrix(other, batchSize)(row=" << rows << ", column=" << columns << ", &=" << (this) << ")" << endl;
 }
 
 bool Matrix::operator==(const Matrix &other) const
@@ -140,7 +148,7 @@ void Matrix::printParams(string name)
 }
 
 void Matrix::setMatrix(double** _matrix) {
-    matrix = this->copyMatrix(_matrix);
+    matrix = this->copyMatrix(_matrix, this->getColumns());
 }
 
 Matrix* Matrix::T()
@@ -157,13 +165,13 @@ Matrix* Matrix::T()
     return transposition;
 }
 
-double** Matrix::copyMatrix(double** _matrix)
+double** Matrix::copyMatrix(double** _matrix, int length)
 {
     double** new_matrix = new double*[rows];
 
     for (int row = 0; row < rows; row++) {
-        new_matrix[row] = new double[columns];
-        for (int column = 0; column < columns; column++)
+        new_matrix[row] = new double[length];
+        for (int column = 0; column < length; column++)
             new_matrix[row][column] = _matrix[row][column];
     }
 

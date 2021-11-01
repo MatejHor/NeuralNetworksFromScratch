@@ -1,34 +1,58 @@
-#include "./matrix/Matrix.cpp"
-#include "./operation/MatrixOperation.cpp"
-#include "./dataset/Dataset.cpp"
-#include <stdlib.h> // RAND
+#include "NeuralNetwork.h"
 
-// SIZE of double[]
-#include <bits/stdc++.h>
+NeuralNetwork::NeuralNetwork(double* layer_dims, int epochs, int batchSize, double learning_rate, bool verbose): layer_dims(layer_dims), epochs(epochs), batchSize(batchSize), learning_rate(learning_rate), VERBOSE(verbose)
+{
+    len_layer = (*(&layer_dims + 1) - layer_dims) - 1;
+}
 
-#include <iostream>
-#include <fstream>
-#include <string.h>
-#include <vector>
+void NeuralNetwork::initializeRandomParameters()
+{
+    weights = initializeRandomWeights(layer_dims);
+    bias = initializeBias(layer_dims);
+}
 
-// TIME
-#include <chrono>
-using namespace chrono;
+void NeuralNetwork::fit(Dataset *train, Dataset *validation){
+    initializeMiniBatch(xBatch, yBatch, train, batchSize);
+    Matrix* AL = NULL;
 
-static int len_layer;
-static double learning_rate;
-static int epochs;
-static int batchSize;
-double accuracy;
-bool VERBOSE;
+    auto start = high_resolution_clock::now();
+    for (int iteration = 0; iteration < epochs; iteration++)
+    {
+        for (int batch = 0; batch < batchCount; batch++)
+        {
+            if (AL != NULL)
+                AL->~Matrix();
+            // cout << "2.1 FORWARD PROPAGATION" << endl;
+            AL = forwardPropagation(xBatch.at(batch), weights, bias);
 
-Matrix *AL = NULL;
-vector<Matrix *> A_cache;
-vector<Matrix *> dA_cache;
-vector<Matrix *> dW_cache;
-vector<Matrix *> db_cache;
+            // cout << "2.2 COMPUTE COST" << endl;
+            double loss = computeCostCrossEntropy(AL, yBatch.at(batch));
 
-vector<Matrix *> initializeBias(double layer_dims[])
+            // cout << "2.3 BACKWARD PROPAGATION" << endl;
+            backwardPropagation(AL, yBatch.at(batch), weights);
+
+            // cout << "2.4 UPDATE PARAMETERS" << endl;
+            updateParametersGradientDescend(bias, weights);
+
+            // if (iteration % 10 == 0 && (batch == batchCount - 1))
+            if (true && (batch == batchCount - 1))
+            // if (iteration % 50 == 0 && (batch == batchCount - 1))
+            {
+                accuracy = predict(validation, weights, bias, "accuracy", false);
+                cout << "[" << iteration << "] epoch LOSS: " << loss << " ACC: " << accuracy << endl;
+            }
+
+            // cout << "2.5 FREE CACHE" << endl;
+            freeCache();
+        }
+    }
+    auto stop = high_resolution_clock::now();
+    freeMatrixVector(xBatch, yBatch, batchCount);
+    if (VERBOSE)
+        cout << "Time for training " << duration_cast<milliseconds>(stop - start).count() << " milliseconds" << endl;
+}
+
+vector<Matrix *> NeuralNetwork::initializeBias(double layer_dims[])
 {
     vector<Matrix *> bias;
     for (int layer = 0; layer < len_layer; layer++)
@@ -38,7 +62,7 @@ vector<Matrix *> initializeBias(double layer_dims[])
     return bias;
 }
 
-vector<Matrix *> initializeRandomWeights(double layer_dims[])
+vector<Matrix *> NeuralNetwork::initializeRandomWeights(double layer_dims[])
 {
     vector<Matrix *> weights;
     for (int layer = 0; layer < len_layer; layer++)
@@ -48,7 +72,7 @@ vector<Matrix *> initializeRandomWeights(double layer_dims[])
     return weights;
 }
 
-vector<Matrix *> initializeHeWeights(double layer_dims[])
+vector<Matrix *> NeuralNetwork::initializeHeWeights(double layer_dims[])
 {
     vector<Matrix *> weights;
     for (int layer = 0; layer < len_layer; layer++)
@@ -59,7 +83,7 @@ vector<Matrix *> initializeHeWeights(double layer_dims[])
     return weights;
 }
 
-Matrix *forwardPropagation(Matrix *X, vector<Matrix *> weights, vector<Matrix *> bias)
+Matrix *NeuralNetwork::forwardPropagation(Matrix *X, vector<Matrix *> weights, vector<Matrix *> bias)
 {
     Matrix *A_prev = X;
     Matrix *Z = NULL;
@@ -89,7 +113,7 @@ Matrix *forwardPropagation(Matrix *X, vector<Matrix *> weights, vector<Matrix *>
     return A_prev;
 }
 
-double computeCostCrossEntropy(Matrix *AL, Matrix *Y)
+double NeuralNetwork::computeCostCrossEntropy(Matrix *AL, Matrix *Y)
 {
     int m = Y->getColumns();
     Matrix *log_AL = log(AL);
@@ -116,7 +140,7 @@ double computeCostCrossEntropy(Matrix *AL, Matrix *Y)
     return (-1.0 / m) * sumMatrixVal;
 }
 
-void backwardPropagation(Matrix *AL, Matrix *Y, vector<Matrix *> weights)
+void NeuralNetwork::backwardPropagation(Matrix *AL, Matrix *Y, vector<Matrix *> weights)
 {
     double m = AL->getColumns();
 
@@ -183,7 +207,7 @@ void backwardPropagation(Matrix *AL, Matrix *Y, vector<Matrix *> weights)
     }
 }
 
-void updateParametersGradientDescend(vector<Matrix *> &bias, vector<Matrix *> &weights)
+void NeuralNetwork::updateParametersGradientDescend(vector<Matrix *> &bias, vector<Matrix *> &weights)
 {
     for (int hidden_layer = 0; hidden_layer < len_layer; hidden_layer++)
     {
@@ -205,7 +229,7 @@ void updateParametersGradientDescend(vector<Matrix *> &bias, vector<Matrix *> &w
     }
 }
 
-int initializeMiniBatch(vector<Matrix *> &X, vector<Matrix *> &Y, Dataset *data, int batchSize)
+int NeuralNetwork::initializeMiniBatch(vector<Matrix *> &X, vector<Matrix *> &Y, Dataset *data, int batchSize)
 {
     Matrix *yData = data->getY();
     Matrix *xData = data->getX();
@@ -223,7 +247,7 @@ int initializeMiniBatch(vector<Matrix *> &X, vector<Matrix *> &Y, Dataset *data,
     return X.size();
 }
 
-double predict(Dataset *data, vector<Matrix *> weights, vector<Matrix *> bias, string measure, bool verbose)
+double NeuralNetwork::predict(Dataset *data, vector<Matrix *> weights, vector<Matrix *> bias, string measure, bool verbose)
 {
     Matrix *A_prev = data->getX();
     Matrix *A_free = NULL;
@@ -278,12 +302,39 @@ double predict(Dataset *data, vector<Matrix *> weights, vector<Matrix *> bias, s
     return measureVal;
 }
 
-void saveParameters(vector<Matrix *> weights, vector<Matrix *> bias)
+void NeuralNetwork::freeMatrixVector(vector<Matrix *> &vector1, vector<Matrix *> &vector2, int count)
+{
+    for (int i = 0; i < count; i++)
+    {
+        vector1.at(i)->~Matrix();
+        vector2.at(i)->~Matrix();
+    }
+    vector1.clear();
+    vector2.clear();
+}
+
+void NeuralNetwork::freeCache()
+{
+    for (int layer = 0; layer < len_layer; layer++)
+    {
+        if (layer != 0)
+            A_cache.at(layer)->~Matrix();
+        dA_cache.at(layer)->~Matrix();
+        dW_cache.at(layer)->~Matrix();
+        db_cache.at(layer)->~Matrix();
+    }
+    A_cache.clear();
+    dA_cache.clear();
+    dW_cache.clear();
+    db_cache.clear();
+}
+
+void NeuralNetwork::saveParameters(string path)
 {
     ofstream weights_file;
     ofstream bias_file;
-    weights_file.open("weights.txt");
-    bias_file.open("bias.txt");
+    weights_file.open(path + "weights.txt");
+    bias_file.open(path + "bias.txt");
 
     for (int layer = 0; layer < len_layer; layer++)
     {
@@ -320,122 +371,4 @@ void saveParameters(vector<Matrix *> weights, vector<Matrix *> bias)
     }
     weights_file.close();
     bias_file.close();
-}
-
-void freeMatrixVector(vector<Matrix *> &vector1, vector<Matrix *> &vector2, int count)
-{
-    for (int i = 0; i < count; i++)
-    {
-        vector1.at(i)->~Matrix();
-        vector2.at(i)->~Matrix();
-    }
-    vector1.clear();
-    vector2.clear();
-}
-
-void freeCache()
-{
-    for (int layer = 0; layer < len_layer; layer++)
-    {
-        if (layer != 0)
-            A_cache.at(layer)->~Matrix();
-        dA_cache.at(layer)->~Matrix();
-        dW_cache.at(layer)->~Matrix();
-        db_cache.at(layer)->~Matrix();
-    }
-    A_cache.clear();
-    dA_cache.clear();
-    dW_cache.clear();
-    db_cache.clear();
-}
-
-int main()
-{
-    cout << "0. Initialize parameters" << endl;
-    static double layer_dims[] = {784, 255, 225, 200, 10};
-    len_layer = (*(&layer_dims + 1) - layer_dims) - 1;
-    learning_rate = 0.001;
-    epochs = 10;
-    batchSize = 16;
-    VERBOSE = true;
-
-    Dataset train = Dataset(
-        "../data/fashion_mnist_train_vectors.csv",
-        "../data/fashion_mnist_train_labels.csv",
-        20000, // size of train dataset
-        VERBOSE);
-
-    Dataset test = Dataset(
-        "../data/fashion_mnist_test_vectors.csv",
-        "../data/fashion_mnist_test_labels.csv",
-        500, // size of test dataset
-        VERBOSE);
-
-    vector<Matrix *> xBatch;
-    vector<Matrix *> yBatch;
-    int batchCount = initializeMiniBatch(xBatch, yBatch, &train, batchSize);
-
-    cout << "Created " << batchCount << " batches\n";
-
-    cout << "1. INITIALIZE PARAMETERS" << endl;
-    vector<Matrix *> weights = initializeRandomWeights(layer_dims);
-    vector<Matrix *> bias = initializeBias(layer_dims);
-
-    cout << "2. LOOP " << endl;
-    auto start = high_resolution_clock::now();
-    for (int iteration = 0; iteration < epochs; iteration++)
-    {
-        for (int batch = 0; batch < batchCount; batch++)
-        {
-            if (AL != NULL)
-                AL->~Matrix();
-            // cout << "2.1 FORWARD PROPAGATION" << endl;
-            AL = forwardPropagation(xBatch.at(batch), weights, bias);
-
-            // cout << "2.2 COMPUTE COST" << endl;
-            double loss = computeCostCrossEntropy(AL, yBatch.at(batch));
-
-            // cout << "2.3 BACKWARD PROPAGATION" << endl;
-            backwardPropagation(AL, yBatch.at(batch), weights);
-
-            // cout << "2.4 UPDATE PARAMETERS" << endl;
-            updateParametersGradientDescend(bias, weights);
-
-            // if (iteration % 10 == 0 && (batch == batchCount - 1))
-            if (true && (batch == batchCount - 1))
-            // if (iteration % 50 == 0 && (batch == batchCount - 1))
-            {
-                accuracy = predict(&train, weights, bias, "accuracy", false);
-                cout << "[" << iteration << "] epoch LOSS: " << loss << " ACC: " << accuracy << endl;
-            }
-
-            // cout << "2.5 FREE CACHE" << endl;
-            freeCache();
-        }
-    }
-    auto stop = high_resolution_clock::now();
-    if (VERBOSE)
-        cout << "2.-1 FREE BATCHS" << endl;
-    freeMatrixVector(xBatch, yBatch, batchCount);
-
-    if (VERBOSE)
-        cout << "Time for training " << duration_cast<milliseconds>(stop - start).count() << " milliseconds" << endl;
-
-    cout << "3 PREDICT" << endl;
-    {
-        cout << "3.1 PREDICTION TRAIN" << endl;
-        accuracy = predict(&train, weights, bias, "accuracy", VERBOSE);
-
-        cout << "3.2 PREDICTION TEST" << endl;
-        accuracy = predict(&test, weights, bias, "accuracy", VERBOSE);
-    }
-
-    if (VERBOSE)
-        cout << "4. SAVE PARAMETERS" << endl;
-    saveParameters(weights, bias);
-
-    if (VERBOSE)
-        cout << "5. FREE BIAS && WEIGHTS VECTOR" << endl;
-    freeMatrixVector(weights, bias, len_layer);
-    return 0;
 }

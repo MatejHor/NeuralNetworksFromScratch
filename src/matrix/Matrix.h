@@ -21,6 +21,7 @@ public:
     Matrix(int rows, int columns, double seed);
     Matrix(int rows, int columns, double **other);
     Matrix(const Matrix &other);
+    Matrix(Matrix *other, int batchSize);
     Matrix();
 
     ~Matrix()
@@ -50,7 +51,7 @@ public:
 
     bool operator==(const Matrix &other) const;
     bool operator!=(const Matrix &other) const;
-    double **copyMatrix(double **_matrix);
+    double **copyMatrix(double** _matrix, int length);
     void setMatrix(double **_matrix);
     void print();
     void print(string name);
