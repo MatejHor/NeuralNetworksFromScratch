@@ -24,6 +24,7 @@ bool VERBOSE;
 
 Matrix *AL = NULL;
 vector<Matrix *> A_cache;
+vector<Matrix *> Z_cache;
 vector<Matrix *> dA_cache;
 vector<Matrix *> dW_cache;
 vector<Matrix *> db_cache;
@@ -67,30 +68,33 @@ Matrix *forwardPropagation(Matrix *X, vector<Matrix *> weights, vector<Matrix *>
 
     for (int hidden_layer = 0; hidden_layer < (len_layer - 1); hidden_layer++)
     {
-        A_cache.push_back(A_prev);
         dot_W_A_prev = dot(weights.at(hidden_layer), A_prev);
         // Formula Z = dot(W[0], A[0-1] a.k.a X) + b[0]
         Z = sumVector(dot_W_A_prev, bias.at(hidden_layer));
+        A_cache.push_back(A_prev);
+        Z_cache.push_back(Z);
+
         // Formula A[0] = activation(Z)
         A_prev = reLu(Z);
 
         // Destruct computed values
         {
             dot_W_A_prev->~Matrix();
-            Z->~Matrix();
         }
     }
-    A_cache.push_back(A_prev);
     dot_W_A_prev = dot(weights.at(len_layer - 1), A_prev);
     // Formula Z = dot(W[last], A[last - 1]) + b[last]
     Z = sumVector(dot_W_A_prev, bias.at(len_layer - 1));
+    A_cache.push_back(A_prev);
+    Z_cache.push_back(Z);
+
     // Formula A[last] = activation(Z)
     A_prev = softmax(Z);
+
 
     // Destruct computed values
     {
         dot_W_A_prev->~Matrix();
-        Z->~Matrix();
     }
     return A_prev;
 }
@@ -99,7 +103,7 @@ double computeCostCrossEntropy(Matrix *AL, Matrix *Y)
 {
     int m = Y->getColumns();
     Matrix *log_AL = log(AL);
-    Matrix *multiply_Y_log_AL = multiply(Y, log_AL);
+    Matrix *multiply_Y_log_AL = multiply(log_AL, Y);
 
     Matrix *subtrack_Y = subtrack(1, Y);
     Matrix *subtrack_AL = subtrack(1, AL);
@@ -121,7 +125,72 @@ double computeCostCrossEntropy(Matrix *AL, Matrix *Y)
 
         sumMatrix_->~Matrix();
     }
-    return (-1.0 / m) * sumMatrixVal;
+    // return (-1.0 / m) * sumMatrixVal;
+    return -(sumMatrixVal / m);
+}
+
+void backwardPropagationTry(Matrix *AL, Matrix *Y, vector<Matrix *> weights)
+{
+    double m = AL->getColumns();
+
+    Matrix *subtrack_AL_Y = subtrack(AL, Y);
+    Matrix *activationDerivation = softmaxDerivation(Z_cache.at(len_layer - 1));
+    // Matrix *dZ = subtrack_AL_Y;
+    Matrix *dZ = multiply(subtrack_AL_Y, activationDerivation);
+
+    Matrix *AprevT = (A_cache.at(len_layer - 1))->T();
+    Matrix *dot_dZ_AprevT = dot(dZ, AprevT);
+    // Formula dW[last] = (1/m) * dot(dZ, A[last].T)
+    Matrix *dW = multiply(dot_dZ_AprevT, (1.0 / m));
+
+    Matrix *sumDimension_dZ = sumDimension(dZ);
+    // Formula db[last] = (1/m) * sumDimension(dZ)
+    Matrix *db = multiply(sumDimension_dZ, (1.0 / m));
+
+    dA_cache.push_back(dZ);
+    dW_cache.push_back(dW);
+    db_cache.push_back(db);
+    {
+        subtrack_AL_Y->~Matrix();
+        subtrackactivationDerivation_AL_Y->~Matrix();
+        AprevT->~Matrix();
+        dot_dZ_AprevT->~Matrix();
+        sumDimension_dZ->~Matrix();
+    }
+
+    for (int hidden_layer = (len_layer - 2); hidden_layer >= 0; hidden_layer--)
+    {
+
+        // Matrix *activationDerivation = reLuDerivation(Z_cache.at(hidden_layer));
+        Matrix *activationDerivation = reLuDerivation(A_cache.at(hidden_layer));
+        Matrix *W_prev_T = weights.at(hidden_layer + 1)->T();
+        Matrix *dot_WprevT_dZprev = dot(W_prev_T, dZ);
+
+        // Formula dZ[last - 1] dot(W_last.T, dZ_last)* activationDer(A[last - 1])
+        dZ = multiply(dot_WprevT_dZprev, activationDerivation);
+
+        Matrix *AprevT = (A_cache.at(hidden_layer))->T();
+        Matrix *dot_dZ_AprevT = dot(dZ, AprevT);
+        // Formula dW[last] = (1/m) * dot(dZ, A[last].T)
+        Matrix *dW = multiply(dot_dZ_AprevT, (1.0 / m));
+
+        Matrix *sumDimension_dZ = sumDimension(dZ);
+        // Formula db[last] = (1/m) * sumDimension(dZ)
+        Matrix *db = multiply(sumDimension_dZ, (1.0 / m));
+
+        dA_cache.push_back(dZ);
+        dW_cache.push_back(dW);
+        db_cache.push_back(db);
+        {
+            activationDerivation->~Matrix();
+            W_prev_T->~Matrix();
+            dot_WprevT_dZprev->~Matrix();
+
+            AprevT->~Matrix();
+            dot_dZ_AprevT->~Matrix();
+            sumDimension_dZ->~Matrix();
+        }
+    }
 }
 
 void backwardPropagation(Matrix *AL, Matrix *Y, vector<Matrix *> weights)
@@ -146,7 +215,8 @@ void backwardPropagation(Matrix *AL, Matrix *Y, vector<Matrix *> weights)
     }
 
     // Formula dZ = activation(dA[last])
-    Matrix *dZ = softmaxDerivation(dAL);
+    Matrix *activeDerivation = softmaxDerivation(Z_cache.at(len_layer - 1));
+    Matrix *dZ = multiply(dAL, activeDerivation);
 
     Matrix *trans_A_cache = (A_cache.at(len_layer - 1))->T();
     Matrix *dot_dZ_AprevT = dot(dZ, trans_A_cache);
@@ -165,6 +235,7 @@ void backwardPropagation(Matrix *AL, Matrix *Y, vector<Matrix *> weights)
 
     // Destruct computed values
     {
+        activeDerivation->~Matrix();
         dAL->~Matrix();
         dZ->~Matrix();
         trans_A_cache->~Matrix();
@@ -176,7 +247,8 @@ void backwardPropagation(Matrix *AL, Matrix *Y, vector<Matrix *> weights)
     for (int hidden_layer = (len_layer - 2); hidden_layer >= 0; hidden_layer--)
     {
         // Formula dZ = activation(dA[last - 1])
-        dZ = reLuDerivation(dA_prev);
+        Matrix *activeDerivation = reLuDerivation(Z_cache.at(hidden_layer));
+        dZ = multiply(dA_prev, activeDerivation);
 
         trans_A_cache = (A_cache.at(hidden_layer))->T();
         dot_dZ_AprevT = dot(dZ, trans_A_cache);
@@ -195,6 +267,7 @@ void backwardPropagation(Matrix *AL, Matrix *Y, vector<Matrix *> weights)
 
         // Destruct computed values
         {
+            activeDerivation->~Matrix();
             dZ->~Matrix();
             trans_A_cache->~Matrix();
             dot_dZ_AprevT->~Matrix();
@@ -360,11 +433,13 @@ void freeCache()
     {
         if (layer != 0)
             A_cache.at(layer)->~Matrix();
+        Z_cache.at(layer)->~Matrix();
         dA_cache.at(layer)->~Matrix();
         dW_cache.at(layer)->~Matrix();
         db_cache.at(layer)->~Matrix();
     }
     A_cache.clear();
+    Z_cache.clear();
     dA_cache.clear();
     dW_cache.clear();
     db_cache.clear();
