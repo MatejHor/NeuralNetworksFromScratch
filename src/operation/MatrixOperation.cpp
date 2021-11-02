@@ -1,7 +1,7 @@
 #include "MatrixOperation.h"
 #include <math.h>
 
-static Matrix *sum(Matrix* m1, Matrix* m2)
+static Matrix *sum(Matrix *m1, Matrix *m2)
 {
     if ((m1->getRows() != m2->getRows()) || (m1->getColumns() != m2->getColumns()))
     {
@@ -25,7 +25,7 @@ static Matrix *sum(Matrix* m1, Matrix* m2)
     return summed;
 }
 
-static Matrix *sumVector(Matrix* m, Matrix* vector)
+static Matrix *sumVector(Matrix *m, Matrix *vector)
 {
     if ((m->getRows() != vector->getRows()))
     {
@@ -49,7 +49,7 @@ static Matrix *sumVector(Matrix* m, Matrix* vector)
     return summed;
 }
 
-static Matrix *subtrack(Matrix* m1, Matrix* m2)
+static Matrix *subtrack(Matrix *m1, Matrix *m2)
 {
     if ((m1->getRows() != m2->getRows()) && (m1->getColumns() != m2->getColumns()))
     {
@@ -73,7 +73,7 @@ static Matrix *subtrack(Matrix* m1, Matrix* m2)
     return summed;
 }
 
-static Matrix *sum(Matrix* m, double x)
+static Matrix *sum(Matrix *m, double x)
 {
     int rows = m->getRows();
     int columns = m->getColumns();
@@ -91,7 +91,7 @@ static Matrix *sum(Matrix* m, double x)
     return summed;
 }
 
-static Matrix *subtrack(double x, Matrix* m)
+static Matrix *subtrack(double x, Matrix *m)
 {
     int rows = m->getRows();
     int columns = m->getColumns();
@@ -109,7 +109,7 @@ static Matrix *subtrack(double x, Matrix* m)
     return summed;
 }
 
-static Matrix *sumDimension(Matrix* m)
+static Matrix *sumDimension(Matrix *m)
 {
     double **new_matrix = new double *[m->getRows()];
     double **_matrix = m->getMatrix();
@@ -126,7 +126,7 @@ static Matrix *sumDimension(Matrix* m)
     return new Matrix(m->getRows(), 1, new_matrix);
 }
 
-static double sumMatrix(Matrix* m)
+static double sumMatrix(Matrix *m)
 {
     double **_matrix = m->getMatrix();
     double sum = 0;
@@ -140,7 +140,7 @@ static double sumMatrix(Matrix* m)
     return sum;
 }
 
-static Matrix *dot(Matrix* m1, Matrix* m2)
+static Matrix *dot(Matrix *m1, Matrix *m2)
 {
     if ((m1->getColumns() != m2->getRows()))
     {
@@ -172,7 +172,7 @@ static Matrix *dot(Matrix* m1, Matrix* m2)
     return multi;
 }
 
-static Matrix *multiply(Matrix* m1, Matrix* m2)
+static Matrix *multiply(Matrix *m1, Matrix *m2)
 {
     if ((m1->getRows() != m2->getRows()) && (m1->getColumns() != m2->getColumns()))
     {
@@ -196,7 +196,7 @@ static Matrix *multiply(Matrix* m1, Matrix* m2)
     return new Matrix(rows, columns, new_matrix);
 }
 
-static Matrix *divide(Matrix* m1, Matrix* m2)
+static Matrix *divide(Matrix *m1, Matrix *m2)
 {
     if ((m1->getRows() != m2->getRows()) && (m1->getColumns() != m2->getColumns()))
     {
@@ -220,7 +220,7 @@ static Matrix *divide(Matrix* m1, Matrix* m2)
     return new Matrix(rows, columns, new_matrix);
 }
 
-static Matrix *multiply(Matrix* m, double x)
+static Matrix *multiply(Matrix *m, double x)
 {
     int rows = m->getRows();
     int columns = m->getColumns();
@@ -237,7 +237,7 @@ static Matrix *multiply(Matrix* m, double x)
     return new Matrix(rows, columns, new_matrix);
 }
 
-static Matrix *log(Matrix* m)
+static Matrix *log(Matrix *m)
 {
     double **new_matrix = new double *[m->getRows()];
     double **_matrix = m->getMatrix();
@@ -252,7 +252,7 @@ static Matrix *log(Matrix* m)
     return new Matrix(m->getRows(), m->getColumns(), new_matrix);
 }
 
-static Matrix *sigmoid(Matrix* x)
+static Matrix *sigmoid(Matrix *x)
 {
     double **matrix = new double *[x->getRows()];
     double **X = x->getMatrix();
@@ -269,7 +269,7 @@ static Matrix *sigmoid(Matrix* x)
     return new Matrix(x->getRows(), x->getColumns(), matrix);
 }
 
-static Matrix *sigmoidDerivative(Matrix* x)
+static Matrix *sigmoidDerivative(Matrix *x)
 {
     double **matrix = new double *[x->getRows()];
     double **X = x->getMatrix();
@@ -287,7 +287,7 @@ static Matrix *sigmoidDerivative(Matrix* x)
     return new Matrix(x->getRows(), x->getColumns(), matrix);
 }
 
-static Matrix *softmax(Matrix* x)
+static Matrix *softmax(Matrix *x)
 {
     double **matrix = new double *[x->getRows()];
     double **X = x->getMatrix();
@@ -295,7 +295,7 @@ static Matrix *softmax(Matrix* x)
     for (int row = 0; row < x->getRows(); row++)
     {
         matrix[row] = new double[x->getColumns()];
-        double sum = 0;
+        double sum = 0.0;
         for (int column = 0; column < x->getColumns(); ++column)
         {
             sum += exp(X[row][column]);
@@ -308,11 +308,10 @@ static Matrix *softmax(Matrix* x)
         }
     }
 
-    // sum_x->~Matrix();
     return new Matrix(x->getRows(), x->getColumns(), matrix);
 }
 
-static Matrix *softmaxDerivation(Matrix* x)
+static Matrix *softmaxDerivation(Matrix *x)
 {
     double **matrix = new double *[x->getRows()];
     double **X = x->getMatrix();
@@ -336,7 +335,7 @@ static Matrix *softmaxDerivation(Matrix* x)
     return new Matrix(x->getRows(), x->getColumns(), matrix);
 }
 
-static Matrix *reLu(Matrix* x)
+static Matrix *reLu(Matrix *x)
 {
     double **matrix = new double *[x->getRows()];
     double **X = x->getMatrix();
@@ -359,7 +358,7 @@ static Matrix *reLu(Matrix* x)
     return new Matrix(x->getRows(), x->getColumns(), matrix);
 }
 
-static Matrix *reLuDerivation(Matrix* x)
+static Matrix *reLuDerivation(Matrix *x)
 {
     double **matrix = new double *[x->getRows()];
     double **X = x->getMatrix();
@@ -382,24 +381,27 @@ static Matrix *reLuDerivation(Matrix* x)
     return new Matrix(x->getRows(), x->getColumns(), matrix);
 }
 
-static Matrix* squeeze(Matrix* Y, string func) {
-    Matrix* Y_T = Y->T();
-    Matrix* new_Y = new Matrix(Y_T->getRows(), 1);
+static Matrix *squeeze(Matrix *Y, string func)
+{
+    Matrix *Y_T = Y->T();
+    Matrix *new_Y = new Matrix(Y_T->getRows(), 1);
     for (int row = 0; row < Y_T->getRows(); row++)
     {
         double comperator = 0.0;
         double foundedValue = 0.0;
         for (int column = 0; column < Y_T->getColumns(); column++)
         {
-            if (func.compare("max") == 0 && Y_T->getMatrix()[row][column] > comperator){
+            if (func.compare("max") == 0 && Y_T->getMatrix()[row][column] > comperator)
+            {
                 comperator = Y_T->getMatrix()[row][column];
                 foundedValue = column * 1.0;
             }
-            if (func.compare("category") == 0 && Y_T->getMatrix()[row][column] == 1.0) {
+            if (func.compare("category") == 0 && Y_T->getMatrix()[row][column] == 1.0)
+            {
                 foundedValue = column * 1.0;
             }
         }
-        new_Y->getMatrix()[row][0] = foundedValue; 
+        new_Y->getMatrix()[row][0] = foundedValue;
     }
     Y_T->~Matrix();
     return new_Y;

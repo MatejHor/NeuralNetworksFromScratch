@@ -116,7 +116,7 @@ void Matrix::print()
             cout << std::fixed << std::setprecision(8) << matrix[row][column] << " ";
         }
 
-        cout << "]" << endl;
+        cout << "]," << endl;
     }
     cout << "]" << endl;
 }
@@ -132,7 +132,7 @@ void Matrix::print(string name)
             cout << std::fixed << std::setprecision(8) << matrix[row][column] << " ";
         }
 
-        cout << "]" << endl;
+        cout << "]," << endl;
     }
     cout << "]" << endl;
 }

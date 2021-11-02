@@ -72,9 +72,9 @@ Matrix *forwardPropagation(Matrix *X, vector<Matrix *> weights, vector<Matrix *>
     // Formula Z = dot(W[0], A[0-1] a.k.a X) + b[0]
         Z = sumVector(dot_W_A_prev, bias.at(hidden_layer));
 
-    // Formula A[0] = activation(Z)
         A_cache.push_back(A_prev);
         Z_cache.push_back(Z);
+    // Formula A[0] = activation(Z)
         A_prev = reLu(Z);
 
         {
@@ -375,9 +375,9 @@ int main()
     cout << "0. Initialize parameters" << endl;
     static double layer_dims[] = {784, 128, 10};
     len_layer = (*(&layer_dims + 1) - layer_dims) - 1;
-    learning_rate = 0.01;
+    learning_rate = 0.0001;
     epochs = 10;
-    batchSize = 2000;
+    batchSize = 32;
     VERBOSE = true;
 
     Dataset train = Dataset(
@@ -402,22 +402,26 @@ int main()
     vector<Matrix *> weights = initializeRandomWeights(layer_dims);
     vector<Matrix *> bias = initializeBias(layer_dims);
 
+    cout << "NetworkLayers: ";
+    for (int layer=0; layer<=len_layer; layer++) cout << layer_dims[layer] << ", ";
+    cout << "\nBatchSize: " << batchSize << " Epochs: " << epochs << " LearningRate: " << learning_rate << endl; 
+
     cout << "2. LOOP " << endl;
     auto start = high_resolution_clock::now();
     for (int iteration = 0; iteration < epochs; iteration++)
     {
         for (int batch = 0; batch < batchCount; batch++)
         {
-            cout << " 2.1 FORWARD PROPAGATION" << endl;
+            // cout << " 2.1 FORWARD PROPAGATION" << endl;
             AL = forwardPropagation(xBatch.at(batch), weights, bias);
 
-            cout << " 2.2 COMPUTE COST" << endl;
+            // cout << " 2.2 COMPUTE COST" << endl;
             double loss = computeCostCrossEntropy(AL, yBatch.at(batch));
 
-            cout << " 2.3 BACKWARD PROPAGATION" << endl;
+            // cout << " 2.3 BACKWARD PROPAGATION" << endl;
             backwardPropagation(AL, yBatch.at(batch), weights);
 
-            cout << " 2.4 UPDATE PARAMETERS" << endl;
+            // cout << " 2.4 UPDATE PARAMETERS" << endl;
             updateParametersGradientDescend(bias, weights);
 
             if ((batch == 0))
@@ -426,7 +430,7 @@ int main()
                 cout << "[" << iteration << "] epoch LOSS: " << loss << " ACC: " << accuracy << endl;
             }
 
-            cout << " 2.5 FREE CACHE" << endl;
+            // cout << " 2.5 FREE CACHE" << endl;
             freeCache();
             AL->~Matrix();
         }
