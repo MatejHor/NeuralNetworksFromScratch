@@ -130,19 +130,23 @@ void backwardPropagation(Matrix *AL, Matrix *Y, vector<Matrix *> weights)
     double m = AL->getColumns();
 
     // Formula dA[last] = - ((Y / AL ) - ((1 - Y) / (1 - AL)))
-    Matrix *divide_Y_AL = divide(Y, AL);
-    Matrix *subtrack_Y = subtrack(1, Y);
-    Matrix *subtrack_AL = subtrack(1, AL);
-    Matrix *divideSubtrack_Y_AL = divide(subtrack_Y, subtrack_AL);
-    Matrix *subtrackDivide_Y_AL_DivideSubtrack_Y_AL = subtrack(divide_Y_AL, divideSubtrack_Y_AL);
-    Matrix *dAL = multiply(subtrackDivide_Y_AL_DivideSubtrack_Y_AL, -1);
+    // Matrix *divide_Y_AL = divide(Y, AL);
+    // Matrix *subtrack_Y = subtrack(1, Y);
+    // Matrix *subtrack_AL = subtrack(1, AL);
+    // Matrix *divideSubtrack_Y_AL = divide(subtrack_Y, subtrack_AL);
+    // Matrix *subtrackDivide_Y_AL_DivideSubtrack_Y_AL = subtrack(divide_Y_AL, divideSubtrack_Y_AL);
+    // Matrix *dAL = multiply(subtrackDivide_Y_AL_DivideSubtrack_Y_AL, -1);
 
+    // dAL = 2 * (output - y_train) / output.shape[0] * self.softmax(params['Z3'], derivative=True)
+    Matrix *subtrack_Y_AL = subtrack(Y, AL);
+    Matrix* dAL = multiply(subtrack_Y_AL, (2.0/Y->getRows()));
     {
-        divide_Y_AL->~Matrix();
-        subtrack_Y->~Matrix();
-        subtrack_AL->~Matrix();
-        divideSubtrack_Y_AL->~Matrix();
+        // divide_Y_AL->~Matrix();
+        // subtrack_Y->~Matrix();
+        // subtrack_AL->~Matrix();
+        // divideSubtrack_Y_AL->~Matrix();
         // subtrackDivide_Y_AL_DivideSubtrack_Y_AL->~Matrix();
+        subtrack_Y_AL->~Matrix();
     }
 
     Matrix *activeDerivation = softmaxDerivation(Z_cache.at(len_layer - 1));
@@ -210,7 +214,6 @@ void updateParametersGradientDescend(vector<Matrix *> &bias, vector<Matrix *> &w
         Matrix *multiplydBLearningRate = multiply(db_cache.at(len_layer - (hidden_layer + 1)), learning_rate);
         Matrix *old_bias = bias.at(hidden_layer);
         bias.at(hidden_layer) = subtrack(old_bias, multiplydBLearningRate);
-
         {
             old_bias->~Matrix();
             multiplydBLearningRate->~Matrix();
@@ -372,7 +375,7 @@ int main()
     cout << "0. Initialize parameters" << endl;
     static double layer_dims[] = {784, 128, 10};
     len_layer = (*(&layer_dims + 1) - layer_dims) - 1;
-    learning_rate = 0.001;
+    learning_rate = 0.01;
     epochs = 10;
     batchSize = 2000;
     VERBOSE = true;
