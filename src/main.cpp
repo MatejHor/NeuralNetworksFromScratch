@@ -67,25 +67,31 @@ Matrix *forwardPropagation(Matrix *X, vector<Matrix *> weights, vector<Matrix *>
 
     for (int hidden_layer = 0; hidden_layer < (len_layer - 1); hidden_layer++)
     {
-        dot_W_A_prev = dot(weights.at(hidden_layer), A_prev);
-        Z = sumVector(dot_W_A_prev, bias.at(hidden_layer));
-
         A_cache.push_back(A_prev);
+        dot_W_A_prev = dot(weights.at(hidden_layer), A_prev);
+        // Formula Z = dot(W[0], A[0-1] a.k.a X) + b[0]
+        Z = sumVector(dot_W_A_prev, bias.at(hidden_layer));
+        // Formula A[0] = activation(Z)
         A_prev = reLu(Z);
 
         // Destruct computed values
-        dot_W_A_prev->~Matrix();
-        Z->~Matrix();
+        {
+            dot_W_A_prev->~Matrix();
+            Z->~Matrix();
+        }
     }
-    dot_W_A_prev = dot(weights.at(len_layer - 1), A_prev);
-    Z = sumVector(dot_W_A_prev, bias.at(len_layer - 1));
-
     A_cache.push_back(A_prev);
+    dot_W_A_prev = dot(weights.at(len_layer - 1), A_prev);
+    // Formula Z = dot(W[last], A[last - 1]) + b[last]
+    Z = sumVector(dot_W_A_prev, bias.at(len_layer - 1));
+    // Formula A[last] = activation(Z)
     A_prev = softmax(Z);
 
     // Destruct computed values
-    dot_W_A_prev->~Matrix();
-    Z->~Matrix();
+    {
+        dot_W_A_prev->~Matrix();
+        Z->~Matrix();
+    }
     return A_prev;
 }
 
@@ -104,15 +110,17 @@ double computeCostCrossEntropy(Matrix *AL, Matrix *Y)
     double sumMatrixVal = sumMatrix(sumMatrix_);
 
     // Destruct computed values
-    log_AL->~Matrix();
-    multiply_Y_log_AL->~Matrix();
+    {
+        log_AL->~Matrix();
+        multiply_Y_log_AL->~Matrix();
 
-    subtrack_Y->~Matrix();
-    subtrack_AL->~Matrix();
-    logSubtrack_AL->~Matrix();
-    multiplySubtrack_Y_logSubtrack_AL->~Matrix();
+        subtrack_Y->~Matrix();
+        subtrack_AL->~Matrix();
+        logSubtrack_AL->~Matrix();
+        multiplySubtrack_Y_logSubtrack_AL->~Matrix();
 
-    sumMatrix_->~Matrix();
+        sumMatrix_->~Matrix();
+    }
     return (-1.0 / m) * sumMatrixVal;
 }
 
@@ -120,6 +128,7 @@ void backwardPropagation(Matrix *AL, Matrix *Y, vector<Matrix *> weights)
 {
     double m = AL->getColumns();
 
+    // Formula dA[last] = - ((Y / AL ) - ((1 - Y) / (1 - AL)))
     Matrix *divide_Y_AL = divide(Y, AL);
     Matrix *subtrack_Y = subtrack(1, Y);
     Matrix *subtrack_AL = subtrack(1, AL);
@@ -128,20 +137,26 @@ void backwardPropagation(Matrix *AL, Matrix *Y, vector<Matrix *> weights)
     Matrix *dAL = multiply(subtrackDivide_Y_AL_DivideSubtrack_Y_AL, -1);
 
     // Destruct computed values
-    divide_Y_AL->~Matrix();
-    subtrack_Y->~Matrix();
-    subtrack_AL->~Matrix();
-    divideSubtrack_Y_AL->~Matrix();
-    subtrackDivide_Y_AL_DivideSubtrack_Y_AL->~Matrix();
+    {
+        divide_Y_AL->~Matrix();
+        subtrack_Y->~Matrix();
+        subtrack_AL->~Matrix();
+        divideSubtrack_Y_AL->~Matrix();
+        subtrackDivide_Y_AL_DivideSubtrack_Y_AL->~Matrix();
+    }
 
+    // Formula dZ = activation(dA[last])
     Matrix *dZ = softmaxDerivation(dAL);
 
     Matrix *trans_A_cache = (A_cache.at(len_layer - 1))->T();
     Matrix *dot_dZ_AprevT = dot(dZ, trans_A_cache);
+    // Formula dW[last] = (1/m) * dot(dZ, A[last].T)
     Matrix *dW = multiply(dot_dZ_AprevT, (1.0 / m));
     Matrix *sumDimension_dZ = sumDimension(dZ);
+    // Formula db[last] = (1/m) * sumDimension(dZ)
     Matrix *db = multiply(sumDimension_dZ, (1.0 / m));
     Matrix *trans_weight = (weights.at(len_layer - 1))->T();
+    // Formula dA[last - 1] = dot(W[last].T, dZ)
     Matrix *dA_prev = dot(trans_weight, dZ);
 
     dA_cache.push_back(dA_prev);
@@ -149,25 +164,29 @@ void backwardPropagation(Matrix *AL, Matrix *Y, vector<Matrix *> weights)
     db_cache.push_back(db);
 
     // Destruct computed values
-    dAL->~Matrix();
-    dZ->~Matrix();
-    trans_A_cache->~Matrix();
-    dot_dZ_AprevT->~Matrix();
-    sumDimension_dZ->~Matrix();
-    trans_weight->~Matrix();
+    {
+        dAL->~Matrix();
+        dZ->~Matrix();
+        trans_A_cache->~Matrix();
+        dot_dZ_AprevT->~Matrix();
+        sumDimension_dZ->~Matrix();
+        trans_weight->~Matrix();
+    }
 
-    // cout << "[+] LOOPING [+]" << endl;
     for (int hidden_layer = (len_layer - 2); hidden_layer >= 0; hidden_layer--)
     {
-        // cout << "Hidden layer " << hidden_layer << endl;
+        // Formula dZ = activation(dA[last - 1])
         dZ = reLuDerivation(dA_prev);
 
         trans_A_cache = (A_cache.at(hidden_layer))->T();
         dot_dZ_AprevT = dot(dZ, trans_A_cache);
+        // Formula dW[last - 1] = (1/m) * dot(dZ, A[last - 1].T)
         dW = multiply(dot_dZ_AprevT, (1.0 / m));
         sumDimension_dZ = sumDimension(dZ);
+        // Formula db[last - 1] = (1/m) * sumDimension(dZ)
         db = multiply(sumDimension_dZ, (1.0 / m));
         trans_weight = (weights.at(hidden_layer))->T();
+        // Formula dA[last - 2] = dot(W[last - 1].T, dZ)
         dA_prev = dot(trans_weight, dZ);
 
         dA_cache.push_back(dA_prev);
@@ -175,11 +194,13 @@ void backwardPropagation(Matrix *AL, Matrix *Y, vector<Matrix *> weights)
         db_cache.push_back(db);
 
         // Destruct computed values
-        dZ->~Matrix();
-        trans_A_cache->~Matrix();
-        dot_dZ_AprevT->~Matrix();
-        sumDimension_dZ->~Matrix();
-        trans_weight->~Matrix();
+        {
+            dZ->~Matrix();
+            trans_A_cache->~Matrix();
+            dot_dZ_AprevT->~Matrix();
+            sumDimension_dZ->~Matrix();
+            trans_weight->~Matrix();
+        }
     }
 }
 
