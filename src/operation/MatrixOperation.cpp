@@ -303,7 +303,8 @@ static Matrix *softmax(Matrix* x)
 
         for (int column = 0; column < x->getColumns(); ++column)
         {
-            matrix[row][column] = exp(X[row][column]) / sum;
+            double x_exp = exp(X[row][column]);
+            matrix[row][column] = x_exp / sum;
         }
     }
 

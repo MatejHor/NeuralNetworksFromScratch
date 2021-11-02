@@ -69,30 +69,28 @@ Matrix *forwardPropagation(Matrix *X, vector<Matrix *> weights, vector<Matrix *>
     for (int hidden_layer = 0; hidden_layer < (len_layer - 1); hidden_layer++)
     {
         dot_W_A_prev = dot(weights.at(hidden_layer), A_prev);
-        // Formula Z = dot(W[0], A[0-1] a.k.a X) + b[0]
+    // Formula Z = dot(W[0], A[0-1] a.k.a X) + b[0]
         Z = sumVector(dot_W_A_prev, bias.at(hidden_layer));
+
+    // Formula A[0] = activation(Z)
         A_cache.push_back(A_prev);
         Z_cache.push_back(Z);
-
-        // Formula A[0] = activation(Z)
         A_prev = reLu(Z);
 
-        // Destruct computed values
         {
             dot_W_A_prev->~Matrix();
         }
     }
     dot_W_A_prev = dot(weights.at(len_layer - 1), A_prev);
-    // Formula Z = dot(W[last], A[last - 1]) + b[last]
+// Formula Z = dot(W[last], A[last - 1]) + b[last]
     Z = sumVector(dot_W_A_prev, bias.at(len_layer - 1));
+
     A_cache.push_back(A_prev);
     Z_cache.push_back(Z);
 
-    // Formula A[last] = activation(Z)
+// Formula A[last] = activation(Z)
     A_prev = softmax(Z);
 
-
-    // Destruct computed values
     {
         dot_W_A_prev->~Matrix();
     }
@@ -103,7 +101,7 @@ double computeCostCrossEntropy(Matrix *AL, Matrix *Y)
 {
     int m = Y->getColumns();
     Matrix *log_AL = log(AL);
-    Matrix *multiply_Y_log_AL = multiply(log_AL, Y);
+    Matrix *multiply_Y_log_AL = multiply(Y, log_AL);
 
     Matrix *subtrack_Y = subtrack(1, Y);
     Matrix *subtrack_AL = subtrack(1, AL);
@@ -113,7 +111,6 @@ double computeCostCrossEntropy(Matrix *AL, Matrix *Y)
     Matrix *sumMatrix_ = sum(multiply_Y_log_AL, multiplySubtrack_Y_logSubtrack_AL);
     double sumMatrixVal = sumMatrix(sumMatrix_);
 
-    // Destruct computed values
     {
         log_AL->~Matrix();
         multiply_Y_log_AL->~Matrix();
@@ -125,70 +122,7 @@ double computeCostCrossEntropy(Matrix *AL, Matrix *Y)
 
         sumMatrix_->~Matrix();
     }
-    // return (-1.0 / m) * sumMatrixVal;
-    return -(sumMatrixVal / m);
-}
-
-void backwardPropagationTry(Matrix *AL, Matrix *Y, vector<Matrix *> weights)
-{
-    double m = AL->getColumns();
-
-    Matrix *subtrack_AL_Y = subtrack(AL, Y);
-    Matrix *activationDerivation = softmaxDerivation(Z_cache.at(len_layer - 1));
-    // Matrix *dZ = subtrack_AL_Y;
-    Matrix *dZ = multiply(subtrack_AL_Y, activationDerivation);
-
-    Matrix *AprevT = (A_cache.at(len_layer - 1))->T();
-    Matrix *dot_dZ_AprevT = dot(dZ, AprevT);
-    // Formula dW[last] = (1/m) * dot(dZ, A[last].T)
-    Matrix *dW = multiply(dot_dZ_AprevT, (1.0 / m));
-
-    Matrix *sumDimension_dZ = sumDimension(dZ);
-    // Formula db[last] = (1/m) * sumDimension(dZ)
-    Matrix *db = multiply(sumDimension_dZ, (1.0 / m));
-
-    dA_cache.push_back(dZ);
-    dW_cache.push_back(dW);
-    db_cache.push_back(db);
-    {
-        subtrack_AL_Y->~Matrix();
-        subtrackactivationDerivation_AL_Y->~Matrix();
-        AprevT->~Matrix();
-        dot_dZ_AprevT->~Matrix();
-        sumDimension_dZ->~Matrix();
-    }
-
-    for (int hidden_layer = (len_layer - 2); hidden_layer >= 0; hidden_layer--)
-    {
-        activationDerivation = reLuDerivation(Z_cache.at(hidden_layer));
-        Matrix *W_prev_T = weights.at(hidden_layer + 1)->T();
-        Matrix *dot_WprevT_dZprev = dot(W_prev_T, dZ);
-
-        // Formula dZ[last - 1] dot(W_last.T, dZ_last)* activationDer(A[last - 1])
-        dZ = multiply(dot_WprevT_dZprev, activationDerivation);
-
-        AprevT = (A_cache.at(hidden_layer))->T();
-        dot_dZ_AprevT = dot(dZ, AprevT);
-        // Formula dW[last] = (1/m) * dot(dZ, A[last].T)
-        dW = multiply(dot_dZ_AprevT, (1.0 / m));
-
-        sumDimension_dZ = sumDimension(dZ);
-        // Formula db[last] = (1/m) * sumDimension(dZ)
-        db = multiply(sumDimension_dZ, (1.0 / m));
-
-        dA_cache.push_back(dZ);
-        dW_cache.push_back(dW);
-        db_cache.push_back(db);
-        {
-            activationDerivation->~Matrix();
-            W_prev_T->~Matrix();
-            dot_WprevT_dZprev->~Matrix();
-
-            AprevT->~Matrix();
-            dot_dZ_AprevT->~Matrix();
-            sumDimension_dZ->~Matrix();
-        }
-    }
+    return (-1.0 / m) * sumMatrixVal;
 }
 
 void backwardPropagation(Matrix *AL, Matrix *Y, vector<Matrix *> weights)
@@ -203,81 +137,68 @@ void backwardPropagation(Matrix *AL, Matrix *Y, vector<Matrix *> weights)
     Matrix *subtrackDivide_Y_AL_DivideSubtrack_Y_AL = subtrack(divide_Y_AL, divideSubtrack_Y_AL);
     Matrix *dAL = multiply(subtrackDivide_Y_AL_DivideSubtrack_Y_AL, -1);
 
-    // Destruct computed values
     {
         divide_Y_AL->~Matrix();
         subtrack_Y->~Matrix();
         subtrack_AL->~Matrix();
         divideSubtrack_Y_AL->~Matrix();
-        subtrackDivide_Y_AL_DivideSubtrack_Y_AL->~Matrix();
+        // subtrackDivide_Y_AL_DivideSubtrack_Y_AL->~Matrix();
     }
-// dZ
-    // Matrix *activeDerivation = softmaxDerivation(Z_cache.at(len_layer - 1));
-    Matrix *activeDerivation = softmaxDerivation(A_cache.at(len_layer - 1)); 
-    // Formula dZ[last - 1] = dA[last]*activation(Z[last- 1] ?? A[last - 1])
-    Matrix *dZ = multiply(dAL, activeDerivation);
-// dW
-    Matrix *trans_A_cache = (A_cache.at(len_layer - 1))->T();
-    Matrix *dot_dZ_AprevT = dot(dZ, trans_A_cache);
-    // Formula dW[last] = (1/m) * dot(dZ, A[last].T)
-    Matrix *dW = multiply(dot_dZ_AprevT, (1.0 / m));
-// dB
-    Matrix *sumDimension_dZ = sumDimension(dZ);
-    // Formula db[last] = (1/m) * sumDimension(dZ)
-    Matrix *db = multiply(sumDimension_dZ, (1.0 / m));
-// dA
-    Matrix *trans_weight = (weights.at(len_layer - 1))->T();
-    // Formula dA[last - 1] = dot(W[last].T, dZ)
-    Matrix *dA_prev = dot(trans_weight, dZ);
 
-    dA_cache.push_back(dA_prev);
+    Matrix *activeDerivation = softmaxDerivation(Z_cache.at(len_layer - 1));
+// Formula dZ[last] = dA[last]*activation(Z[last])
+    Matrix *dZ = multiply(dAL, activeDerivation);
+// Formula dW[last] = (1/m) * dot(dZ, A[last - 1].T)
+    Matrix *Aprev_T = (A_cache.at(len_layer - 1))->T();
+    Matrix *dot_dZ_AprevT = dot(dZ, Aprev_T);
+    Matrix *dW = multiply(dot_dZ_AprevT, (1.0 / m));
+// Formula db[last] = (1/m) * sumDimension(dZ)
+    Matrix *sumDimension_dZ = sumDimension(dZ);
+    Matrix *db = multiply(sumDimension_dZ, (1.0 / m));
+// Formula dA[last - 1] = dot(W[last].T, dZ)
+    Matrix *W_T = (weights.at(len_layer - 1))->T();
+    Matrix *dA = dot(W_T, dZ);
+
     dW_cache.push_back(dW);
     db_cache.push_back(db);
 
-    // Destruct computed values
     {
-        activeDerivation->~Matrix();
         dAL->~Matrix();
+        activeDerivation->~Matrix();
         dZ->~Matrix();
-        trans_A_cache->~Matrix();
+        Aprev_T->~Matrix();
         dot_dZ_AprevT->~Matrix();
         sumDimension_dZ->~Matrix();
-        trans_weight->~Matrix();
+        W_T->~Matrix();
     }
 
     for (int hidden_layer = (len_layer - 2); hidden_layer >= 0; hidden_layer--)
     {
-    // dZ
-        // activeDerivation = reLuDerivation(Z_cache.at(hidden_layer));
-        activeDerivation = reLuDerivation(A_cache.at(hidden_layer));
-        // Formula dZ[last - 1] = dA[last]*activation(Z[last- 1] ?? A[last - 1])
-        dZ = multiply(dA_prev, activeDerivation);
-    // dW
-        trans_A_cache = (A_cache.at(hidden_layer))->T();
-        dot_dZ_AprevT = dot(dZ, trans_A_cache);
-        // Formula dW[last - 1] = (1/m) * dot(dZ, A[last - 1].T)
-        dW = multiply(dot_dZ_AprevT, (1.0 / m));
-    // dB
-        sumDimension_dZ = sumDimension(dZ);
-        // Formula db[last - 1] = (1/m) * sumDimension(dZ)
-        db = multiply(sumDimension_dZ, (1.0 / m));
-    // dA    
-        trans_weight = (weights.at(hidden_layer))->T();
-        // Formula dA[last - 2] = dot(W[last - 1].T, dZ)
-        dA_prev = dot(trans_weight, dZ);
 
-        dA_cache.push_back(dA_prev);
+    // Formula dZ[last - 1] = dA[last]*activation(Z[last- 1])
+        activeDerivation = reLuDerivation(Z_cache.at(hidden_layer));
+        dZ = multiply(dA, activeDerivation);
+    // Formula dW[last - 1] = (1/m) * dot(dZ, A[last - 2].T)
+        Aprev_T = (A_cache.at(hidden_layer))->T();
+        dot_dZ_AprevT = dot(dZ, Aprev_T);
+        dW = multiply(dot_dZ_AprevT, (1.0 / m));
+    // Formula db[last - 1] = (1/m) * sumDimension(dZ)
+        sumDimension_dZ = sumDimension(dZ);
+        db = multiply(sumDimension_dZ, (1.0 / m));
+    // Formula dA[last - 2] = dot(W[last - 1].T, dZ)
+        W_T = (weights.at(hidden_layer))->T();
+        dA = dot(W_T, dZ);
+
         dW_cache.push_back(dW);
         db_cache.push_back(db);
 
-        // Destruct computed values
         {
             activeDerivation->~Matrix();
             dZ->~Matrix();
-            trans_A_cache->~Matrix();
+            Aprev_T->~Matrix();
             dot_dZ_AprevT->~Matrix();
             sumDimension_dZ->~Matrix();
-            trans_weight->~Matrix();
+            W_T->~Matrix();
         }
     }
 }
@@ -290,17 +211,19 @@ void updateParametersGradientDescend(vector<Matrix *> &bias, vector<Matrix *> &w
         Matrix *old_bias = bias.at(hidden_layer);
         bias.at(hidden_layer) = subtrack(old_bias, multiplydBLearningRate);
 
-        // Destruct computed values
-        old_bias->~Matrix();
-        multiplydBLearningRate->~Matrix();
+        {
+            old_bias->~Matrix();
+            multiplydBLearningRate->~Matrix();
+        }
 
         Matrix *multiplydWLearningRate = multiply(dW_cache.at(len_layer - (hidden_layer + 1)), learning_rate);
         Matrix *old_weights = weights.at(hidden_layer);
         weights.at(hidden_layer) = subtrack(old_weights, multiplydWLearningRate);
 
-        // Destruct computed values
-        old_weights->~Matrix();
-        multiplydWLearningRate->~Matrix();
+        {
+            old_weights->~Matrix();
+            multiplydWLearningRate->~Matrix();
+        }
     }
 }
 
@@ -329,50 +252,39 @@ double predict(Dataset *data, vector<Matrix *> weights, vector<Matrix *> bias, s
     Matrix *Z = NULL;
     Matrix *dot_W_A_prev;
 
-    auto pred_start = high_resolution_clock::now();
     for (int layer = 0; layer < (len_layer - 1); layer++)
     {
         dot_W_A_prev = dot(weights.at(layer), A_prev);
         Z = sumVector(dot_W_A_prev, bias.at(layer));
-        A_free = A_prev;
         A_prev = reLu(Z);
 
-        // Destruct
         {
             dot_W_A_prev->~Matrix();
             Z->~Matrix();
             if (layer != 0)
-                A_free->~Matrix();
+                A_prev->~Matrix();
         }
+
+
     }
+
     dot_W_A_prev = dot(weights.at(len_layer - 1), A_prev);
     Z = sumVector(dot_W_A_prev, bias.at(len_layer - 1));
-    Matrix *A_predict = softmax(Z);
-    auto pred_stop = high_resolution_clock::now();
+    A_prev = softmax(Z);
 
-    // Destruct
-    {
-        A_prev->~Matrix();
-        dot_W_A_prev->~Matrix();
-        Z->~Matrix();
-    }
 
-    Matrix *PrediLabel = squeeze(A_predict, "max");
+    Matrix *predictLabel = squeeze(A_prev, "max");
     double measureVal;
     if (measure.compare("accuracy") == 0)
-        measureVal = data->accuracy(PrediLabel);
+        measureVal = data->accuracy(predictLabel);
     else
-        measureVal = data->f1_mikro(PrediLabel);
+        measureVal = data->f1_mikro(predictLabel);
 
-    if (verbose)
-        cout << "Predict Time " << duration_cast<milliseconds>(pred_stop - pred_start).count() << " milliseconds" << endl;
-    if (verbose)
-        cout << measure << ": " << measureVal << endl;
-
-    // destruct
     {
-        PrediLabel->~Matrix();
-        A_predict->~Matrix();
+        dot_W_A_prev->~Matrix();
+        Z->~Matrix();
+        A_prev->~Matrix();
+        predictLabel->~Matrix();
     }
     return measureVal;
 }
@@ -432,6 +344,13 @@ void freeMatrixVector(vector<Matrix *> &vector1, vector<Matrix *> &vector2, int 
     vector2.clear();
 }
 
+void freeVector(vector<Matrix *> &vector)
+{
+    for (int i = 0; i < vector.size(); i++)
+        vector.at(i)->~Matrix();
+    vector.clear();
+}
+
 void freeCache()
 {
     for (int layer = 0; layer < len_layer; layer++)
@@ -439,13 +358,11 @@ void freeCache()
         if (layer != 0)
             A_cache.at(layer)->~Matrix();
         Z_cache.at(layer)->~Matrix();
-        dA_cache.at(layer)->~Matrix();
         dW_cache.at(layer)->~Matrix();
         db_cache.at(layer)->~Matrix();
     }
     A_cache.clear();
     Z_cache.clear();
-    dA_cache.clear();
     dW_cache.clear();
     db_cache.clear();
 }
@@ -453,23 +370,23 @@ void freeCache()
 int main()
 {
     cout << "0. Initialize parameters" << endl;
-    static double layer_dims[] = {784, 255, 225, 200, 10};
+    static double layer_dims[] = {784, 128, 10};
     len_layer = (*(&layer_dims + 1) - layer_dims) - 1;
     learning_rate = 0.001;
     epochs = 10;
-    batchSize = 16;
+    batchSize = 2000;
     VERBOSE = true;
 
     Dataset train = Dataset(
         "../data/fashion_mnist_train_vectors.csv",
         "../data/fashion_mnist_train_labels.csv",
-        20000, // size of train dataset
+        2000, // size of train dataset
         VERBOSE);
 
     Dataset test = Dataset(
         "../data/fashion_mnist_test_vectors.csv",
         "../data/fashion_mnist_test_labels.csv",
-        500, // size of test dataset
+        100, // size of test dataset
         VERBOSE);
 
     vector<Matrix *> xBatch;
@@ -488,35 +405,30 @@ int main()
     {
         for (int batch = 0; batch < batchCount; batch++)
         {
-            if (AL != NULL)
-                AL->~Matrix();
-            // cout << "2.1 FORWARD PROPAGATION" << endl;
+            cout << " 2.1 FORWARD PROPAGATION" << endl;
             AL = forwardPropagation(xBatch.at(batch), weights, bias);
 
-            // cout << "2.2 COMPUTE COST" << endl;
+            cout << " 2.2 COMPUTE COST" << endl;
             double loss = computeCostCrossEntropy(AL, yBatch.at(batch));
 
-            // cout << "2.3 BACKWARD PROPAGATION" << endl;
+            cout << " 2.3 BACKWARD PROPAGATION" << endl;
             backwardPropagation(AL, yBatch.at(batch), weights);
 
-            // cout << "2.4 UPDATE PARAMETERS" << endl;
+            cout << " 2.4 UPDATE PARAMETERS" << endl;
             updateParametersGradientDescend(bias, weights);
 
-            // if (iteration % 10 == 0 && (batch == batchCount - 1))
-            if (true && (batch == batchCount - 1))
-            // if (iteration % 50 == 0 && (batch == batchCount - 1))
+            if ((batch == 0))
             {
                 accuracy = predict(&train, weights, bias, "accuracy", false);
                 cout << "[" << iteration << "] epoch LOSS: " << loss << " ACC: " << accuracy << endl;
             }
 
-            // cout << "2.5 FREE CACHE" << endl;
+            cout << " 2.5 FREE CACHE" << endl;
             freeCache();
+            AL->~Matrix();
         }
     }
     auto stop = high_resolution_clock::now();
-    if (VERBOSE)
-        cout << "2.-1 FREE BATCHS" << endl;
     freeMatrixVector(xBatch, yBatch, batchCount);
 
     if (VERBOSE)
@@ -526,9 +438,11 @@ int main()
     {
         cout << "3.1 PREDICTION TRAIN" << endl;
         accuracy = predict(&train, weights, bias, "accuracy", VERBOSE);
+        cout << "TRAIN [" << train.getY()->getColumns() << "] acc:" << accuracy << endl;
 
         cout << "3.2 PREDICTION TEST" << endl;
         accuracy = predict(&test, weights, bias, "accuracy", VERBOSE);
+        cout << "TEST [" << test.getY()->getColumns() << "] acc:" << accuracy << endl;
     }
 
     if (VERBOSE)
