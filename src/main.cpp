@@ -160,23 +160,21 @@ void backwardPropagationTry(Matrix *AL, Matrix *Y, vector<Matrix *> weights)
 
     for (int hidden_layer = (len_layer - 2); hidden_layer >= 0; hidden_layer--)
     {
-
-        // Matrix *activationDerivation = reLuDerivation(Z_cache.at(hidden_layer));
-        Matrix *activationDerivation = reLuDerivation(A_cache.at(hidden_layer));
+        activationDerivation = reLuDerivation(Z_cache.at(hidden_layer));
         Matrix *W_prev_T = weights.at(hidden_layer + 1)->T();
         Matrix *dot_WprevT_dZprev = dot(W_prev_T, dZ);
 
         // Formula dZ[last - 1] dot(W_last.T, dZ_last)* activationDer(A[last - 1])
         dZ = multiply(dot_WprevT_dZprev, activationDerivation);
 
-        Matrix *AprevT = (A_cache.at(hidden_layer))->T();
-        Matrix *dot_dZ_AprevT = dot(dZ, AprevT);
+        AprevT = (A_cache.at(hidden_layer))->T();
+        dot_dZ_AprevT = dot(dZ, AprevT);
         // Formula dW[last] = (1/m) * dot(dZ, A[last].T)
-        Matrix *dW = multiply(dot_dZ_AprevT, (1.0 / m));
+        dW = multiply(dot_dZ_AprevT, (1.0 / m));
 
-        Matrix *sumDimension_dZ = sumDimension(dZ);
+        sumDimension_dZ = sumDimension(dZ);
         // Formula db[last] = (1/m) * sumDimension(dZ)
-        Matrix *db = multiply(sumDimension_dZ, (1.0 / m));
+        db = multiply(sumDimension_dZ, (1.0 / m));
 
         dA_cache.push_back(dZ);
         dW_cache.push_back(dW);
@@ -213,18 +211,21 @@ void backwardPropagation(Matrix *AL, Matrix *Y, vector<Matrix *> weights)
         divideSubtrack_Y_AL->~Matrix();
         subtrackDivide_Y_AL_DivideSubtrack_Y_AL->~Matrix();
     }
-
-    // Formula dZ = activation(dA[last])
-    Matrix *activeDerivation = softmaxDerivation(Z_cache.at(len_layer - 1));
+// dZ
+    // Matrix *activeDerivation = softmaxDerivation(Z_cache.at(len_layer - 1));
+    Matrix *activeDerivation = softmaxDerivation(A_cache.at(len_layer - 1)); 
+    // Formula dZ[last - 1] = dA[last]*activation(Z[last- 1] ?? A[last - 1])
     Matrix *dZ = multiply(dAL, activeDerivation);
-
+// dW
     Matrix *trans_A_cache = (A_cache.at(len_layer - 1))->T();
     Matrix *dot_dZ_AprevT = dot(dZ, trans_A_cache);
     // Formula dW[last] = (1/m) * dot(dZ, A[last].T)
     Matrix *dW = multiply(dot_dZ_AprevT, (1.0 / m));
+// dB
     Matrix *sumDimension_dZ = sumDimension(dZ);
     // Formula db[last] = (1/m) * sumDimension(dZ)
     Matrix *db = multiply(sumDimension_dZ, (1.0 / m));
+// dA
     Matrix *trans_weight = (weights.at(len_layer - 1))->T();
     // Formula dA[last - 1] = dot(W[last].T, dZ)
     Matrix *dA_prev = dot(trans_weight, dZ);
@@ -246,17 +247,21 @@ void backwardPropagation(Matrix *AL, Matrix *Y, vector<Matrix *> weights)
 
     for (int hidden_layer = (len_layer - 2); hidden_layer >= 0; hidden_layer--)
     {
-        // Formula dZ = activation(dA[last - 1])
-        Matrix *activeDerivation = reLuDerivation(Z_cache.at(hidden_layer));
+    // dZ
+        // activeDerivation = reLuDerivation(Z_cache.at(hidden_layer));
+        activeDerivation = reLuDerivation(A_cache.at(hidden_layer));
+        // Formula dZ[last - 1] = dA[last]*activation(Z[last- 1] ?? A[last - 1])
         dZ = multiply(dA_prev, activeDerivation);
-
+    // dW
         trans_A_cache = (A_cache.at(hidden_layer))->T();
         dot_dZ_AprevT = dot(dZ, trans_A_cache);
         // Formula dW[last - 1] = (1/m) * dot(dZ, A[last - 1].T)
         dW = multiply(dot_dZ_AprevT, (1.0 / m));
+    // dB
         sumDimension_dZ = sumDimension(dZ);
         // Formula db[last - 1] = (1/m) * sumDimension(dZ)
         db = multiply(sumDimension_dZ, (1.0 / m));
+    // dA    
         trans_weight = (weights.at(hidden_layer))->T();
         // Formula dA[last - 2] = dot(W[last - 1].T, dZ)
         dA_prev = dot(trans_weight, dZ);
