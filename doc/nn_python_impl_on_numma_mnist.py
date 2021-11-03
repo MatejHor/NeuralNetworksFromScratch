@@ -4,12 +4,6 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 import time
 
-x, y = fetch_openml('mnist_784', version=1, return_X_y=True)
-x = (x/255).astype('float32')
-y = to_categorical(y)
-
-x_train, x_val, y_train, y_val = train_test_split(x, y, test_size=0.15, random_state=42)
-
 class DeepNeuralNetwork():
     def __init__(self, sizes, epochs=10, l_rate=0.001):
         self.sizes = sizes
@@ -41,7 +35,11 @@ class DeepNeuralNetwork():
         params = {
             'W1':np.random.randn(hidden_1, input_layer) * np.sqrt(1. / hidden_1),
             'W2':np.random.randn(hidden_2, hidden_1) * np.sqrt(1. / hidden_2),
-            'W3':np.random.randn(output_layer, hidden_2) * np.sqrt(1. / output_layer)
+            'W3':np.random.randn(output_layer, hidden_2) * np.sqrt(1. / output_layer),
+
+            'b1':np.zeros((hidden_1, 1)),
+            'b2':np.zeros((hidden_2, 1)),
+            'b3':np.zeros((output_layer, 1))
         }
 
         return params
@@ -53,15 +51,21 @@ class DeepNeuralNetwork():
         params['A0'] = x_train
 
         # input layer to hidden layer 1
-        params['Z1'] = np.dot(params["W1"], params['A0'])
+        ERROR
+        print(params['b1'].shape)
+        print(params['A0'].shape)
+        print(params['W1'].shape)
+        params['Z1'] = np.dot(params["W1"], params['A0']) + params['b1']
+        print(params['Z1'].shape)
+        print(np.dot(params["W1"], params['A0']).shape)
         params['A1'] = self.sigmoid(params['Z1'])
 
         # hidden layer 1 to hidden layer 2
-        params['Z2'] = np.dot(params["W2"], params['A1'])
+        params['Z2'] = np.dot(params["W2"], params['A1']) + params['b2']
         params['A2'] = self.sigmoid(params['Z2'])
 
         # hidden layer 2 to output layer
-        params['Z3'] = np.dot(params["W3"], params['A2'])
+        params['Z3'] = np.dot(params["W3"], params['A2']) + params['b3']
         params['A3'] = self.softmax(params['Z3'])
 
         return params['A3']
@@ -84,14 +88,17 @@ class DeepNeuralNetwork():
         # Calculate W3 update
         error = 2 * (output - y_train) / output.shape[0] * self.softmax(params['Z3'], derivative=True)
         change_w['W3'] = np.outer(error, params['A2'])
+        change_w['b3'] = np.sum(error, axis=1, keepdims=True)
 
         # Calculate W2 update
         error = np.dot(params['W3'].T, error) * self.sigmoid(params['Z2'], derivative=True)
         change_w['W2'] = np.outer(error, params['A1'])
+        change_w['b1'] = np.sum(error, axis=1, keepdims=True)
 
         # Calculate W1 update
         error = np.dot(params['W2'].T, error) * self.sigmoid(params['Z1'], derivative=True)
         change_w['W1'] = np.outer(error, params['A0'])
+        change_w['b1'] = np.sum(error, axis=1, keepdims=True)
 
         return change_w
 
@@ -139,29 +146,35 @@ class DeepNeuralNetwork():
             ))
             
 
-# file = open("./data/fashion_mnist_sample_vectors.csv")
-# x_train = np.loadtxt(file, delimiter=',')
-# # print(train_x_orig)
+file = open("./data/fashion_mnist_train_vectors.csv")
+x_train = np.loadtxt(file, delimiter=',')
 
-# file = open("./data/fashion_mnist_sample_labels.csv")
-# y_train = np.loadtxt(file, delimiter=',', dtype=np.int)
-# y_train = y_train.reshape(100,1)
-# y_train = y_train.T
+file = open("./data/fashion_mnist_train_labels.csv")
+y_train = np.loadtxt(file, delimiter=',')
 
-# a = y_train
-# b = np.zeros((a.size, a.max()+1))
-# b[np.arange(a.size),a] = 1.0
-# print(b)
-# y_train = b
+file = open("./data/fashion_mnist_test_vectors.csv")
+x_val = np.loadtxt(file, delimiter=',')
+file = open("./data/fashion_mnist_test_labels.csv")
+y_val = np.loadtxt(file, delimiter=',')
 
-# file = open("./data/fashion_mnist_test_vectors.csv")
-# x_val = np.loadtxt(file, delimiter=',')
-# # print(train_x_orig)
+# x, y = fetch_openml('mnist_784', version=1, return_X_y=True)
+# x_ = x.to_numpy()
+x_ = (x_train/255).astype('float64')
+y_ = to_categorical(y_train)
+y_ = y_.astype('float64')
 
-# file = open("./data/fashion_mnist_test_labels.csv")
-# y_val = np.loadtxt(file, delimiter=',', dtype=np.int)
-# y_val = y_val.reshape(10000,1)
-# y_val = y_val.T
+x_val = (x_val/255).astype('float64')
+y_val = to_categorical(y_val)
+y_val = y_val.astype('float64')
+
+print("x_train.shape ", x_train.shape)
+print("y_train.shape ", y_train.shape)
+print("x.shape ", x_.shape)
+print("y.shape ", y_.shape)
+print(y_train[0])
+print(y_[0])
+
+# x_train, x_val, y_train, y_val = train_test_split(x_, y_, test_size=0.15, random_state=42)
 
 dnn = DeepNeuralNetwork(sizes=[784, 128, 64, 10])
-dnn.train(x_train, y_train, x_val, y_val)
+dnn.train(x_, y_, x_val, y_val)
