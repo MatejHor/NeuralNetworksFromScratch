@@ -1,22 +1,32 @@
 import numpy as np
 
-# x = np.array([[0, 1], [2,3], [4,5]])
 def sigmoid(x):
     s = 1 / (1 + np.exp(-x))    
     return s
-# print("sigmoid(x) = " + str(sigmoid(x)))
 
-# def sigmoid_derivative(x):
-#     s = sigmoid(x)
-#     ds = s* (1 - s)    
-#     return ds
-# print("sigmoid_derivative(x) = " + str(sigmoid_derivative(x)))
+def sigmoid_derivative(x):
+    s = sigmoid(x)
+    ds = s* (1 - s)    
+    return ds
 
 def softmax(x):
     x_exp = np.exp(x)
     x_sum = np.sum(x_exp, axis = 1, keepdims = True) 
     s = x_exp / x_sum
     return s
+
+def softmax_derivative(x):
+    s = softmax(x)
+    ds = s * (1 - s)
+    return ds
+
+def relu(x):
+    func = lambda x: 0.0 if x <= 0.0 else x
+    return np.vectorize(func)(x)
+
+def relu_derivative(x):
+    func = lambda x: 0.0 if x <= 0.0 else 1.0
+    return np.vectorize(func)(x)
 
 # # print("softmax(x) = " + str(softmax(x)))
 # x = np.array([[636.652],
@@ -32,20 +42,18 @@ def softmax(x):
 # print("softmax(x) = " + str(softmax(x)))
 
 
-# def softmax_derivation(x):
-#     s = softmax(x)
-#     ds = s * (1 - s)
-#     return ds
-# print("softmax_derivation(x) = " + str(softmax_derivation(x)))
+def softmax_derivative(x):
+    s = softmax(x)
+    ds = s * (1 - s)
+    return ds
 
-def ReLu(x):
+def relu(x):
     func = lambda x: 0.0 if x <= 0.0 else x
     return np.vectorize(func)(x)
 
-# def ReLu_derivation(x):
-#     func = lambda x: 0.0 if x <= 0.0 else 1.0
-#     return np.vectorize(func)(x)
-# print("ReLu_derivation(x) = " + str(ReLu_derivation(x)))
+def relu_derivative(x):
+    func = lambda x: 0.0 if x <= 0.0 else 1.0
+    return np.vectorize(func)(x)
 
 
 # def normalizeRows(x):

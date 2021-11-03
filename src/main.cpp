@@ -122,7 +122,8 @@ double computeCostCrossEntropy(Matrix *AL, Matrix *Y)
 
         sumMatrix_->~Matrix();
     }
-    return (-1.0 / m) * sumMatrixVal;
+    return -(sumMatrixVal / m);
+    // return (-1.0 / m) * sumMatrixVal;
 }
 
 void backwardPropagation(Matrix *AL, Matrix *Y, vector<Matrix *> weights)
@@ -130,24 +131,25 @@ void backwardPropagation(Matrix *AL, Matrix *Y, vector<Matrix *> weights)
     double m = AL->getColumns();
 
     // Formula dA[last] = - ((Y / AL ) - ((1 - Y) / (1 - AL)))
-    // Matrix *divide_Y_AL = divide(Y, AL);
-    // Matrix *subtrack_Y = subtrack(1, Y);
-    // Matrix *subtrack_AL = subtrack(1, AL);
-    // Matrix *divideSubtrack_Y_AL = divide(subtrack_Y, subtrack_AL);
-    // Matrix *subtrackDivide_Y_AL_DivideSubtrack_Y_AL = subtrack(divide_Y_AL, divideSubtrack_Y_AL);
-    // Matrix *dAL = multiply(subtrackDivide_Y_AL_DivideSubtrack_Y_AL, -1);
-
-    // dAL = 2 * (output - y_train) / output.shape[0] * self.softmax(params['Z3'], derivative=True)
-    Matrix *subtrack_Y_AL = subtrack(Y, AL);
-    Matrix* dAL = multiply(subtrack_Y_AL, (2.0/Y->getRows()));
+    Matrix *divide_Y_AL = divide(Y, AL);
+    Matrix *subtrack_Y = subtrack(1, Y);
+    Matrix *subtrack_AL = subtrack(1, AL);
+    Matrix *divideSubtrack_Y_AL = divide(subtrack_Y, subtrack_AL);
+    Matrix *subtrackDivide_Y_AL_DivideSubtrack_Y_AL = subtrack(divide_Y_AL, divideSubtrack_Y_AL);
+    Matrix *dAL = multiply(subtrackDivide_Y_AL_DivideSubtrack_Y_AL, -1);
     {
-        // divide_Y_AL->~Matrix();
-        // subtrack_Y->~Matrix();
-        // subtrack_AL->~Matrix();
-        // divideSubtrack_Y_AL->~Matrix();
-        // subtrackDivide_Y_AL_DivideSubtrack_Y_AL->~Matrix();
-        subtrack_Y_AL->~Matrix();
+        divide_Y_AL->~Matrix();
+        subtrack_Y->~Matrix();
+        subtrack_AL->~Matrix();
+        divideSubtrack_Y_AL->~Matrix();
+        subtrackDivide_Y_AL_DivideSubtrack_Y_AL->~Matrix();
     }
+
+    // EASER VERSION
+    // dAL = 2 * (output - y_train) / output.shape[0] * self.softmax(params['Z3'], derivative=True)
+    // Matrix *subtrack_Y_AL = subtrack(Y, AL);
+    // Matrix* dAL = multiply(subtrack_Y_AL, (2.0/Y->getRows()));
+    // subtrack_Y_AL->~Matrix();
 
     Matrix *activeDerivation = softmaxDerivation(Z_cache.at(len_layer - 1));
 // Formula dZ[last] = dA[last]*activation(Z[last])
@@ -180,7 +182,7 @@ void backwardPropagation(Matrix *AL, Matrix *Y, vector<Matrix *> weights)
     {
 
     // Formula dZ[last - 1] = dA[last]*activation(Z[last- 1])
-        activeDerivation = reLuDerivation(Z_cache.at(hidden_layer));
+        Matrix *activeDerivation = reLuDerivation(Z_cache.at(hidden_layer));
         dZ = multiply(dA, activeDerivation);
     // Formula dW[last - 1] = (1/m) * dot(dZ, A[last - 2].T)
         Aprev_T = (A_cache.at(hidden_layer))->T();
@@ -375,7 +377,7 @@ int main()
     cout << "0. Initialize parameters" << endl;
     static double layer_dims[] = {784, 128, 10};
     len_layer = (*(&layer_dims + 1) - layer_dims) - 1;
-    learning_rate = 0.0001;
+    learning_rate = 0.00001;
     epochs = 10;
     batchSize = 32;
     VERBOSE = true;
@@ -427,7 +429,7 @@ int main()
             if ((batch == 0))
             {
                 accuracy = predict(&train, weights, bias, "accuracy", false);
-                cout << "[" << iteration << "] epoch LOSS: " << loss << " ACC: " << accuracy << endl;
+                cout << "[" << iteration << "] epoch ["<< batch << "] batch LOSS: " << loss << " ACC: " << accuracy << endl;
             }
 
             // cout << " 2.5 FREE CACHE" << endl;
@@ -445,11 +447,11 @@ int main()
     {
         cout << "3.1 PREDICTION TRAIN" << endl;
         accuracy = predict(&train, weights, bias, "accuracy", VERBOSE);
-        cout << "TRAIN [" << train.getY()->getColumns() << "] acc:" << accuracy << endl;
+        cout << "TRAIN [" << train.getY()->getColumns() << "] acc: " << accuracy << endl;
 
         cout << "3.2 PREDICTION TEST" << endl;
         accuracy = predict(&test, weights, bias, "accuracy", VERBOSE);
-        cout << "TEST [" << test.getY()->getColumns() << "] acc:" << accuracy << endl;
+        cout << "TEST [" << test.getY()->getColumns() << "] acc: " << accuracy << endl;
     }
 
     if (VERBOSE)
