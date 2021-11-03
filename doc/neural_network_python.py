@@ -1,8 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy
-import scipy
-from PIL import Image
+# from PIL import Image
 from scipy import ndimage
 
 def sigmoid(x):
@@ -183,7 +182,7 @@ def compute_cost(AL, Y):
 
     # Compute loss from aL and y.
     ### START CODE HERE ### (≈ 1 lines of code)
-    cost =  -1/m * np.sum(np.multiply(Y, np.log(AL)) + np.multiply((1-Y), np.log(1-AL)))
+    cost =  -1/m * np.sum(np.multiply(Y, np.log(AL))) # + np.multiply((1-Y), np.log(1-AL)))
     ### END CODE HERE ###
     
     cost = np.squeeze(cost)      # To make sure your cost's shape is what we expect (e.g. this turns [[17]] into 17).
@@ -234,6 +233,9 @@ def linear_activation_backward(dA, cache, activation):
     db -- Gradient of the cost with respect to b (current layer l), same shape as b
     """
     linear_cache, activation_cache = cache
+    dA_prev = 0
+    dW = 0
+    db = 0
     
     if activation == "relu":
         ### START CODE HERE ### (≈ 2 lines of code)
@@ -244,6 +246,12 @@ def linear_activation_backward(dA, cache, activation):
     elif activation == "softmax":
         ### START CODE HERE ### (≈ 2 lines of code)
         dZ = dA*softmax_derivative(activation_cache["Z"])
+        dA_prev, dW, db = linear_backward(dZ, linear_cache)
+        ### END CODE HERE ###
+
+    elif activation == "sigmoid":
+        ### START CODE HERE ### (≈ 2 lines of code)
+        dZ = dA*sigmoid_derivative(activation_cache["Z"])
         dA_prev, dW, db = linear_backward(dZ, linear_cache)
         ### END CODE HERE ###
     
@@ -280,7 +288,7 @@ def L_model_backward(AL, Y, caches):
     # Lth layer (SIGMOID -> LINEAR) gradients. Inputs: "dAL, current_cache". Outputs: "grads["dAL-1"], grads["dWL"], grads["dbL"]
     ### START CODE HERE ### (approx. 2 lines)
     current_cache = caches[-1]
-    grads["dA" + str(L-1)], grads["dW" + str(L)], grads["db" + str(L)] = linear_activation_backward(dAL, current_cache, 'sigmoid')
+    grads["dA" + str(L-1)], grads["dW" + str(L)], grads["db" + str(L)] = linear_activation_backward(dAL, current_cache, 'softmax')
     ### END CODE HERE ###
     
     # Loop from l=L-2 to l=0
@@ -323,7 +331,7 @@ def update_parameters(parameters, grads, learning_rate):
     ### END CODE HERE ###
     return parameters
 
-def L_layer_model(X, Y, layers_dims, learning_rate = 0.0075, num_iterations = 3000, print_cost=False):#lr was 0.009
+def L_layer_model(X, Y, layers_dims, learning_rate = 0.001, num_iterations = 3000, print_cost=False):#lr was 0.009
     """
     Implements a L-layer neural network: [LINEAR->RELU]*(L-1)->LINEAR->SIGMOID.
     
@@ -385,30 +393,57 @@ def L_layer_model(X, Y, layers_dims, learning_rate = 0.0075, num_iterations = 30
     
     return parameters
 
+def predict(X, Y, parameters):
+    AL, caches = L_model_forward(X, parameters)
+    # TODO:
+    N = Y.shape[1]
+    accuracy = (AL == Y).sum() / N
+
+    return accuracy
+
+
 # TODO: doplnit nacitanie datasetu
+file = open("./data/fashion_mnist_sample_vectors.csv")
+train_x_orig = np.loadtxt(file, delimiter=',')
+# print(train_x_orig)
+
+file = open("./data/fashion_mnist_sample_labels.csv")
+train_y = np.loadtxt(file, delimiter=',', dtype=np.int)
+train_y = train_y.reshape(100,1)
+train_y = train_y.T
+# print(train_y)
 
 # Explore your dataset 
 m_train = train_x_orig.shape[0]
 num_px = train_x_orig.shape[1]
-m_test = test_x_orig.shape[0]
+# m_test = test_x_orig.shape[0]
 print ("Number of training examples: " + str(m_train))
-print ("Number of testing examples: " + str(m_test))
+# print ("Number of testing examples: " + str(m_test))
 print ("Each image is of size: (" + str(num_px) + ", " + str(num_px) + ", 3)")
 print ("train_x_orig shape: " + str(train_x_orig.shape))
 print ("train_y shape: " + str(train_y.shape))
-print ("test_x_orig shape: " + str(test_x_orig.shape))
-print ("test_y shape: " + str(test_y.shape))
+# print ("test_x_orig shape: " + str(test_x_orig.shape))
+# print ("test_y shape: " + str(test_y.shape))
+print(train_x_orig)
+print(train_y)
+
+a = train_y
+b = np.zeros((a.size, a.max()+1))
+b[np.arange(a.size),a] = 1.0
+print(b)
+train_y = b.T
+print(train_y)
 
 # Reshape the training and test examples 
 train_x_flatten = train_x_orig.reshape(train_x_orig.shape[0], -1).T   # The "-1" makes reshape flatten the remaining dimensions
-test_x_flatten = test_x_orig.reshape(test_x_orig.shape[0], -1).T
+# test_x_flatten = test_x_orig.reshape(test_x_orig.shape[0], -1).T
 
 # Standardize data to have feature values between 0 and 1.
 train_x = train_x_flatten/255.
-test_x = test_x_flatten/255.
+# test_x = test_x_flatten/255.
 
 print ("train_x's shape: " + str(train_x.shape))
-print ("test_x's shape: " + str(test_x.shape))
+# print ("test_x's shape: " + str(test_x.shape))
 
 ### CONSTANTS DEFINING THE MODEL ####
 n_x = 784     # num_px * num_px * 3
@@ -418,7 +453,8 @@ layers_dims = (n_x, n_h, n_y)
 
 parameters = L_layer_model(train_x, train_y, layers_dims, num_iterations = 2500, print_cost = True)
 
+print(predict(train_x, train_y, parameters))
 
-def predict(X, Y, parameters):
-    AL, caches = L_model_forward(X, parameters)
-    # TODO:
+
+
+
