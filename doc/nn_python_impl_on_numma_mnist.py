@@ -25,6 +25,13 @@ class DeepNeuralNetwork():
             return exps / np.sum(exps, axis=0) * (1 - exps / np.sum(exps, axis=0))
         return exps / np.sum(exps, axis=0)
 
+    def relu(self, x, derivative=False):
+        if derivative:
+            func = lambda x: 0.0 if x <= 0.0 else 1.0
+        else:
+            func = lambda x: 0.0 if x <= 0.0 else x
+        return np.vectorize(func)(x)
+
     def initialization(self):
         # number of nodes in each layer
         input_layer=self.sizes[0]
@@ -37,9 +44,9 @@ class DeepNeuralNetwork():
             'W2':np.random.randn(hidden_2, hidden_1) * np.sqrt(1. / hidden_2),
             'W3':np.random.randn(output_layer, hidden_2) * np.sqrt(1. / output_layer),
 
-            'b1':np.zeros((hidden_1, 1)),
-            'b2':np.zeros((hidden_2, 1)),
-            'b3':np.zeros((output_layer, 1))
+            'b1':np.zeros((hidden_1)),
+            'b2':np.zeros((hidden_2)),
+            'b3':np.zeros((output_layer))
         }
 
         return params
@@ -51,13 +58,7 @@ class DeepNeuralNetwork():
         params['A0'] = x_train
 
         # input layer to hidden layer 1
-        ERROR
-        print(params['b1'].shape)
-        print(params['A0'].shape)
-        print(params['W1'].shape)
         params['Z1'] = np.dot(params["W1"], params['A0']) + params['b1']
-        print(params['Z1'].shape)
-        print(np.dot(params["W1"], params['A0']).shape)
         params['A1'] = self.sigmoid(params['Z1'])
 
         # hidden layer 1 to hidden layer 2
@@ -88,6 +89,8 @@ class DeepNeuralNetwork():
         # Calculate W3 update
         error = 2 * (output - y_train) / output.shape[0] * self.softmax(params['Z3'], derivative=True)
         change_w['W3'] = np.outer(error, params['A2'])
+        print(change_w['W3'].shape)
+        print(error.shape)
         change_w['b3'] = np.sum(error, axis=1, keepdims=True)
 
         # Calculate W2 update
