@@ -439,7 +439,8 @@ train_x_flatten = train_x_orig.reshape(train_x_orig.shape[0], -1).T   # The "-1"
 # test_x_flatten = test_x_orig.reshape(test_x_orig.shape[0], -1).T
 
 # Standardize data to have feature values between 0 and 1.
-train_x = train_x_flatten/255.
+# train_x = train_x_flatten/255.
+train_x = (train_x_flatten/255).astype('float64')
 # test_x = test_x_flatten/255.
 
 print ("train_x's shape: " + str(train_x.shape))

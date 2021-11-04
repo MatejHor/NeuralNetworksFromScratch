@@ -375,9 +375,9 @@ void freeCache()
 int main()
 {
     cout << "0. Initialize parameters" << endl;
-    static double layer_dims[] = {784, 128, 10};
+    static double layer_dims[] = {784, 255, 10};
     len_layer = (*(&layer_dims + 1) - layer_dims) - 1;
-    learning_rate = 0.00001;
+    learning_rate = 0.001;
     epochs = 10;
     batchSize = 32;
     VERBOSE = true;
@@ -391,7 +391,7 @@ int main()
     Dataset test = Dataset(
         "../data/fashion_mnist_test_vectors.csv",
         "../data/fashion_mnist_test_labels.csv",
-        100, // size of test dataset
+        1000, // size of test dataset
         VERBOSE);
 
     vector<Matrix *> xBatch;
@@ -428,7 +428,7 @@ int main()
 
             if ((batch == 0))
             {
-                accuracy = predict(&train, weights, bias, "accuracy", false);
+                accuracy = predict(&test, weights, bias, "accuracy", false);
                 cout << "[" << iteration << "] epoch ["<< batch << "] batch LOSS: " << loss << " ACC: " << accuracy << endl;
             }
 
