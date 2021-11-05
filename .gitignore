@@ -40,3 +40,5 @@ data/fashion_mnist_test_vectors.csv
 .idea
 src/weights.txt
 src/bias.txt
+doc/result.csv
+*.pyc
