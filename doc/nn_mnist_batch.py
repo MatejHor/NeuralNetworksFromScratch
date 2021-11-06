@@ -5,11 +5,12 @@ from sklearn.model_selection import train_test_split
 import time
 
 class DeepNeuralNetwork():
-    def __init__(self, sizes, epochs=10, l_rate=0.001, optimalizer='GD'):
+    def __init__(self, sizes, epochs=10, l_rate=0.001, optimalizer='GD', batch_size=32):
         self.sizes = sizes
         self.epochs = epochs
         self.l_rate = l_rate
         self.optimalizer = optimalizer
+        self.batch_size = batch_size
 
         self.params = self.initialization()
         
@@ -25,11 +26,16 @@ class DeepNeuralNetwork():
             return (np.exp(-x))/((np.exp(-x)+1)**2)
         return 1/(1 + np.exp(-x))
 
+    # def softmax(self, x, derivative=False):
+    #     exps = np.exp(x - x.max())
+    #     if derivative:
+    #         return (exps / np.sum(exps, axis=0)) * (1 - (exps / np.sum(exps, axis=0)))
+    #     return exps / np.sum(exps, axis=0)
+
     def softmax(self, x, derivative=False):
-        exps = np.exp(x - x.max())
         if derivative:
-            return exps / np.sum(exps, axis=0) * (1 - exps / np.sum(exps, axis=0))
-        return exps / np.sum(exps, axis=0)
+            (np.exp(x) / np.exp(x).sum()) * (1 - np.exp(x) / np.exp(x).sum())
+        return np.exp(x) / np.exp(x).sum()
 
     def relu(self, x, derivative=False):
         if derivative:
@@ -42,8 +48,8 @@ class DeepNeuralNetwork():
         params = {}
         layers = self.sizes
         for index in range(1, len(layers)):
-            params['W' + str(index)] = np.random.randn(layers[index], layers[index - 1]) * np.sqrt(1. / layers[index])
-            params['b' + str(index)] = np.zeros((layers[index]))
+            params['W' + str(index)] = np.random.randn(layers[index - 1], layers[index]) * np.sqrt(1. / layers[index])
+            params['b' + str(index)] = np.zeros((1, layers[index]))
         return params
 
     def forward_pass(self, x_train):
@@ -55,7 +61,11 @@ class DeepNeuralNetwork():
 
         for index in range(1, len_layers):
             # input layer to hidden layer 1
-            params['Z' + str(index)] = np.dot(params["W" + str(index)], params['A' + str(index - 1)]) + params['b' + str(index)]
+            params['Z' + str(index)] = np.dot(params['A' + str(index - 1)], params["W" + str(index)]) 
+            # print('params["Z" + str(index)]', params['Z' + str(index)].shape)
+            # print("params['b' + str(index)", params['b' + str(index)].shape)
+            # input()
+            params['Z' + str(index)] += params['b' + str(index)]
             params['A' + str(index)] = self.relu(params['Z' + str(index)])
 
         return params['A' + str(len_layers - 1)]
@@ -76,14 +86,21 @@ class DeepNeuralNetwork():
         change_w = {}
         len_layers = len(self.sizes)
 
-        error = 2 * (output - y_train) / output.shape[0] #* self.softmax(params['Z' + str(len_layers - 1)], derivative=True)
+        # dZ = np.multiply((2 * (output - y_train) / output.shape[0]),self.softmax(params['Z' + str(len_layers - 1)], derivative=True))
+        first = (2 * (y_train - output) / output.shape[0])
+        #second = self.softmax(params['Z' + str(len_layers - 1)], derivative=True)
+        dZ = first #* second
+
         for index in reversed(range(1, len_layers)):
-            change_w['W' + str(index)] = np.outer(error, params['A' + str(index - 1)]) 
-            change_w['b' + str(index)] = error
+            change_w['W' + str(index)] = np.dot(params['A' + str(index - 1)].T, dZ) 
+            change_w['b' + str(index)] = np.sum(dZ, axis=0, keepdims=True)
 
             if index != 1:
-                error = np.dot(params['W' + str(index)].T, error) * self.relu(params['Z' + str(index - 1)], derivative=True)
+                dA = np.dot(dZ, params['W' + str(index)].T)
+                dRELU = self.relu(params['Z' + str(index - 1)], derivative=True)
+                dZ = dA * dRELU
         return change_w
+
 
     def update_network_parameters(self, changes_to_w):
         '''
@@ -268,25 +285,30 @@ class DeepNeuralNetwork():
         '''
         predictions = []
         loss = []
+        al = []
 
-        for x, y in zip(x_val, y_val):
-            output = self.forward_pass(x)
+        # for x, y in zip(x_val, y_val):
+        for batch in range(0, len(x_val), self.batch_size): 
+            output = self.forward_pass(x_val[batch:batch + self.batch_size])
+
             pred = np.argmax(output)
-            predictions.append(pred == np.argmax(y))      
+            al.append(pred)
+            predictions.append(pred == np.argmax(y_val[batch:batch + self.batch_size]))      
 
             log = np.log(output, out=np.zeros_like(output), where=(output!=0))
-            loss.append(-np.sum(y * log))
+            loss.append(-np.sum(y_val[batch:batch + self.batch_size] * log))
+        print('len(x_val)', len(x_val), len(predictions), len(al))
         
-        return np.mean(predictions), np.mean(loss)
+        return np.mean(predictions), np.mean(loss), al
 
     def train(self, x_train, y_train, x_val, y_val):
         start_time = time.time()
-        accuracy_list = []
         t = 0
         for iteration in range(self.epochs):
-            for x,y in zip(x_train, y_train):
-                output = self.forward_pass(x)
-                changes_to_w = self.backward_pass(y, output)
+            # for x,y in zip(x_train, y_train):
+            for batch in range(0, len(x_train), self.batch_size):
+                output = self.forward_pass(x_train[batch:batch + self.batch_size])
+                changes_to_w = self.backward_pass(y_train[batch:batch + self.batch_size], output)
 
                 if self.optimalizer == 'GD':
                     self.update_network_parameters(changes_to_w) 
@@ -296,14 +318,10 @@ class DeepNeuralNetwork():
                     t = t + 1
                     self.update_parameters_with_adam(grads=changes_to_w, t=t, learning_rate=self.l_rate)
 
-            accuracy, loss = self.compute_accuracy(x_val, y_val)
-            print('Epoch: {0}, Time Spent: {1:.2f}s, Accuracy: {2:.2f}%, Loss: {3:.4f}, Learning rate {4}'.format(
-                iteration+1, time.time() - start_time, accuracy * 100, loss, self.l_rate
+            accuracy, loss, al = self.compute_accuracy(x_val, y_val)
+            print('Epoch: {0}, Time Spent: {1:.2f}s, Accuracy: {2:.2f}%, Loss: {3:.4f}'.format(
+                iteration+1, time.time() - start_time, accuracy * 100, loss
             ))
-            accuracy_list.append(accuracy)
-
-            if len(accuracy_list) > 2 and accuracy_list[len(accuracy_list) - 1] - accuracy_list[len(accuracy_list) - 2] < 0.01:
-                self.l_rate /= 10
             
 file = open("./data/fashion_mnist_train_vectors.csv")
 x_train = np.loadtxt(file, delimiter=',')
@@ -323,9 +341,10 @@ y_test = to_categorical(y_test).astype('float64')
 
 x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=0.164, random_state=42)
 
-# dnn = DeepNeuralNetwork(sizes=[784, 128, 64, 10], l_rate=0.01, epochs=10, optimalizer='GD')
-dnn = DeepNeuralNetwork(sizes=[784, 1024, 10], l_rate=0.01, epochs=20, optimalizer='momentum')
+# dnn = DeepNeuralNetwork(sizes=[784, 128, 64, 10], l_rate=0.001, epochs=10, optimalizer='adam')
+dnn = DeepNeuralNetwork(sizes=[784, 128, 10], l_rate=0.001, epochs=10, optimalizer='GD', batch_size=10000)
 dnn.train(x_train, y_train, x_val, y_val)
 
-acc, loss = dnn.compute_accuracy(x_test, y_test)
+acc, loss, al = dnn.compute_accuracy(x_test, y_test)
 print("Test Accuracy: {:.2f}%, Loss: {:.4f}".format(acc * 100, loss))
+print(al)

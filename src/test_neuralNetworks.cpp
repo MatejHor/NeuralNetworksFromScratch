@@ -5,12 +5,31 @@
 
 int main()
 {
-    double layer_dims[] = {784, 255, 225, 200, 10};
+    bool VERBOSE = true;
+    Dataset train = Dataset(
+        "../data/fashion_mnist_train_vectors.csv",
+        "../data/fashion_mnist_train_labels.csv",
+        3000, // size of train dataset
+        VERBOSE);
+
+    Dataset test = Dataset(
+        "../data/fashion_mnist_test_vectors.csv",
+        "../data/fashion_mnist_test_labels.csv",
+        1000, // size of test dataset
+        VERBOSE);
+
     NeuralNetwork model = NeuralNetwork(
-        layer_dims, //layer_dims
         10, //epochs
-        16, //batchSize
-        0.001, //learning_rate
-        true //verbose
+        256, //batchSize
+        4.0, //learning_rate
+        0.9 //beta
     );
+
+    model.fit(&train);
+
+    double accuracy = model.transform(&test);
+    cout << "Test Accuracy: " << acc << endl;
+
+    model.~NeuralNetwork();
+    return 0;
 }

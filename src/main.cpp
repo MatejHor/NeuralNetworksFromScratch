@@ -54,7 +54,7 @@ vector<Matrix *> initializeHeWeights(double layer_dims[])
     vector<Matrix *> weights;
     for (int layer = 0; layer < len_layer; layer++)
     {
-        double he = sqrt(2 / layer_dims[layer]);
+        double he = sqrt(1. / layer_dims[layer + 1]);
         weights.push_back(new Matrix(layer_dims[layer + 1], layer_dims[layer], he));
     }
     return weights;
@@ -131,25 +131,25 @@ void backwardPropagation(Matrix *AL, Matrix *Y, vector<Matrix *> weights)
     double m = AL->getColumns();
 
     // Formula dA[last] = - ((Y / AL ) - ((1 - Y) / (1 - AL)))
-    Matrix *divide_Y_AL = divide(Y, AL);
-    Matrix *subtrack_Y = subtrack(1, Y);
-    Matrix *subtrack_AL = subtrack(1, AL);
-    Matrix *divideSubtrack_Y_AL = divide(subtrack_Y, subtrack_AL);
-    Matrix *subtrackDivide_Y_AL_DivideSubtrack_Y_AL = subtrack(divide_Y_AL, divideSubtrack_Y_AL);
-    Matrix *dAL = multiply(subtrackDivide_Y_AL_DivideSubtrack_Y_AL, -1);
-    {
-        divide_Y_AL->~Matrix();
-        subtrack_Y->~Matrix();
-        subtrack_AL->~Matrix();
-        divideSubtrack_Y_AL->~Matrix();
-        subtrackDivide_Y_AL_DivideSubtrack_Y_AL->~Matrix();
-    }
+    // Matrix *divide_Y_AL = divide(Y, AL);
+    // Matrix *subtrack_Y = subtrack(1, Y);
+    // Matrix *subtrack_AL = subtrack(1, AL);
+    // Matrix *divideSubtrack_Y_AL = divide(subtrack_Y, subtrack_AL);
+    // Matrix *subtrackDivide_Y_AL_DivideSubtrack_Y_AL = subtrack(divide_Y_AL, divideSubtrack_Y_AL);
+    // Matrix *dAL = multiply(subtrackDivide_Y_AL_DivideSubtrack_Y_AL, -1);
+    // {
+    //     divide_Y_AL->~Matrix();
+    //     subtrack_Y->~Matrix();
+    //     subtrack_AL->~Matrix();
+    //     divideSubtrack_Y_AL->~Matrix();
+    //     subtrackDivide_Y_AL_DivideSubtrack_Y_AL->~Matrix();
+    // }
 
     // EASER VERSION
     // dAL = 2 * (output - y_train) / output.shape[0] * self.softmax(params['Z3'], derivative=True)
-    // Matrix *subtrack_Y_AL = subtrack(Y, AL);
-    // Matrix* dAL = multiply(subtrack_Y_AL, (2.0/Y->getRows()));
-    // subtrack_Y_AL->~Matrix();
+    Matrix *subtrack_Y_AL = subtrack(Y, AL);
+    Matrix* dAL = multiply(subtrack_Y_AL, (2.0/Y->getRows()));
+    subtrack_Y_AL->~Matrix();
 
     Matrix *activeDerivation = softmaxDerivation(Z_cache.at(len_layer - 1));
 // Formula dZ[last] = dA[last]*activation(Z[last])
@@ -385,7 +385,7 @@ int main()
     Dataset train = Dataset(
         "../data/fashion_mnist_train_vectors.csv",
         "../data/fashion_mnist_train_labels.csv",
-        2000, // size of train dataset
+        3000, // size of train dataset
         VERBOSE);
 
     Dataset test = Dataset(

@@ -1,374 +1,197 @@
 #include "NeuralNetwork.h"
 
-NeuralNetwork::NeuralNetwork(double* layer_dims, int epochs, int batchSize, double learning_rate, bool verbose): layer_dims(layer_dims), epochs(epochs), batchSize(batchSize), learning_rate(learning_rate), VERBOSE(verbose)
+NeuralNetwork::NeuralNetwork(int epochs, int batchSize, double learningRate, double beta) : epochs(epochs), batchSize(batchSize), learningRate(learningRate), beta(beta)
 {
-    len_layer = (*(&layer_dims + 1) - layer_dims) - 1;
 }
 
-void NeuralNetwork::initializeRandomParameters()
+void NeuralNetwork::initialize()
 {
-    weights = initializeRandomWeights(layer_dims);
-    bias = initializeBias(layer_dims);
+    this->params["W1"] = new Matrix(256, 784, sqrt(1. / 784));
+    this->params["W1"] = new Matrix(256, 1, sqrt(1. / 784));
+    this->params["W2"] = new Matrix(10, 256, sqrt(1. / 256));
+    this->params["W1"] = new Matrix(10, 1, sqrt(1. / 256));
+
+    this->params["V_dW1"] = new Matrix(256, 784, 0.0);
+    this->params["V_db1"] = new Matrix(256, 1, 0.0);
+    this->params["V_dW2"] = new Matrix(10, 256, 0.0);
+    this->params["V_db2"] = new Matrix(10, 1, 0.0);
 }
 
-void NeuralNetwork::fit(Dataset *train, Dataset *validation){
-    initializeMiniBatch(xBatch, yBatch, train, batchSize);
-    Matrix* AL = NULL;
+void NeuralNetwork::forwardPropagation(Matrix *xBatch)
+{
+    Matrix *dot_W1_X = dot(this->params["W1"], xBatch);
+    this->cache["Z1"] = sum(dot_W1_X, this->params["b1"]);
+    this->cache["A1"] = sigmoid(this->cache["Z1"]);
 
-    auto start = high_resolution_clock::now();
-    for (int iteration = 0; iteration < epochs; iteration++)
+    Matrix *dot_W2_A1 = dot(this->params["W2"], this->cache["A1"]);
+    this->cache["Z2"] = sum(dot_W2_A1, this->params["b2"]);
+    this->cache["A2"] = softmax(this->cache["Z2"]);
+
     {
-        for (int batch = 0; batch < batchCount; batch++)
-        {
-            if (AL != NULL)
-                AL->~Matrix();
-            // cout << "2.1 FORWARD PROPAGATION" << endl;
-            AL = forwardPropagation(xBatch.at(batch), weights, bias);
-
-            // cout << "2.2 COMPUTE COST" << endl;
-            double loss = computeCostCrossEntropy(AL, yBatch.at(batch));
-
-            // cout << "2.3 BACKWARD PROPAGATION" << endl;
-            backwardPropagation(AL, yBatch.at(batch), weights);
-
-            // cout << "2.4 UPDATE PARAMETERS" << endl;
-            updateParametersGradientDescend(bias, weights);
-
-            // if (iteration % 10 == 0 && (batch == batchCount - 1))
-            if (true && (batch == batchCount - 1))
-            // if (iteration % 50 == 0 && (batch == batchCount - 1))
-            {
-                accuracy = predict(validation, weights, bias, "accuracy", false);
-                cout << "[" << iteration << "] epoch LOSS: " << loss << " ACC: " << accuracy << endl;
-            }
-
-            // cout << "2.5 FREE CACHE" << endl;
-            freeCache();
-        }
-    }
-    auto stop = high_resolution_clock::now();
-    freeMatrixVector(xBatch, yBatch, batchCount);
-    if (VERBOSE)
-        cout << "Time for training " << duration_cast<milliseconds>(stop - start).count() << " milliseconds" << endl;
-}
-
-vector<Matrix *> NeuralNetwork::initializeBias(double layer_dims[])
-{
-    vector<Matrix *> bias;
-    for (int layer = 0; layer < len_layer; layer++)
-    {
-        bias.push_back(new Matrix(layer_dims[layer + 1], 1, 0.0));
-    }
-    return bias;
-}
-
-vector<Matrix *> NeuralNetwork::initializeRandomWeights(double layer_dims[])
-{
-    vector<Matrix *> weights;
-    for (int layer = 0; layer < len_layer; layer++)
-    {
-        weights.push_back(new Matrix(layer_dims[layer + 1], layer_dims[layer], 0.01));
-    }
-    return weights;
-}
-
-vector<Matrix *> NeuralNetwork::initializeHeWeights(double layer_dims[])
-{
-    vector<Matrix *> weights;
-    for (int layer = 0; layer < len_layer; layer++)
-    {
-        double he = sqrt(2 / layer_dims[layer]);
-        weights.push_back(new Matrix(layer_dims[layer + 1], layer_dims[layer], he));
-    }
-    return weights;
-}
-
-Matrix *NeuralNetwork::forwardPropagation(Matrix *X, vector<Matrix *> weights, vector<Matrix *> bias)
-{
-    Matrix *A_prev = X;
-    Matrix *Z = NULL;
-    Matrix *dot_W_A_prev;
-
-    for (int hidden_layer = 0; hidden_layer < (len_layer - 1); hidden_layer++)
-    {
-        dot_W_A_prev = dot(weights.at(hidden_layer), A_prev);
-        Z = sumVector(dot_W_A_prev, bias.at(hidden_layer));
-
-        A_cache.push_back(A_prev);
-        A_prev = reLu(Z);
-
-        // Destruct computed values
-        dot_W_A_prev->~Matrix();
-        Z->~Matrix();
-    }
-    dot_W_A_prev = dot(weights.at(len_layer - 1), A_prev);
-    Z = sumVector(dot_W_A_prev, bias.at(len_layer - 1));
-
-    A_cache.push_back(A_prev);
-    A_prev = softmax(Z);
-
-    // Destruct computed values
-    dot_W_A_prev->~Matrix();
-    Z->~Matrix();
-    return A_prev;
-}
-
-double NeuralNetwork::computeCostCrossEntropy(Matrix *AL, Matrix *Y)
-{
-    int m = Y->getColumns();
-    Matrix *log_AL = log(AL);
-    Matrix *multiply_Y_log_AL = multiply(Y, log_AL);
-
-    Matrix *subtrack_Y = subtrack(1, Y);
-    Matrix *subtrack_AL = subtrack(1, AL);
-    Matrix *logSubtrack_AL = log(subtrack_AL);
-    Matrix *multiplySubtrack_Y_logSubtrack_AL = multiply(subtrack_Y, logSubtrack_AL);
-
-    Matrix *sumMatrix_ = sum(multiply_Y_log_AL, multiplySubtrack_Y_logSubtrack_AL);
-    double sumMatrixVal = sumMatrix(sumMatrix_);
-
-    // Destruct computed values
-    log_AL->~Matrix();
-    multiply_Y_log_AL->~Matrix();
-
-    subtrack_Y->~Matrix();
-    subtrack_AL->~Matrix();
-    logSubtrack_AL->~Matrix();
-    multiplySubtrack_Y_logSubtrack_AL->~Matrix();
-
-    sumMatrix_->~Matrix();
-    return (-1.0 / m) * sumMatrixVal;
-}
-
-void NeuralNetwork::backwardPropagation(Matrix *AL, Matrix *Y, vector<Matrix *> weights)
-{
-    double m = AL->getColumns();
-
-    Matrix *divide_Y_AL = divide(Y, AL);
-    Matrix *subtrack_Y = subtrack(1, Y);
-    Matrix *subtrack_AL = subtrack(1, AL);
-    Matrix *divideSubtrack_Y_AL = divide(subtrack_Y, subtrack_AL);
-    Matrix *subtrackDivide_Y_AL_DivideSubtrack_Y_AL = subtrack(divide_Y_AL, divideSubtrack_Y_AL);
-    Matrix *dAL = multiply(subtrackDivide_Y_AL_DivideSubtrack_Y_AL, -1);
-
-    // Destruct computed values
-    divide_Y_AL->~Matrix();
-    subtrack_Y->~Matrix();
-    subtrack_AL->~Matrix();
-    divideSubtrack_Y_AL->~Matrix();
-    subtrackDivide_Y_AL_DivideSubtrack_Y_AL->~Matrix();
-
-    Matrix *dZ = softmaxDerivation(dAL);
-
-    Matrix *trans_A_cache = (A_cache.at(len_layer - 1))->T();
-    Matrix *dot_dZ_AprevT = dot(dZ, trans_A_cache);
-    Matrix *dW = multiply(dot_dZ_AprevT, (1.0 / m));
-    Matrix *sumDimension_dZ = sumDimension(dZ);
-    Matrix *db = multiply(sumDimension_dZ, (1.0 / m));
-    Matrix *trans_weight = (weights.at(len_layer - 1))->T();
-    Matrix *dA_prev = dot(trans_weight, dZ);
-
-    dA_cache.push_back(dA_prev);
-    dW_cache.push_back(dW);
-    db_cache.push_back(db);
-
-    // Destruct computed values
-    dAL->~Matrix();
-    dZ->~Matrix();
-    trans_A_cache->~Matrix();
-    dot_dZ_AprevT->~Matrix();
-    sumDimension_dZ->~Matrix();
-    trans_weight->~Matrix();
-
-    // cout << "[+] LOOPING [+]" << endl;
-    for (int hidden_layer = (len_layer - 2); hidden_layer >= 0; hidden_layer--)
-    {
-        // cout << "Hidden layer " << hidden_layer << endl;
-        dZ = reLuDerivation(dA_prev);
-
-        trans_A_cache = (A_cache.at(hidden_layer))->T();
-        dot_dZ_AprevT = dot(dZ, trans_A_cache);
-        dW = multiply(dot_dZ_AprevT, (1.0 / m));
-        sumDimension_dZ = sumDimension(dZ);
-        db = multiply(sumDimension_dZ, (1.0 / m));
-        trans_weight = (weights.at(hidden_layer))->T();
-        dA_prev = dot(trans_weight, dZ);
-
-        dA_cache.push_back(dA_prev);
-        dW_cache.push_back(dW);
-        db_cache.push_back(db);
-
-        // Destruct computed values
-        dZ->~Matrix();
-        trans_A_cache->~Matrix();
-        dot_dZ_AprevT->~Matrix();
-        sumDimension_dZ->~Matrix();
-        trans_weight->~Matrix();
+        dot_W1_X->~Matrix();
+        dot_W2_A1->~Matrix();
     }
 }
 
-void NeuralNetwork::updateParametersGradientDescend(vector<Matrix *> &bias, vector<Matrix *> &weights)
+double NeuralNetwork::costCrossEntropy(Matrix *AL, Matrix *yBatch)
 {
-    for (int hidden_layer = 0; hidden_layer < len_layer; hidden_layer++)
+    Matrix *logAl = log(AL);
+    Matrix *multiply_Y_logAL = multiply(yBatch, logAl);
+    double sumMultiply_Y_logAL = sum(multiply_Y_logAL);
+
+    logAl->~Matrix();
+    multiply_Y_logAL->~Matrix();
+
+    return -(1.0 / yBatch->getColumns()) * sumMultiply_Y_logAL;
+}
+
+void NeuralNetwork::backPropagation(Matrix *xBatch, Matrix *yBatch, double m_batch)
+{
+    Matrix *dZ2 = subtrack(this->cache["A2"], yBatch);
+    Matrix *A1_T = this->cache["A1"]->T();
+    Matrix *dot_dZ2_A1T = dot(dZ2, A1_T);
+    Matrix *sumDimension_dZ2 = sumDimension(dZ2);
+    this->grads["dW2"] = multiply(dot_dZ2_A1T, (1.0 / m_batch));
+    this->grads["db2"] = multiply(sumDimension_dZ2, (1.0 / m_batch));
+
+    Matrix *W2_T = this->cache["W2"]->T();
+    Matrix *sigmoidDerivative_Z1 = sigmoidDerivative(this->cache["Z1"]);
+    Matrix *dA1 = dot(W2_T, dZ2);
+    Matrix *dZ1 = multiply(dA1, sigmoidDerivative_Z1);
+    Matrix *X_T = xBatch->T();
+    Matrix *dot_dZ1_XT = dot(dZ1, X_T);
+    Matrix *sumDimension_dZ1 = sumDimension(dZ1);
+    this->grads["dW1"] = multiply(dot_dZ1_XT, (1.0 / m_batch));
+    this->grads["db1"] = multiply(sumDimension_dZ1, (1.0 / m_batch));
+
     {
-        Matrix *multiplydBLearningRate = multiply(db_cache.at(len_layer - (hidden_layer + 1)), learning_rate);
-        Matrix *old_bias = bias.at(hidden_layer);
-        bias.at(hidden_layer) = subtrack(old_bias, multiplydBLearningRate);
-
-        // Destruct computed values
-        old_bias->~Matrix();
-        multiplydBLearningRate->~Matrix();
-
-        Matrix *multiplydWLearningRate = multiply(dW_cache.at(len_layer - (hidden_layer + 1)), learning_rate);
-        Matrix *old_weights = weights.at(hidden_layer);
-        weights.at(hidden_layer) = subtrack(old_weights, multiplydWLearningRate);
-
-        // Destruct computed values
-        old_weights->~Matrix();
-        multiplydWLearningRate->~Matrix();
+        dZ2->~Matrix();
+        A1_T->~Matrix();
+        dot_dZ2_A1T->~Matrix();
+        sumDimension_dZ2->~Matrix();
+        W2_T->~Matrix();
+        sigmoidDerivative_Z1->~Matrix();
+        dZ1->~Matrix();
+        X_T->~Matrix();
+        dot_dZ1_XT->~Matrix();
+        sumDimension_dZ1->~Matrix();
     }
 }
 
-int NeuralNetwork::initializeMiniBatch(vector<Matrix *> &X, vector<Matrix *> &Y, Dataset *data, int batchSize)
+void NeuralNetwork::fit(Dataset *train)
 {
-    Matrix *yData = data->getY();
-    Matrix *xData = data->getX();
-    int length_data = xData->getColumns();
-
+    vector<Matrix *> X;
+    vector<Matrix *> Y;
     while (length_data != 0)
     {
-        if (length_data - batchSize < 0)
-            batchSize = length_data;
-        X.push_back(new Matrix(xData, batchSize));
-        Y.push_back(new Matrix(yData, batchSize));
+        if (length_data - this->batchSize < 0)
+            this->batchSize = length_data;
+        X.push_back(new Matrix(train->getX(), batchSize));
+        Y.push_back(new Matrix(train->getY(), batchSize));
 
-        length_data -= batchSize;
+        length_data -= this->batchSize;
     }
-    return X.size();
-}
 
-double NeuralNetwork::predict(Dataset *data, vector<Matrix *> weights, vector<Matrix *> bias, string measure, bool verbose)
-{
-    Matrix *A_prev = data->getX();
-    Matrix *A_free = NULL;
-    Matrix *Z = NULL;
-    Matrix *dot_W_A_prev;
-
-    auto pred_start = high_resolution_clock::now();
-    for (int layer = 0; layer < (len_layer - 1); layer++)
+    for (int epoch = 0; epoch < this->epochs; epoch++)
     {
-        dot_W_A_prev = dot(weights.at(layer), A_prev);
-        Z = sumVector(dot_W_A_prev, bias.at(layer));
-        A_free = A_prev;
-        A_prev = reLu(Z);
-
-        // Destruct
+        for (int batch = 0; batch < X.size(); batch++)
         {
-            dot_W_A_prev->~Matrix();
-            Z->~Matrix();
-            if (layer != 0)
-                A_free->~Matrix();
-        }
-    }
-    dot_W_A_prev = dot(weights.at(len_layer - 1), A_prev);
-    Z = sumVector(dot_W_A_prev, bias.at(len_layer - 1));
-    Matrix *A_predict = softmax(Z);
-    auto pred_stop = high_resolution_clock::now();
+            Matrix *xBatch = X.at(batch);
+            Matrix *yBatch = Y.at(batch);
+            int batchLength = xBatch->getColumns();
 
-    // Destruct
-    {
-        A_prev->~Matrix();
-        dot_W_A_prev->~Matrix();
-        Z->~Matrix();
-    }
+            this->forwardPropagation(xBatch);
+            this->backPropagation(xBatch, yBatch, batchLength);
 
-    Matrix *PrediLabel = squeeze(A_predict, "max");
-    double measureVal;
-    if (measure.compare("accuracy") == 0)
-        measureVal = data->accuracy(PrediLabel);
-    else
-        measureVal = data->f1_mikro(PrediLabel);
+            // MOMENTUM UPDATE
+            Matrix *multiply_VdW1 = multiply(this->params["V_dW1"], this->beta);
+            Matrix *multiply_dW1 = multiply(this->grads["dW1"], (1.0 - this->beta));
+            Matrix *V_dW1 = this->params["V_dW1"];
+            this->params["V_dW1"] = sum(multiply_VdW1, multiply_dW1);
 
-    if (verbose)
-        cout << "Predict Time " << duration_cast<milliseconds>(pred_stop - pred_start).count() << " milliseconds" << endl;
-    if (verbose)
-        cout << measure << ": " << measureVal << endl;
+            Matrix *multiply_Vdb1 = multiply(this->params["V_db1"], this->beta);
+            Matrix *multiply_db1 = multiply(this->grads["db1"], (1.0 - this->beta));
+            Matrix *V_db1 = this->params["V_db1"];
+            this->params["V_db1"] = sum(multiply_Vdb1, multiply_db1);
 
-    // destruct
-    {
-        PrediLabel->~Matrix();
-        A_predict->~Matrix();
-    }
-    return measureVal;
-}
+            Matrix *multiply_VdW2 = multiply(this->params["V_dW2"], this->beta);
+            Matrix *multiply_dW2 = multiply(this->grads["dW2"], (1.0 - this->beta));
+            Matrix *V_dW2 = this->params["V_dW2"];
+            this->params["V_dW2"] = sum(multiply_VdW2, multiply_dW2);
 
-void NeuralNetwork::freeMatrixVector(vector<Matrix *> &vector1, vector<Matrix *> &vector2, int count)
-{
-    for (int i = 0; i < count; i++)
-    {
-        vector1.at(i)->~Matrix();
-        vector2.at(i)->~Matrix();
-    }
-    vector1.clear();
-    vector2.clear();
-}
+            Matrix *multiply_Vdb2 = multiply(this->params["V_db2"], this->beta);
+            Matrix *multiply_db2 = multiply(this->grads["db2"], (1.0 - this->beta));
+            Matrix *V_db2 = this->params["V_db2"];
+            this->params["V_db2"] = sum(multiply_Vdb2, multiply_db2);
 
-void NeuralNetwork::freeCache()
-{
-    for (int layer = 0; layer < len_layer; layer++)
-    {
-        if (layer != 0)
-            A_cache.at(layer)->~Matrix();
-        dA_cache.at(layer)->~Matrix();
-        dW_cache.at(layer)->~Matrix();
-        db_cache.at(layer)->~Matrix();
-    }
-    A_cache.clear();
-    dA_cache.clear();
-    dW_cache.clear();
-    db_cache.clear();
-}
-
-void NeuralNetwork::saveParameters(string path)
-{
-    ofstream weights_file;
-    ofstream bias_file;
-    weights_file.open(path + "weights.txt");
-    bias_file.open(path + "bias.txt");
-
-    for (int layer = 0; layer < len_layer; layer++)
-    {
-        string weights_value = "";
-        string bias_value = "";
-        double **matrix_weights = weights.at(layer)->getMatrix();
-        double **matrix_bias = bias.at(layer)->getMatrix();
-        int rows = weights.at(layer)->getRows();
-        int columns = weights.at(layer)->getColumns();
-
-        for (int row = 0; row < rows; row++)
-        {
-            weights_value += "{\n";
-            bias_value += "{\n";
-            for (int column = 0; column < columns; column++)
             {
-                weights_value += to_string(matrix_weights[row][column]);
-                weights_value += ", ";
+                multiply_VdW1->~Matrix();
+                multiply_dW1->~Matrix();
+                V_dW1->~Matrix();
+                multiply_Vdb1->~Matrix();
+                multiply_db1->~Matrix();
+                V_db1->~Matrix();
+                multiply_VdW2->~Matrix();
+                multiply_dW2->~Matrix();
+                V_dW2->~Matrix();
+                multiply_Vdb2->~Matrix();
+                multiply_db2->~Matrix();
+                V_db2->~Matrix();
             }
-            bias_value += to_string(matrix_bias[row][0]);
 
-            weights_value += "}\n";
-            bias_value += "}\n";
+            // UPDATE PARAMS
+            Matrix *W1 = this->params["W1"];
+            Matrix *multiply_LR_V_dW1 = multiply(this->params["V_dW1"], this->learningRate);
+            this->params["W1"] = subtrack(W1, multiply_LR_V_dW1);
+
+            Matrix *b1 = this->params["b1"];
+            Matrix *multiply_LR_V_db1 = multiply(this->params["V_db1"], this->learningRate);
+            this->params["b1"] = subtrack(W1, multiply_LR_V_db1);
+
+            Matrix *W2 = this->params["W2"];
+            Matrix *multiply_LR_V_dW2 = multiply(this->params["V_dW2"], this->learningRate);
+            this->params["W2"] = subtrack(W2, multiply_LR_V_dW2);
+
+            Matrix *b2 = this->params["b2"];
+            Matrix *multiply_LR_V_db2 = multiply(this->params["V_db2"], this->learningRate);
+            this->params["b2"] = subtrack(b2, multiply_LR_V_db2);
+
+            {
+                W1->~Matrix();
+                multiply_LR_V_dW1->~Matrix();
+                b1->~Matrix();
+                multiply_LR_V_db1->~Matrix();
+                W2->~Matrix();
+                multiply_LR_V_dW2->~Matrix();
+                b2->~Matrix();
+                multiply_LR_V_db2->~Matrix();
+            }
+            
+            this->cache["Z1"]->~Matrix();
+            this->cache["A1"]->~Matrix();
+            this->cache["Z2"]->~Matrix();
+            this->cache["A2"]->~Matrix();
+
+            this->grads["dW1"]->~Matrix();
+            this->grads["db1"]->~Matrix();
+            this->grads["dW2"]->~Matrix();
+            this->grads["db2"]->~Matrix();
         }
-
-        weights_file << "Weigth layer [" << layer << "]\n"
-                     << rows << " " << columns << "\n{"
-                     << weights_value
-                     << "}\n\n";
-        bias_file << "Bias layer [" << layer << "]\n"
-                  << rows << " " << 1 << "\n{"
-                  << bias_value
-                  << "}\n\n";
+        this->forwardPropagation(train->getX());
+        double cost = this->costCrossEntropy(this->cache["A2"], yBatch);
+        double acc = this->transform(train);
+        cout << "Epoch [" << epoch << "] training cost: " << cost << " Accuracy: " << acc << endl;
     }
-    weights_file.close();
-    bias_file.close();
+}
+
+double NeuralNetwork::transform(Dataset *test){
+    this->forwardPropagation(test->getX());
+    double accuracy = accuracy(this->cache["A2"], test->getY());
+
+    this->cache["Z1"]->~Matrix();
+    this->cache["A1"]->~Matrix();
+    this->cache["Z2"]->~Matrix();
+    this->cache["A2"]->~Matrix();
+
+    return accuracy;
 }
