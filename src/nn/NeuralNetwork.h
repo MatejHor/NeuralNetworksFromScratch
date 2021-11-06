@@ -20,56 +20,35 @@ using namespace chrono;
 class NeuralNetwork
 {
 private:
-    double* layer_dims;
-    int len_layer;
-    int epochs;
-    int batchSize;
-    double learning_rate;
-    double accuracy;
-    bool VERBOSE;
-
-    Matrix *AL = NULL;
-    vector<Matrix *> A_cache;
-    vector<Matrix *> dA_cache;
-    vector<Matrix *> dW_cache;
-    vector<Matrix *> db_cache;
-
-    vector<Matrix *> xBatch;
-    vector<Matrix *> yBatch;
-    int batchCount;
-
-    vector<Matrix *> weights;
-    vector<Matrix *> bias;
+    int epoch = 20;
+    int batchSize = 256
+    double learningRate = 4.0;
+    double beta = 0.9;
+    map<string, Matrix*> cache;
+    map<string, Matrix*> grads;
+    map<string, Matrix*> params;
 public:
-    NeuralNetwork(double* layer_dims, int epochs, int batchSize, double learning_rate, bool verbose);
+    NeuralNetwork(int epochs, int batchSize, double learningRate, double beta);
+
+    void initialize();
+    void forwardPropagation(Matrix* xBatch);
+    double costCrossEntropy(Matrix* AL, Matrix* yBatch);
+    void backPropagation(Matrix *xBatch, Matrix *yBatch, double m_batch);
+
+    void fit(Dataset* train);
+    double transform(Dataset* test);
 
     ~NeuralNetwork() {
-        freeCache();
-        freeMatrixVector(xBatch, yBatch, batchCount);
+        this->params["W1"]->~Matrix();
+        this->params["b1"]->~Matrix();
+        this->params["W2"]->~Matrix();
+        this->params["b2"]->~Matrix();
+
+        this->params["V_dW1"]->~Matrix();
+        this->params["V_db1"]->~Matrix();
+        this->params["V_dW2"]->~Matrix();
+        this->params["V_db2"]->~Matrix();
     }
-    void initializeRandomParameters();
-
-    vector<Matrix *> initializeBias(double layer_dims[]);
-    vector<Matrix *> initializeRandomWeights(double layer_dims[]);
-    vector<Matrix *> initializeHeWeights(double layer_dims[]);
-
-    int initializeMiniBatch(vector<Matrix *> &X, vector<Matrix *> &Y, Dataset *data, int batchSize);
-
-    Matrix *forwardPropagation(Matrix *X, vector<Matrix *> weights, vector<Matrix *> bias);
-    void backwardPropagation(Matrix *AL, Matrix *Y, vector<Matrix *> weights);
-    
-    double computeCostCrossEntropy(Matrix *AL, Matrix *Y);
-
-    void updateParametersGradientDescend(vector<Matrix *> &bias, vector<Matrix *> &weights);
-
-    void fit(Dataset *train, Dataset *validation);
-    double predict(Dataset *data, vector<Matrix *> weights, vector<Matrix *> bias, string measure, bool verbose);
-
-    void saveParameters(string path);
-
-    void freeMatrixVector(vector<Matrix *> &vector1, vector<Matrix *> &vector2, int count);
-    void freeCache();
-
 };
 
 #endif

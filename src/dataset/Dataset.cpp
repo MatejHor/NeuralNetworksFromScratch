@@ -131,47 +131,32 @@ void Dataset::print(int limit)
     }
 }
 
-double Dataset::f1_mikro(Matrix *AL)
-{
-    Matrix *yMatrix = squeeze(getY(), "category");
-    double **y = yMatrix->getMatrix();
-    double **al = AL->getMatrix();
+// double Dataset::f1_mikro(Matrix *AL)
+// {
+//     Matrix *yMatrix = squeeze(getY(), "category");
+//     double **y = yMatrix->getMatrix();
+//     double **al = AL->getMatrix();
 
-    double TP = 0;
-    double TN = 0;
-    double FP = 0;
-    double FN = 0;
+//     double TP = 0;
+//     double TN = 0;
+//     double FP = 0;
+//     double FN = 0;
 
-    for (int i = 0; i < 10; i++)
-    {
-        for (int row = 0; row < Y->getRows(); row++)
-        {
-            (al[row][0] == i && y[row][0] == i && ++TP);
-            (al[row][0] != i && y[row][0] != i && ++TN);
-            (al[row][0] == i && y[row][0] != i && ++FP);
-            (al[row][0] != i && y[row][0] == i && ++FN);
-        }
-    }
+//     for (int i = 0; i < 10; i++)
+//     {
+//         for (int row = 0; row < Y->getRows(); row++)
+//         {
+//             (al[row][0] == i && y[row][0] == i && ++TP);
+//             (al[row][0] != i && y[row][0] != i && ++TN);
+//             (al[row][0] == i && y[row][0] != i && ++FP);
+//             (al[row][0] != i && y[row][0] == i && ++FN);
+//         }
+//     }
 
-    double precision = TP / (TP + FP);
-    double recall = TP / (TP + FN);
-    yMatrix->~Matrix();
-    return 2 * ((precision * recall) / (precision + recall));
-}
+//     double precision = TP / (TP + FP);
+//     double recall = TP / (TP + FN);
+//     yMatrix->~Matrix();
+//     return 2 * ((precision * recall) / (precision + recall));
+// }
 
-double Dataset::accuracy(Matrix *AL)
-{
-    Matrix *yMatrix = squeeze(getY(), "category");
-    double **y = yMatrix->getMatrix();
-    double **al = AL->getMatrix();
 
-    double TP = 0;
-
-    for (int row = 0; row < Y->getRows(); row++)
-    {
-        (al[row][0] == y[row][0] && ++TP);
-    }
-
-    yMatrix->~Matrix();
-    return TP / (Y->getRows());
-}

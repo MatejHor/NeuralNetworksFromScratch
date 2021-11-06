@@ -1,7 +1,7 @@
 #include "MatrixOperation.h"
 #include <math.h>
 
-static Matrix *sum(Matrix *m1, Matrix *m2)
+static Matrix *Matrix::sum(Matrix *m1, Matrix *m2)
 {
     if ((m1->getRows() != m2->getRows()) || (m1->getColumns() != m2->getColumns()))
     {
@@ -25,7 +25,7 @@ static Matrix *sum(Matrix *m1, Matrix *m2)
     return summed;
 }
 
-static Matrix *sumVector(Matrix *m, Matrix *vector)
+static Matrix *Matrix::sumVector(Matrix *m, Matrix *vector)
 {
     if ((m->getRows() != vector->getRows()))
     {
@@ -49,7 +49,7 @@ static Matrix *sumVector(Matrix *m, Matrix *vector)
     return summed;
 }
 
-static Matrix *subtrack(Matrix *m1, Matrix *m2)
+static Matrix *Matrix::subtrack(Matrix *m1, Matrix *m2)
 {
     if ((m1->getRows() != m2->getRows()) && (m1->getColumns() != m2->getColumns()))
     {
@@ -73,7 +73,7 @@ static Matrix *subtrack(Matrix *m1, Matrix *m2)
     return summed;
 }
 
-static Matrix *sum(Matrix *m, double x)
+static Matrix *Matrix::sum(Matrix *m, double x)
 {
     int rows = m->getRows();
     int columns = m->getColumns();
@@ -91,7 +91,7 @@ static Matrix *sum(Matrix *m, double x)
     return summed;
 }
 
-static Matrix *subtrack(double x, Matrix *m)
+static Matrix *Matrix::subtrack(double x, Matrix *m)
 {
     int rows = m->getRows();
     int columns = m->getColumns();
@@ -109,7 +109,7 @@ static Matrix *subtrack(double x, Matrix *m)
     return summed;
 }
 
-static Matrix *sumDimension(Matrix *m)
+static Matrix *Matrix::sumDimension(Matrix *m)
 {
     double **new_matrix = new double *[m->getRows()];
     double **_matrix = m->getMatrix();
@@ -126,7 +126,7 @@ static Matrix *sumDimension(Matrix *m)
     return new Matrix(m->getRows(), 1, new_matrix);
 }
 
-static double sumMatrix(Matrix *m)
+static double Matrix::sumMatrix(Matrix *m)
 {
     double **_matrix = m->getMatrix();
     double sum = 0;
@@ -140,7 +140,7 @@ static double sumMatrix(Matrix *m)
     return sum;
 }
 
-static Matrix *dot(Matrix *m1, Matrix *m2)
+static Matrix *Matrix::dot(Matrix *m1, Matrix *m2)
 {
     if ((m1->getColumns() != m2->getRows()))
     {
@@ -172,7 +172,7 @@ static Matrix *dot(Matrix *m1, Matrix *m2)
     return multi;
 }
 
-static Matrix *multiply(Matrix *m1, Matrix *m2)
+static Matrix *Matrix::multiply(Matrix *m1, Matrix *m2)
 {
     if ((m1->getRows() != m2->getRows()) && (m1->getColumns() != m2->getColumns()))
     {
@@ -196,7 +196,7 @@ static Matrix *multiply(Matrix *m1, Matrix *m2)
     return new Matrix(rows, columns, new_matrix);
 }
 
-static Matrix *divide(Matrix *m1, Matrix *m2)
+static Matrix *Matrix::divide(Matrix *m1, Matrix *m2)
 {
     if ((m1->getRows() != m2->getRows()) && (m1->getColumns() != m2->getColumns()))
     {
@@ -220,7 +220,7 @@ static Matrix *divide(Matrix *m1, Matrix *m2)
     return new Matrix(rows, columns, new_matrix);
 }
 
-static Matrix *multiply(Matrix *m, double x)
+static Matrix *Matrix::multiply(Matrix *m, double x)
 {
     int rows = m->getRows();
     int columns = m->getColumns();
@@ -237,7 +237,7 @@ static Matrix *multiply(Matrix *m, double x)
     return new Matrix(rows, columns, new_matrix);
 }
 
-static Matrix *log(Matrix *m)
+static Matrix *Matrix::log(Matrix *m)
 {
     double **new_matrix = new double *[m->getRows()];
     double **_matrix = m->getMatrix();
@@ -252,7 +252,7 @@ static Matrix *log(Matrix *m)
     return new Matrix(m->getRows(), m->getColumns(), new_matrix);
 }
 
-static Matrix *sigmoid(Matrix *x)
+static Matrix *Matrix::sigmoid(Matrix *x)
 {
     double **matrix = new double *[x->getRows()];
     double **X = x->getMatrix();
@@ -269,7 +269,7 @@ static Matrix *sigmoid(Matrix *x)
     return new Matrix(x->getRows(), x->getColumns(), matrix);
 }
 
-static Matrix *sigmoidDerivative(Matrix *x)
+static Matrix *Matrix::sigmoidDerivative(Matrix *x)
 {
     double **matrix = new double *[x->getRows()];
     double **X = x->getMatrix();
@@ -287,7 +287,7 @@ static Matrix *sigmoidDerivative(Matrix *x)
     return new Matrix(x->getRows(), x->getColumns(), matrix);
 }
 
-static Matrix *softmax(Matrix *x)
+static Matrix *Matrix::softmax(Matrix *x)
 {
     double **matrix = new double *[x->getRows()];
     double **X = x->getMatrix();
@@ -315,7 +315,7 @@ static Matrix *softmax(Matrix *x)
     return new Matrix(x->getRows(), x->getColumns(), matrix);
 }
 
-static Matrix *softmaxDerivation(Matrix *x)
+static Matrix *Matrix::softmaxDerivation(Matrix *x)
 {
     double **matrix = new double *[x->getRows()];
     double **X = x->getMatrix();
@@ -343,7 +343,7 @@ static Matrix *softmaxDerivation(Matrix *x)
     return new Matrix(x->getRows(), x->getColumns(), matrix);
 }
 
-static Matrix *reLu(Matrix *x)
+static Matrix *Matrix::reLu(Matrix *x)
 {
     double **matrix = new double *[x->getRows()];
     double **X = x->getMatrix();
@@ -366,7 +366,7 @@ static Matrix *reLu(Matrix *x)
     return new Matrix(x->getRows(), x->getColumns(), matrix);
 }
 
-static Matrix *reLuDerivation(Matrix *x)
+static Matrix *Matrix::reLuDerivation(Matrix *x)
 {
     double **matrix = new double *[x->getRows()];
     double **X = x->getMatrix();
@@ -389,7 +389,7 @@ static Matrix *reLuDerivation(Matrix *x)
     return new Matrix(x->getRows(), x->getColumns(), matrix);
 }
 
-static Matrix *squeeze(Matrix *Y, string func)
+static Matrix *Matrix::squeeze(Matrix *Y, string func)
 {
     Matrix *Y_T = Y->T();
     Matrix *new_Y = new Matrix(Y_T->getRows(), 1);
@@ -413,4 +413,24 @@ static Matrix *squeeze(Matrix *Y, string func)
     }
     Y_T->~Matrix();
     return new_Y;
+}
+
+static double Matrix::accuracy(Matrix *AL, Matrix *Y)
+{
+    Matrix *Y = squeeze(Y, "category");
+    Matrix *AL = squeeze(AL, "max");
+    double **y = Y->getMatrix();
+    double **al = AL->getMatrix();
+    double m = Y->getRows();
+
+    double TP = 0;
+
+    for (int row = 0; row < Y->getRows(); row++)
+    {
+        (al[row][0] == y[row][0] && ++TP);
+    }
+
+    Y->~Matrix();
+    AL->~Matrix();
+    return TP / m;
 }

@@ -54,7 +54,7 @@ vector<Matrix *> initializeHeWeights(double layer_dims[])
     vector<Matrix *> weights;
     for (int layer = 0; layer < len_layer; layer++)
     {
-        double he = sqrt(2 / layer_dims[layer]);
+        double he = sqrt(1. / layer_dims[layer + 1]);
         weights.push_back(new Matrix(layer_dims[layer + 1], layer_dims[layer], he));
     }
     return weights;
@@ -401,7 +401,7 @@ int main()
     Dataset train = Dataset(
         "../data/fashion_mnist_train_vectors.csv",
         "../data/fashion_mnist_train_labels.csv",
-        2000, // size of train dataset
+        3000, // size of train dataset
         VERBOSE);
 
     Dataset test = Dataset(

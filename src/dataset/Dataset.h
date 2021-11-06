@@ -36,8 +36,8 @@ public:
     int getColumns(string file);
     double **readData(string file, int rows, int columns, bool X);
     void print(int limit);
-    double f1_mikro(Matrix *AL);
-    double accuracy(Matrix *AL);
+    // double f1_mikro(Matrix *AL);
+    // double accuracy(Matrix *AL);
 };
 
 #endif
