@@ -24,7 +24,7 @@ public:
     static double crossEntropySum(Matrix *m1, Matrix *m2);
     static Matrix* forwardDot(Matrix* m1, Matrix* m2, Matrix* vector);
     static Matrix* backwardDotDW(Matrix* m1, Matrix* m2, double multiplicator);
-    static Matrix *backwardDotDZ(Matrix* m1, Matrix* m2, Matrix* multiply);
+    static Matrix *backwardDotDZSigmoid(Matrix* m1, Matrix* m2, Matrix* multiply);
     static Matrix *backwardSumDimension(Matrix *m, double multiplicator);
     static Matrix *momentumSum(Matrix *m1, double multiplicator1, Matrix *m2, double multiplicator2);
     static Matrix *momentumUpdate(Matrix *m1, Matrix *m2, double multiplicator);

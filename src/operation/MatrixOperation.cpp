@@ -261,10 +261,10 @@ static double crossEntropySum(Matrix *m1, Matrix *m2)
 {
     double sum = 0;
 
-    for (int row = 0; row < m->getRows(); row++)
+    for (int row = 0; row < m1->getRows(); row++)
     {
-        for (int column = 0; column < m->getColumns(); column++)
-            sum += (m1->getMatrix()[row][column] * (log(m2->getMatrix[row][column])));
+        for (int column = 0; column < m1->getColumns(); column++)
+            sum += (m1->getMatrix()[row][column] * (log(m2->getMatrix()[row][column])));
     }
 
     return sum;
@@ -321,7 +321,7 @@ static Matrix *backwardDotDW(Matrix *m1, Matrix *m2, double multiplicator)
     return multi;
 }
 
-static Matrix *backwardDotDZ(Matrix *m1, Matrix *m2, Matrix *multiply)
+static Matrix *backwardDotDZSigmoid(Matrix *m1, Matrix *m2, Matrix *multiply)
 {
     int rows = m1->getColumns();
     int mid = m1->getRows();
@@ -339,7 +339,9 @@ static Matrix *backwardDotDZ(Matrix *m1, Matrix *m2, Matrix *multiply)
             {
                 element += m1->getMatrix()[j][i] * m2->getMatrix()[j][k];
             }
-            multi->getMatrix()[i][k] = element * multiply->getMatrix()[i][k];
+            double s = 1 / (1.0 + exp(-(multiply->getMatrix()[i][k])));
+            double sigmoidDerivative = s * (1 - s);
+            multi->getMatrix()[i][k] = element * sigmoidDerivative;
         }
     }
 

@@ -11,7 +11,7 @@ int main()
     Dataset train = Dataset(
         "../data/fashion_mnist_train_vectors.csv",
         "../data/fashion_mnist_train_labels.csv",
-        60000, // size of train dataset
+        40000, // size of train dataset
         VERBOSE);
     auto stop = high_resolution_clock::now();
     cout << "Train dataset load time: " << duration_cast<seconds>(stop - start).count() << " seconds" << endl;

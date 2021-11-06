@@ -93,14 +93,12 @@ void NeuralNetwork::backPropagation(Matrix *xBatch, Matrix *yBatch, double m_bat
     this->grads["dW2"] = backwardDotDW(dZ2, this->cache["A1"], (1.0 / m_batch));
     this->grads["db2"] = backwardSumDimension(dZ2, (1.0 / m_batch));
 
-    Matrix *sigmoidDerivative_Z1 = sigmoidDerivative(this->cache["Z1"]);
-    Matrix *dZ1 = backwardDotDZ(this->params["W2"], dZ2, sigmoidDerivative_Z1);
+    Matrix *dZ1 = backwardDotDZSigmoid(this->params["W2"], dZ2, this->cache["Z1"]);
     this->grads["dW1"] = backwardDotDW(dZ1, xBatch, (1.0 / m_batch));
     this->grads["db1"] = backwardSumDimension(dZ1, (1.0 / m_batch));
 
     {
         dZ2->~Matrix();
-        sigmoidDerivative_Z1->~Matrix();
         dZ1->~Matrix();
     }
 }
@@ -117,6 +115,7 @@ void NeuralNetwork::fit(Dataset *train)
 {
     vector<Matrix *> X;
     vector<Matrix *> Y;
+    double acc;
     int length_data = train->getMaxRow();
     while (length_data != 0)
     {
@@ -249,7 +248,7 @@ void NeuralNetwork::fit(Dataset *train)
         this->clearCache();
 
         double previous_acc = acc;
-        double acc = this->transform(train);
+        acc = this->transform(train);
         if (previous_acc - acc <= 0.01) 
             this->learningRate /= 10;
         cout << "Epoch [" << epoch << "] training cost: " << cost << " Accuracy: " << acc << endl;
