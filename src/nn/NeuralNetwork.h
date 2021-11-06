@@ -12,6 +12,7 @@
 #include <fstream>
 #include <string.h>
 #include <vector>
+#include <map>
 
 // TIME
 #include <chrono>
@@ -21,7 +22,7 @@ class NeuralNetwork
 {
 private:
     int epoch = 20;
-    int batchSize = 256
+    int batchSize = 256;
     double learningRate = 4.0;
     double beta = 0.9;
     map<string, Matrix*> cache;
@@ -37,17 +38,18 @@ public:
 
     void fit(Dataset* train);
     double transform(Dataset* test);
+    void clearCache();
 
     ~NeuralNetwork() {
-        this->params["W1"]->~Matrix();
-        this->params["b1"]->~Matrix();
-        this->params["W2"]->~Matrix();
-        this->params["b2"]->~Matrix();
+        params["W1"]->~Matrix();
+        params["b1"]->~Matrix();
+        params["W2"]->~Matrix();
+        params["b2"]->~Matrix();
 
-        this->params["V_dW1"]->~Matrix();
-        this->params["V_db1"]->~Matrix();
-        this->params["V_dW2"]->~Matrix();
-        this->params["V_db2"]->~Matrix();
+        params["V_dW1"]->~Matrix();
+        params["V_db1"]->~Matrix();
+        params["V_dW2"]->~Matrix();
+        params["V_db2"]->~Matrix();
     }
 };
 

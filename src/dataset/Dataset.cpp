@@ -1,6 +1,6 @@
 #include "Dataset.h"
 
-Dataset::Dataset(string xFileName, string yFileName, int maxRow, bool verbose)
+Dataset::Dataset(string xFileName, string yFileName, int maxRow, bool verbose): maxRow(maxRow)
 {
     int rows = (maxRow != -1) ? maxRow : getRows(xFileName);
     int columns = getColumns(xFileName);

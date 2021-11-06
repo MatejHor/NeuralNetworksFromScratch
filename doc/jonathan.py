@@ -98,7 +98,7 @@ np.random.seed(138)
 # hyperparameters
 n_x = X_train.shape[0]
 n_h = 256
-learning_rate = 4
+learning_rate = 4.
 beta = .9
 batch_size = 256
 batches = -(-m // batch_size)
@@ -115,7 +115,7 @@ V_dW2 = np.zeros(params["W2"].shape)
 V_db2 = np.zeros(params["b2"].shape)
 
     # train
-for i in range(20):
+for i in range(5):
 
     permutation = np.random.permutation(X_train.shape[1])
     X_train_shuffled = X_train[:, permutation]

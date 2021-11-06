@@ -12,6 +12,7 @@ class Dataset
 private:
     Matrix *X;
     Matrix *Y;
+    int maxRow;
 
 public:
     Dataset(string vectors, string labels, int maxRow, bool verbose);
@@ -30,6 +31,11 @@ public:
     Matrix *getY() const
     {
         return Y;
+    }
+
+    int getMaxRow() const
+    {
+        return maxRow;
     }
 
     int getRows(string file);

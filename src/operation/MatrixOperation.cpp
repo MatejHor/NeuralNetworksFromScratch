@@ -1,7 +1,7 @@
 #include "MatrixOperation.h"
 #include <math.h>
 
-static Matrix *Matrix::sum(Matrix *m1, Matrix *m2)
+static Matrix *sum(Matrix *m1, Matrix *m2)
 {
     if ((m1->getRows() != m2->getRows()) || (m1->getColumns() != m2->getColumns()))
     {
@@ -25,11 +25,12 @@ static Matrix *Matrix::sum(Matrix *m1, Matrix *m2)
     return summed;
 }
 
-static Matrix *Matrix::sumVector(Matrix *m, Matrix *vector)
+static Matrix *sumVector(Matrix *m, Matrix *vector)
 {
     if ((m->getRows() != vector->getRows()))
     {
         cout << "[-] CAN NOT SUM VECTOR(NOT HAVE SHAPE TO SUM) m&=" << (m) << " vector&=" << (vector) << endl;
+        cout << "Shape(m_rows=" << m->getRows() << ", vector_columns=" << vector->getRows() << endl;
         return NULL;
     }
 
@@ -49,11 +50,13 @@ static Matrix *Matrix::sumVector(Matrix *m, Matrix *vector)
     return summed;
 }
 
-static Matrix *Matrix::subtrack(Matrix *m1, Matrix *m2)
+static Matrix *subtrack(Matrix *m1, Matrix *m2)
 {
     if ((m1->getRows() != m2->getRows()) && (m1->getColumns() != m2->getColumns()))
     {
         cout << "[-] CAN NOT SUBTRACK MATRIX(NOT HAVE SHAPE TO SUM) m1&=" << (m1) << " m2&=" << (m2) << endl;
+        cout << "Shape(m1_rows=" << m1->getRows() << ", m2_rows=" << m2->getRows() << endl;
+        cout << "Shape(m1_columns=" << m1->getColumns() << ", m2_columns=" << m2->getColumns() << endl;
         return NULL;
     }
 
@@ -73,7 +76,7 @@ static Matrix *Matrix::subtrack(Matrix *m1, Matrix *m2)
     return summed;
 }
 
-static Matrix *Matrix::sum(Matrix *m, double x)
+static Matrix *sum(Matrix *m, double x)
 {
     int rows = m->getRows();
     int columns = m->getColumns();
@@ -91,7 +94,7 @@ static Matrix *Matrix::sum(Matrix *m, double x)
     return summed;
 }
 
-static Matrix *Matrix::subtrack(double x, Matrix *m)
+static Matrix *subtrack(double x, Matrix *m)
 {
     int rows = m->getRows();
     int columns = m->getColumns();
@@ -109,7 +112,7 @@ static Matrix *Matrix::subtrack(double x, Matrix *m)
     return summed;
 }
 
-static Matrix *Matrix::sumDimension(Matrix *m)
+static Matrix *sumDimension(Matrix *m)
 {
     double **new_matrix = new double *[m->getRows()];
     double **_matrix = m->getMatrix();
@@ -126,7 +129,7 @@ static Matrix *Matrix::sumDimension(Matrix *m)
     return new Matrix(m->getRows(), 1, new_matrix);
 }
 
-static double Matrix::sumMatrix(Matrix *m)
+static double sumMatrix(Matrix *m)
 {
     double **_matrix = m->getMatrix();
     double sum = 0;
@@ -140,7 +143,7 @@ static double Matrix::sumMatrix(Matrix *m)
     return sum;
 }
 
-static Matrix *Matrix::dot(Matrix *m1, Matrix *m2)
+static Matrix *dot(Matrix *m1, Matrix *m2)
 {
     if ((m1->getColumns() != m2->getRows()))
     {
@@ -172,7 +175,7 @@ static Matrix *Matrix::dot(Matrix *m1, Matrix *m2)
     return multi;
 }
 
-static Matrix *Matrix::multiply(Matrix *m1, Matrix *m2)
+static Matrix *multiply(Matrix *m1, Matrix *m2)
 {
     if ((m1->getRows() != m2->getRows()) && (m1->getColumns() != m2->getColumns()))
     {
@@ -196,7 +199,7 @@ static Matrix *Matrix::multiply(Matrix *m1, Matrix *m2)
     return new Matrix(rows, columns, new_matrix);
 }
 
-static Matrix *Matrix::divide(Matrix *m1, Matrix *m2)
+static Matrix *divide(Matrix *m1, Matrix *m2)
 {
     if ((m1->getRows() != m2->getRows()) && (m1->getColumns() != m2->getColumns()))
     {
@@ -220,7 +223,7 @@ static Matrix *Matrix::divide(Matrix *m1, Matrix *m2)
     return new Matrix(rows, columns, new_matrix);
 }
 
-static Matrix *Matrix::multiply(Matrix *m, double x)
+static Matrix *multiply(Matrix *m, double x)
 {
     int rows = m->getRows();
     int columns = m->getColumns();
@@ -237,7 +240,7 @@ static Matrix *Matrix::multiply(Matrix *m, double x)
     return new Matrix(rows, columns, new_matrix);
 }
 
-static Matrix *Matrix::log(Matrix *m)
+static Matrix *log(Matrix *m)
 {
     double **new_matrix = new double *[m->getRows()];
     double **_matrix = m->getMatrix();
@@ -252,7 +255,152 @@ static Matrix *Matrix::log(Matrix *m)
     return new Matrix(m->getRows(), m->getColumns(), new_matrix);
 }
 
-static Matrix *Matrix::sigmoid(Matrix *x)
+// NEURAL NETWORK OPERATIONS
+
+static double crossEntropySum(Matrix *m1, Matrix *m2)
+{
+    double sum = 0;
+
+    for (int row = 0; row < m->getRows(); row++)
+    {
+        for (int column = 0; column < m->getColumns(); column++)
+            sum += (m1->getMatrix()[row][column] * (log(m2->getMatrix[row][column])));
+    }
+
+    return sum;
+}
+
+static Matrix *forwardDot(Matrix *m1, Matrix *m2, Matrix *vector)
+{
+
+    int rows = m1->getRows();
+    int mid = m1->getColumns();
+    int cols = m2->getColumns();
+
+    Matrix *multi = new Matrix(rows, cols);
+    double element = 0;
+
+    for (int i = 0; i < rows; i++)
+    {
+        for (int k = 0; k < cols; k++)
+        {
+            element = 0;
+            for (int j = 0; j < mid; j++)
+            {
+                element += m1->getMatrix()[i][j] * m2->getMatrix()[j][k];
+            }
+            multi->getMatrix()[i][k] = element + vector->getMatrix()[i][0];
+        }
+    }
+
+    return multi;
+}
+
+static Matrix *backwardDotDW(Matrix *m1, Matrix *m2, double multiplicator)
+{
+    int rows = m1->getRows();
+    int mid = m1->getColumns();
+    int cols = m2->getRows();
+
+    Matrix *multi = new Matrix(rows, cols);
+    double element = 0;
+
+    for (int i = 0; i < rows; i++)
+    {
+        for (int k = 0; k < cols; k++)
+        {
+            element = 0;
+            for (int j = 0; j < mid; j++)
+            {
+                element += m1->getMatrix()[i][j] * m2->getMatrix()[k][j];
+            }
+            multi->getMatrix()[i][k] = element * multiplicator;
+        }
+    }
+
+    return multi;
+}
+
+static Matrix *backwardDotDZ(Matrix *m1, Matrix *m2, Matrix *multiply)
+{
+    int rows = m1->getColumns();
+    int mid = m1->getRows();
+    int cols = m2->getColumns();
+
+    Matrix *multi = new Matrix(rows, cols);
+    double element = 0;
+
+    for (int i = 0; i < rows; i++)
+    {
+        for (int k = 0; k < cols; k++)
+        {
+            element = 0;
+            for (int j = 0; j < mid; j++)
+            {
+                element += m1->getMatrix()[j][i] * m2->getMatrix()[j][k];
+            }
+            multi->getMatrix()[i][k] = element * multiply->getMatrix()[i][k];
+        }
+    }
+
+    return multi;
+}
+
+static Matrix *backwardSumDimension(Matrix *m, double multiplicator)
+{
+    double **new_matrix = new double *[m->getRows()];
+    double **_matrix = m->getMatrix();
+
+    for (int row = 0; row < m->getRows(); row++)
+    {
+        new_matrix[row] = new double[1];
+        double sum = 0;
+        for (int column = 0; column < m->getColumns(); column++)
+            sum += _matrix[row][column];
+        *new_matrix[row] = sum * multiplicator;
+    }
+
+    return new Matrix(m->getRows(), 1, new_matrix);
+}
+
+static Matrix *momentumSum(Matrix *m1, double multiplicator1, Matrix *m2, double multiplicator2)
+{
+    int rows = m1->getRows();
+    int columns = m1->getColumns();
+
+    Matrix *summed = new Matrix(rows, columns);
+
+    for (int row = 0; row < rows; row++)
+    {
+        for (int column = 0; column < columns; column++)
+        {
+            summed->getMatrix()[row][column] = (m1->getMatrix()[row][column] * multiplicator1) + (m2->getMatrix()[row][column] * multiplicator1);
+        }
+    }
+
+    return summed;
+}
+
+static Matrix *momentumUpdate(Matrix *m1, Matrix *m2, double multiplicator)
+{
+    int rows = m1->getRows();
+    int columns = m1->getColumns();
+
+    Matrix *summed = new Matrix(rows, columns);
+
+    for (int row = 0; row < rows; row++)
+    {
+        for (int column = 0; column < columns; column++)
+        {
+            summed->getMatrix()[row][column] = m1->getMatrix()[row][column] - (m2->getMatrix()[row][column] * multiplicator);
+        }
+    }
+
+    return summed;
+}
+
+// ACTIVACNE FUNKCIE
+static Matrix *sigmoid(Matrix *x)
 {
     double **matrix = new double *[x->getRows()];
     double **X = x->getMatrix();
@@ -269,7 +417,7 @@ static Matrix *Matrix::sigmoid(Matrix *x)
     return new Matrix(x->getRows(), x->getColumns(), matrix);
 }
 
-static Matrix *Matrix::sigmoidDerivative(Matrix *x)
+static Matrix *sigmoidDerivative(Matrix *x)
 {
     double **matrix = new double *[x->getRows()];
     double **X = x->getMatrix();
@@ -287,7 +435,7 @@ static Matrix *Matrix::sigmoidDerivative(Matrix *x)
     return new Matrix(x->getRows(), x->getColumns(), matrix);
 }
 
-static Matrix *Matrix::softmax(Matrix *x)
+static Matrix *softmax(Matrix *x)
 {
     double **matrix = new double *[x->getRows()];
     double **X = x->getMatrix();
@@ -296,7 +444,7 @@ static Matrix *Matrix::softmax(Matrix *x)
     {
         matrix[row] = new double[x->getColumns()];
     }
-    
+
     for (int column = 0; column < x->getColumns(); column++)
     {
         double sum = 0.0;
@@ -315,7 +463,7 @@ static Matrix *Matrix::softmax(Matrix *x)
     return new Matrix(x->getRows(), x->getColumns(), matrix);
 }
 
-static Matrix *Matrix::softmaxDerivation(Matrix *x)
+static Matrix *softmaxDerivation(Matrix *x)
 {
     double **matrix = new double *[x->getRows()];
     double **X = x->getMatrix();
@@ -343,7 +491,7 @@ static Matrix *Matrix::softmaxDerivation(Matrix *x)
     return new Matrix(x->getRows(), x->getColumns(), matrix);
 }
 
-static Matrix *Matrix::reLu(Matrix *x)
+static Matrix *reLu(Matrix *x)
 {
     double **matrix = new double *[x->getRows()];
     double **X = x->getMatrix();
@@ -366,7 +514,7 @@ static Matrix *Matrix::reLu(Matrix *x)
     return new Matrix(x->getRows(), x->getColumns(), matrix);
 }
 
-static Matrix *Matrix::reLuDerivation(Matrix *x)
+static Matrix *reLuDerivation(Matrix *x)
 {
     double **matrix = new double *[x->getRows()];
     double **X = x->getMatrix();
@@ -389,48 +537,56 @@ static Matrix *Matrix::reLuDerivation(Matrix *x)
     return new Matrix(x->getRows(), x->getColumns(), matrix);
 }
 
-static Matrix *Matrix::squeeze(Matrix *Y, string func)
+static Matrix *squeeze(Matrix *Y, string func)
 {
-    Matrix *Y_T = Y->T();
-    Matrix *new_Y = new Matrix(Y_T->getRows(), 1);
-    for (int row = 0; row < Y_T->getRows(); row++)
+    Matrix *new_Y = new Matrix(Y->getRows(), 1);
+    for (int row = 0; row < Y->getRows(); row++)
     {
         double comperator = 0.0;
         double foundedValue = 0.0;
-        for (int column = 0; column < Y_T->getColumns(); column++)
+        for (int column = 0; column < Y->getColumns(); column++)
         {
-            if (func.compare("max") == 0 && Y_T->getMatrix()[row][column] > comperator)
+            if (func.compare("max") == 0 && Y->getMatrix()[row][column] > comperator)
             {
-                comperator = Y_T->getMatrix()[row][column];
+                comperator = Y->getMatrix()[row][column];
                 foundedValue = column * 1.0;
             }
-            if (func.compare("category") == 0 && Y_T->getMatrix()[row][column] == 1.0)
+            if (func.compare("category") == 0 && Y->getMatrix()[row][column] == 1.0)
             {
                 foundedValue = column * 1.0;
             }
         }
         new_Y->getMatrix()[row][0] = foundedValue;
     }
-    Y_T->~Matrix();
     return new_Y;
 }
 
-static double Matrix::accuracy(Matrix *AL, Matrix *Y)
+static double accuracy(Matrix *AL, Matrix *Y)
 {
-    Matrix *Y = squeeze(Y, "category");
-    Matrix *AL = squeeze(AL, "max");
-    double **y = Y->getMatrix();
-    double **al = AL->getMatrix();
-    double m = Y->getRows();
+    Matrix *transponseAL = AL->T();
+    Matrix *transponseY = Y->T();
+    Matrix *AL_squeeze = squeeze(transponseAL, "max");
+    Matrix *Y_squeeze = squeeze(transponseY, "category");
+
+    // AL->printParams("AL");
+    // Y->printParams("Y");
+
+    double **al = AL_squeeze->getMatrix();
+    double **y = Y_squeeze->getMatrix();
+
+    // AL_squeeze->print("AL_squeeze");
+    // Y_squeeze->print("Y_squeeze");
 
     double TP = 0;
 
-    for (int row = 0; row < Y->getRows(); row++)
+    for (int row = 0; row < transponseAL->getRows(); row++)
     {
         (al[row][0] == y[row][0] && ++TP);
     }
 
-    Y->~Matrix();
-    AL->~Matrix();
-    return TP / m;
+    transponseAL->~Matrix();
+    transponseY->~Matrix();
+    AL_squeeze->~Matrix();
+    Y_squeeze->~Matrix();
+    return TP / Y->getColumns();
 }

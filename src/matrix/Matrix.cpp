@@ -113,7 +113,7 @@ void Matrix::print()
         cout << " [ ";
         for (int column = 0; column < columns; column++)
         {
-            cout << std::fixed << std::setprecision(8) << matrix[row][column] << " ";
+            cout << std::fixed << std::setprecision(8) << matrix[row][column] << ", ";
         }
 
         if (row + 1 == rows)
@@ -132,7 +132,12 @@ void Matrix::print(string name)
         cout << " [ ";
         for (int column = 0; column < columns; column++)
         {
-            cout << std::fixed << std::setprecision(8) << matrix[row][column] << " ";
+            cout << std::fixed << std::setprecision(8) << matrix[row][column];
+
+            if (column + 1 == columns)
+                cout << " ";
+            else
+                cout << ", ";
         }
 
         if (row + 1 == rows)
