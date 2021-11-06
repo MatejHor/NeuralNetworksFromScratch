@@ -63,6 +63,7 @@ vector<Matrix *> initializeHeWeights(double layer_dims[])
 Matrix *forwardPropagation(Matrix *X, vector<Matrix *> weights, vector<Matrix *> bias)
 {
     Matrix *A_prev = X;
+    // A_prev->printParams("X: ");
     Matrix *Z = NULL;
     Matrix *dot_W_A_prev;
 
@@ -72,10 +73,17 @@ Matrix *forwardPropagation(Matrix *X, vector<Matrix *> weights, vector<Matrix *>
     // Formula Z = dot(W[0], A[0-1] a.k.a X) + b[0]
         Z = sumVector(dot_W_A_prev, bias.at(hidden_layer));
 
+        // (weights.at(hidden_layer))->printParams("params[W1]: ");
+        // (bias.at(hidden_layer))->printParams("params[b1]: ");
+        // Z->printParams("cache[Z1]: ");
+
+
         A_cache.push_back(A_prev);
         Z_cache.push_back(Z);
     // Formula A[0] = activation(Z)
-        A_prev = reLu(Z);
+        A_prev = sigmoid(Z);
+        // A_prev->print("[1] After sigmoid operation: ");
+        // A_prev->printParams("chache[A1]: ");
 
         {
             dot_W_A_prev->~Matrix();
@@ -85,11 +93,19 @@ Matrix *forwardPropagation(Matrix *X, vector<Matrix *> weights, vector<Matrix *>
 // Formula Z = dot(W[last], A[last - 1]) + b[last]
     Z = sumVector(dot_W_A_prev, bias.at(len_layer - 1));
 
+    // (weights.at(len_layer - 1))->printParams("params[W2]: ");
+    // (bias.at(len_layer - 1))->printParams("params[b2]: ");
+    // Z->printParams("cache[Z2]: ");
+
     A_cache.push_back(A_prev);
     Z_cache.push_back(Z);
 
 // Formula A[last] = activation(Z)
     A_prev = softmax(Z);
+    // A_prev->print("[2] After softmax operation: ");
+    // A_prev->printParams("chache[A2]: ");
+    // A_prev = softmax(Z->T());
+    // A_prev->print();
 
     {
         dot_W_A_prev->~Matrix();
@@ -131,25 +147,25 @@ void backwardPropagation(Matrix *AL, Matrix *Y, vector<Matrix *> weights)
     double m = AL->getColumns();
 
     // Formula dA[last] = - ((Y / AL ) - ((1 - Y) / (1 - AL)))
-    Matrix *divide_Y_AL = divide(Y, AL);
-    Matrix *subtrack_Y = subtrack(1, Y);
-    Matrix *subtrack_AL = subtrack(1, AL);
-    Matrix *divideSubtrack_Y_AL = divide(subtrack_Y, subtrack_AL);
-    Matrix *subtrackDivide_Y_AL_DivideSubtrack_Y_AL = subtrack(divide_Y_AL, divideSubtrack_Y_AL);
-    Matrix *dAL = multiply(subtrackDivide_Y_AL_DivideSubtrack_Y_AL, -1);
-    {
-        divide_Y_AL->~Matrix();
-        subtrack_Y->~Matrix();
-        subtrack_AL->~Matrix();
-        divideSubtrack_Y_AL->~Matrix();
-        subtrackDivide_Y_AL_DivideSubtrack_Y_AL->~Matrix();
-    }
+    // Matrix *divide_Y_AL = divide(Y, AL);
+    // Matrix *subtrack_Y = subtrack(1, Y);
+    // Matrix *subtrack_AL = subtrack(1, AL);
+    // Matrix *divideSubtrack_Y_AL = divide(subtrack_Y, subtrack_AL);
+    // Matrix *subtrackDivide_Y_AL_DivideSubtrack_Y_AL = subtrack(divide_Y_AL, divideSubtrack_Y_AL);
+    // Matrix *dAL = multiply(subtrackDivide_Y_AL_DivideSubtrack_Y_AL, -1);
+    // {
+    //     divide_Y_AL->~Matrix();
+    //     subtrack_Y->~Matrix();
+    //     subtrack_AL->~Matrix();
+    //     divideSubtrack_Y_AL->~Matrix();
+    //     subtrackDivide_Y_AL_DivideSubtrack_Y_AL->~Matrix();
+    // }
 
     // EASER VERSION
     // dAL = 2 * (output - y_train) / output.shape[0] * self.softmax(params['Z3'], derivative=True)
-    // Matrix *subtrack_Y_AL = subtrack(Y, AL);
-    // Matrix* dAL = multiply(subtrack_Y_AL, (2.0/Y->getRows()));
-    // subtrack_Y_AL->~Matrix();
+    Matrix *subtrack_Y_AL = subtrack(Y, AL);
+    Matrix* dAL = multiply(subtrack_Y_AL, (2.0/Y->getRows()));
+    subtrack_Y_AL->~Matrix();
 
     Matrix *activeDerivation = softmaxDerivation(Z_cache.at(len_layer - 1));
 // Formula dZ[last] = dA[last]*activation(Z[last])
@@ -375,11 +391,11 @@ void freeCache()
 int main()
 {
     cout << "0. Initialize parameters" << endl;
-    static double layer_dims[] = {784, 255, 10};
+    static double layer_dims[] = {784, 128, 10};
     len_layer = (*(&layer_dims + 1) - layer_dims) - 1;
     learning_rate = 0.001;
     epochs = 10;
-    batchSize = 32;
+    batchSize = 64;
     VERBOSE = true;
 
     Dataset train = Dataset(

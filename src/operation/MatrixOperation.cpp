@@ -260,9 +260,9 @@ static Matrix *sigmoid(Matrix *x)
     for (int row = 0; row < x->getRows(); row++)
     {
         matrix[row] = new double[x->getColumns()];
-        for (int column = 0; column < x->getColumns(); ++column)
+        for (int column = 0; column < x->getColumns(); column++)
         {
-            matrix[row][column] = 1 / (1.0 + exp(-X[row][column]));
+            matrix[row][column] = 1.0 / (1.0 + exp(-X[row][column]));
         }
     }
 
@@ -277,7 +277,7 @@ static Matrix *sigmoidDerivative(Matrix *x)
     for (int row = 0; row < x->getRows(); row++)
     {
         matrix[row] = new double[x->getColumns()];
-        for (int column = 0; column < x->getColumns(); ++column)
+        for (int column = 0; column < x->getColumns(); column++)
         {
             double s = 1 / (1.0 + exp(-(X[row][column])));
             matrix[row][column] = s * (1.0 - s);
@@ -295,13 +295,17 @@ static Matrix *softmax(Matrix *x)
     for (int row = 0; row < x->getRows(); row++)
     {
         matrix[row] = new double[x->getColumns()];
+    }
+    
+    for (int column = 0; column < x->getColumns(); column++)
+    {
         double sum = 0.0;
-        for (int column = 0; column < x->getColumns(); ++column)
+        for (int row = 0; row < x->getRows(); row++)
         {
             sum += exp(X[row][column]);
         }
 
-        for (int column = 0; column < x->getColumns(); ++column)
+        for (int row = 0; row < x->getRows(); row++)
         {
             double x_exp = exp(X[row][column]);
             matrix[row][column] = x_exp / sum;
@@ -319,13 +323,17 @@ static Matrix *softmaxDerivation(Matrix *x)
     for (int row = 0; row < x->getRows(); row++)
     {
         matrix[row] = new double[x->getColumns()];
+    }
+
+    for (int column = 0; column < x->getColumns(); column++)
+    {
         double sum = 0;
-        for (int column = 0; column < x->getColumns(); ++column)
+        for (int row = 0; row < x->getRows(); row++)
         {
             sum += exp(X[row][column]);
         }
 
-        for (int column = 0; column < x->getColumns(); ++column)
+        for (int row = 0; row < x->getRows(); row++)
         {
             double x_softmax = exp(X[row][column]) / sum;
             matrix[row][column] = x_softmax * (1.0 - x_softmax);
@@ -343,7 +351,7 @@ static Matrix *reLu(Matrix *x)
     for (int row = 0; row < x->getRows(); row++)
     {
         matrix[row] = new double[x->getColumns()];
-        for (int column = 0; column < x->getColumns(); ++column)
+        for (int column = 0; column < x->getColumns(); column++)
         {
             if (X[row][column] <= 0)
             {
@@ -366,7 +374,7 @@ static Matrix *reLuDerivation(Matrix *x)
     for (int row = 0; row < x->getRows(); row++)
     {
         matrix[row] = new double[x->getColumns()];
-        for (int column = 0; column < x->getColumns(); ++column)
+        for (int column = 0; column < x->getColumns(); column++)
         {
             if (X[row][column] <= 0)
             {
