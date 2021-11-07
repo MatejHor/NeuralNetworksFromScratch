@@ -77,7 +77,7 @@ double **Dataset::readData(string file, int rows, int columns, bool X)
         {
             while (getline(one_line, value, ','))
             {
-                _matrix[i][j++] = stod(value)/255.0;
+                _matrix[i][j++] = stod(value) / 255.0;
             }
         }
         else

@@ -22,6 +22,7 @@ public:
     Matrix(int rows, int columns, double **other);
     Matrix(const Matrix &other);
     Matrix(Matrix *other, int batchSize);
+    Matrix(Matrix *other, int batchSize, vector<int> arrayOfIndexes);
     Matrix();
 
     ~Matrix()
@@ -58,6 +59,7 @@ public:
     void printParams();
     void printParams(string name);
     Matrix *T();
+    double **copyMatrixRandom(double** _matrix, int length, vector<int> arrayOfIndexes);
 };
 
 #endif

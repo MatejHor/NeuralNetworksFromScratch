@@ -13,6 +13,8 @@
 #include <string.h>
 #include <vector>
 #include <map>
+#include <algorithm>
+#include <random>
 
 // TIME
 #include <chrono>

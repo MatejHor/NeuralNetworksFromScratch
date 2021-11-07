@@ -59,6 +59,14 @@ Matrix::Matrix(Matrix *other, int batchSize)
     // cout << "Creating Matrix(other, batchSize)(row=" << rows << ", column=" << columns << ", &=" << (this) << ")" << endl;
 }
 
+Matrix::Matrix(Matrix *other, int batchSize, vector<int> arrayOfIndexes)
+{
+    rows = other->getRows();
+    columns = batchSize;
+    matrix = this->copyMatrixRandom(other->getMatrix(), columns, arrayOfIndexes);
+    // cout << "Creating Matrix(other, batchSize)(row=" << rows << ", column=" << columns << ", &=" << (this) << ")" << endl;
+}
+
 bool Matrix::operator==(const Matrix &other) const
 {
     if ((rows == other.rows) && (columns == other.columns))
@@ -189,3 +197,16 @@ double** Matrix::copyMatrix(double** _matrix, int length)
     return new_matrix;
 } 
 
+double** Matrix::copyMatrixRandom(double** _matrix, int length, vector<int> arrayOfIndexes)
+{
+    double** new_matrix = new double*[rows];
+    int index =  rand() % 6000;
+
+    for (int row = 0; row < rows; row++) {
+        new_matrix[row] = new double[length];
+        for (int column = 0; column < length; column++)
+            new_matrix[row][column] = _matrix[row][arrayOfIndexes.at(column)];
+    }
+
+    return new_matrix;
+} 

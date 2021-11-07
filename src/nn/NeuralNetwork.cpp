@@ -9,9 +9,9 @@ NeuralNetwork::NeuralNetwork(int epochs, int batchSize, double learningRate, dou
 void NeuralNetwork::initialize()
 {
     this->params["W1"] = new Matrix(256, 784, sqrt(1. / 784));
-    this->params["b1"] = new Matrix(256, 1, sqrt(1. / 784));
+    this->params["b1"] = new Matrix(256, 1, 0.0);
     this->params["W2"] = new Matrix(10, 256, sqrt(1. / 256));
-    this->params["b2"] = new Matrix(10, 1, sqrt(1. / 256));
+    this->params["b2"] = new Matrix(10, 1, 0.0);
 
     this->params["V_dW1"] = new Matrix(256, 784, 0.0);
     this->params["V_db1"] = new Matrix(256, 1, 0.0);
@@ -115,16 +115,26 @@ void NeuralNetwork::fit(Dataset *train)
 {
     vector<Matrix *> X;
     vector<Matrix *> Y;
+    vector<int> arra;
     double acc;
+    auto rng = default_random_engine {};
+    int offset = 0;
     int length_data = train->getMaxRow();
     while (length_data != 0)
     {
         if (length_data - this->batchSize < 0)
             this->batchSize = length_data;
-        X.push_back(new Matrix(train->getX(), batchSize));
-        Y.push_back(new Matrix(train->getY(), batchSize));
+        for(int i = offset; i < batchSize + offset; i++)
+            arra.push_back(i);
+
+        shuffle(arra.begin(), arra.end(), rng);
+
+        X.push_back(new Matrix(train->getX(), batchSize, arra));
+        Y.push_back(new Matrix(train->getY(), batchSize, arra));
 
         length_data -= this->batchSize;
+        offset += this->batchSize;
+        arra.clear();
     }
 
     this->initialize();
@@ -135,6 +145,7 @@ void NeuralNetwork::fit(Dataset *train)
         {
             Matrix *xBatch = X.at(batch);
             Matrix *yBatch = Y.at(batch);
+
             int batchLength = xBatch->getColumns();
 
             this->forwardPropagation(xBatch);
@@ -249,8 +260,8 @@ void NeuralNetwork::fit(Dataset *train)
 
         double previous_acc = acc;
         acc = this->transform(train);
-        if (previous_acc - acc <= 0.01) 
-            this->learningRate /= 10;
+        // if (previous_acc - acc <= 0.01) 
+        //     this->learningRate /= 10;
         cout << "Epoch [" << epoch << "] training cost: " << cost << " Accuracy: " << acc << endl;
     }
 }
