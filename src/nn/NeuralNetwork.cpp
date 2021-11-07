@@ -9,9 +9,12 @@ NeuralNetwork::NeuralNetwork(int epochs, int batchSize, double learningRate, dou
 void NeuralNetwork::initialize()
 {
     this->params["W1"] = new Matrix(256, 784, sqrt(1. / 784));
-    this->params["b1"] = new Matrix(256, 1, 0.0);
+    // this->params["b1"] = new Matrix(256, 1, 0.0);
+    this->params["b1"] = new Matrix(256, 1, sqrt(1. / 784));
+    
     this->params["W2"] = new Matrix(10, 256, sqrt(1. / 256));
-    this->params["b2"] = new Matrix(10, 1, 0.0);
+    // this->params["b2"] = new Matrix(10, 1, 0.0);
+    this->params["b2"] = new Matrix(10, 1, sqrt(1. / 256));
 
     this->params["V_dW1"] = new Matrix(256, 784, 0.0);
     this->params["V_db1"] = new Matrix(256, 1, 0.0);

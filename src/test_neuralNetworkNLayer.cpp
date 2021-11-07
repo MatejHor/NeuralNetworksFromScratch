@@ -1,7 +1,7 @@
 #include "./matrix/Matrix.cpp"
 #include "./dataset/Dataset.cpp"
 #include "./operation/MatrixOperation.cpp"
-#include "./nn/NeuralNetwork.cpp"
+#include "./nn/NeuralNetworkMultiLayer.cpp"
 
 int main()
 {
@@ -9,8 +9,8 @@ int main()
 
     auto start = high_resolution_clock::now();
     Dataset train = Dataset(
-        "../data/fashion_mnist_train_vectors.csv",
-        "../data/fashion_mnist_train_labels.csv",
+        "D:/MyData/NN_from_scratch/data/fashion_mnist_train_vectors.csv",
+        "D:/MyData/NN_from_scratch/data/fashion_mnist_train_labels.csv",
         60000, // size of train dataset
         VERBOSE);
     auto stop = high_resolution_clock::now();
@@ -18,17 +18,19 @@ int main()
 
     start = high_resolution_clock::now();
     Dataset test = Dataset(
-        "../data/fashion_mnist_test_vectors.csv",
-        "../data/fashion_mnist_test_labels.csv",
+        "D:/MyData/NN_from_scratch/data/fashion_mnist_test_vectors.csv",
+        "D:/MyData/NN_from_scratch/data/fashion_mnist_test_labels.csv",
         10000, // size of test dataset
         VERBOSE);
     stop = high_resolution_clock::now();
     cout << "Test dataset load time: " << duration_cast<seconds>(stop - start).count() << " seconds" << endl;
     
-    NeuralNetwork model = NeuralNetwork(
+    vector<int> layer = {784, 256, 10};
+    NeuralNetworkMultiLayer model = NeuralNetworkMultiLayer(
+        layer, // layers
         10, //epochs
-        128, //batchSize
-        4.0, //learning_rate
+        250, //batchSize
+        6.0, //learning_rate
         0.9 //beta
     );
 
