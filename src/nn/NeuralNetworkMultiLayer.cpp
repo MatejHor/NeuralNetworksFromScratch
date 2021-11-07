@@ -123,26 +123,14 @@ void NeuralNetworkMultiLayer::fit(Dataset *train, Dataset *test)
 
             for (int layer = 1; layer <= (this->layer.size() - 1); layer++)
             {
-                // ??? UPRAVA UPDATE PREMENIAME POVODNU MATICU ???
-                // Matrix *V_dW_cache = this->params["V_dW" + to_string(layer)];
-                // Matrix *V_db_cache = this->params["V_db" + to_string(layer)];
                 this->params["V_dW" + to_string(layer)] = momentumSum(this->params["V_dW" + to_string(layer)], this->beta, this->grads["dW" + to_string(layer)], (1.0 - this->beta));
                 this->params["V_db" + to_string(layer)] = momentumSum(this->params["V_db" + to_string(layer)], this->beta, this->grads["db" + to_string(layer)], (1.0 - this->beta));
-
-                // V_db_cache->~Matrix();
-                // V_dW_cache->~Matrix();
             }
 
             for (int layer = 1; layer <= (this->layer.size() - 1); layer++)
             {
-                // ??? UPRAVA UPDATE PREMENIAME POVODNU MATICU ???
-                // Matrix *W_cache = this->params["W" + to_string(layer)];
-                // Matrix *b_cache = this->params["b" + to_string(layer)];
                 this->params["W" + to_string(layer)] = momentumUpdate(this->params["W" + to_string(layer)], this->params["V_dW" + to_string(layer)], this->learningRate);
                 this->params["b" + to_string(layer)] = momentumUpdate(this->params["b" + to_string(layer)], this->params["V_db" + to_string(layer)], this->learningRate);
-
-                // W_cache->~Matrix();
-                // b_cache->~Matrix();
             }
             costs.push_back(costCrossEntropy(this->cache["A" + to_string(this->layer.size() - 1)], yBatch));
             

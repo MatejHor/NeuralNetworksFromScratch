@@ -9,8 +9,8 @@ int main()
 
     auto start = high_resolution_clock::now();
     Dataset train = Dataset(
-        "D:/MyData/NN_from_scratch/data/fashion_mnist_train_vectors.csv",
-        "D:/MyData/NN_from_scratch/data/fashion_mnist_train_labels.csv",
+        "../data/fashion_mnist_train_vectors.csv",
+        "../data/fashion_mnist_train_labels.csv",
         60000, // size of train dataset
         VERBOSE);
     auto stop = high_resolution_clock::now();
@@ -18,8 +18,8 @@ int main()
 
     start = high_resolution_clock::now();
     Dataset test = Dataset(
-        "D:/MyData/NN_from_scratch/data/fashion_mnist_test_vectors.csv",
-        "D:/MyData/NN_from_scratch/data/fashion_mnist_test_labels.csv",
+        "../data/fashion_mnist_test_vectors.csv",
+        "../data/fashion_mnist_test_labels.csv",
         10000, // size of test dataset
         VERBOSE);
     stop = high_resolution_clock::now();
@@ -42,6 +42,6 @@ int main()
     start = high_resolution_clock::now();
     double acc = model.transform(&test);
     stop = high_resolution_clock::now();
-    cout << "Test accuracy: " << acc << " time: " << duration_cast<seconds>(stop - start).count() << " seconds" << endl;
+    cout << "Test accuracy: " << acc << " Time: " << duration_cast<seconds>(stop - start).count() << " seconds" << endl;
     return 0;
 }
