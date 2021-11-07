@@ -20,7 +20,10 @@ Matrix::Matrix()
 Matrix::Matrix(int rows, int columns, double seed): rows(rows), columns(columns)
 {
     random_device rd{};
-    mt19937 gen{rd()};
+    // mt19937 gen{rd()};
+    // mt19937 gen{4089354279};
+    mt19937 gen{138};
+    // cout << "gen " << gen;
     normal_distribution<> d{0, 1};
 
     double** new_matrix = new double*[rows];

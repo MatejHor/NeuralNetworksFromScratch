@@ -29,15 +29,15 @@ int main()
     NeuralNetworkMultiLayer model = NeuralNetworkMultiLayer(
         layer, // layers
         10, //epochs
-        250, //batchSize
-        6.0, //learning_rate
+        256, //batchSize
+        0.5, //learning_rate
         0.9 //beta
     );
 
     start = high_resolution_clock::now();
     model.fit(&train);
     stop = high_resolution_clock::now();
-    cout << "Train time: " << duration_cast<seconds>(stop - start).count() << " seconds" << duration_cast<minutes>(stop - start).count() << " minutes" << endl;
+    cout << "Train time: " << duration_cast<seconds>(stop - start).count() << " seconds " << duration_cast<minutes>(stop - start).count() << " minutes" << endl;
 
     start = high_resolution_clock::now();
     double acc = model.transform(&test);

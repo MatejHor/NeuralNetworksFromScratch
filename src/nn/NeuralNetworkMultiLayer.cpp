@@ -3,9 +3,9 @@
 NeuralNetworkMultiLayer::NeuralNetworkMultiLayer(vector<int> layer, int epochs, int batchSize, double learningRate, double beta) : epoch(epochs), batchSize(batchSize), learningRate(learningRate), beta(beta), layer(layer)
 {
     cout << "Creating object NeuralNetworkMultiLayer\n";
-    cout << "Layers: {"
+    cout << "Layers: {";
     for (auto const &c : layer)
-        cout << c << ', ';
+        cout << c << ", ";
     cout << "} Epoch: " << epoch << " batchSize: " << batchSize << " learningRate: " << learningRate << " beta: " << beta << endl;
 }
 

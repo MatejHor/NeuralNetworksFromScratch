@@ -27,8 +27,8 @@ int main()
     
     NeuralNetwork model = NeuralNetwork(
         10, //epochs
-        128, //batchSize
-        4.0, //learning_rate
+        256, //batchSize
+        0.1, //learning_rate 4 not good
         0.9 //beta
     );
 

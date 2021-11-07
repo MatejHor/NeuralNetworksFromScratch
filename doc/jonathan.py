@@ -93,7 +93,7 @@ def back_propagate(X, Y, params, cache):
 
     return grads
 
-np.random.seed(138)
+np.random.seed(4089354279)
 
 # hyperparameters
 n_x = X_train.shape[0]
@@ -105,9 +105,12 @@ batches = -(-m // batch_size)
 
 # initialization
 params = { "W1": np.random.randn(n_h, n_x) * np.sqrt(1. / n_x),
-           "b1": np.zeros((n_h, 1)) * np.sqrt(1. / n_x),
+        #    "b1": np.zeros((n_h, 1)) * np.sqrt(1. / n_x),
+           "b1": np.random.randn(n_h, 1) * np.sqrt(1. / n_x),
            "W2": np.random.randn(digits, n_h) * np.sqrt(1. / n_h),
-           "b2": np.zeros((digits, 1)) * np.sqrt(1. / n_h) }
+        #    "b2": np.zeros((digits, 1)) * np.sqrt(1. / n_h) }
+           "b2": np.random.randn(digits, 1) * np.sqrt(1. / n_h) }
+
 
 V_dW1 = np.zeros(params["W1"].shape)
 V_db1 = np.zeros(params["b1"].shape)
@@ -115,7 +118,7 @@ V_dW2 = np.zeros(params["W2"].shape)
 V_db2 = np.zeros(params["b2"].shape)
 
     # train
-for i in range(5):
+for i in range(10):
 
     permutation = np.random.permutation(X_train.shape[1])
     X_train_shuffled = X_train[:, permutation]
@@ -157,3 +160,15 @@ print(classification_report(predictions, labels))
 
 with open('prediction.csv', 'w') as f:
     np.savetxt(f, predictions)
+
+with open('paramsW1', 'w') as f:
+    np.savetxt(f, params["W1"])
+
+with open('paramsb1', 'w') as f:
+    np.savetxt(f, params["b1"])
+
+with open('paramsW2', 'w') as f:
+    np.savetxt(f, params["W2"])
+
+with open('paramsb2', 'w') as f:
+    np.savetxt(f, params["b2"])
