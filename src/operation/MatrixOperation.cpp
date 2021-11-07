@@ -370,17 +370,18 @@ static Matrix *momentumSum(Matrix *m1, double multiplicator1, Matrix *m2, double
     int rows = m1->getRows();
     int columns = m1->getColumns();
 
-    Matrix *summed = new Matrix(rows, columns);
+    // Matrix *summed = new Matrix(rows, columns);
 
     for (int row = 0; row < rows; row++)
     {
         for (int column = 0; column < columns; column++)
         {
-            summed->getMatrix()[row][column] = (m1->getMatrix()[row][column] * multiplicator1) + (m2->getMatrix()[row][column] * multiplicator1);
+            // summed->getMatrix()[row][column] = (m1->getMatrix()[row][column] * multiplicator1) + (m2->getMatrix()[row][column] * multiplicator1);
+            m1->getMatrix()[row][column] = (m1->getMatrix()[row][column] * multiplicator1) + (m2->getMatrix()[row][column] * multiplicator1);
         }
     }
 
-    return summed;
+    return m1;
 }
 
 static Matrix *momentumUpdate(Matrix *m1, Matrix *m2, double multiplicator)
@@ -388,17 +389,18 @@ static Matrix *momentumUpdate(Matrix *m1, Matrix *m2, double multiplicator)
     int rows = m1->getRows();
     int columns = m1->getColumns();
 
-    Matrix *summed = new Matrix(rows, columns);
+    // Matrix *summed = new Matrix(rows, columns);
 
     for (int row = 0; row < rows; row++)
     {
         for (int column = 0; column < columns; column++)
         {
-            summed->getMatrix()[row][column] = m1->getMatrix()[row][column] - (m2->getMatrix()[row][column] * multiplicator);
+            // summed->getMatrix()[row][column] = m1->getMatrix()[row][column] - (m2->getMatrix()[row][column] * multiplicator);
+            m1->getMatrix()[row][column] = m1->getMatrix()[row][column] - (m2->getMatrix()[row][column] * multiplicator);
         }
     }
 
-    return summed;
+    return m1;
 }
 
 // ACTIVACNE FUNKCIE

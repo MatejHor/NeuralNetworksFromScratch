@@ -30,18 +30,18 @@ int main()
         layer, // layers
         10, //epochs
         256, //batchSize
-        0.5, //learning_rate
+        0.2, //learning_rate
         0.9 //beta
     );
 
     start = high_resolution_clock::now();
-    model.fit(&train);
+    model.fit(&train, &test);
     stop = high_resolution_clock::now();
     cout << "Train time: " << duration_cast<seconds>(stop - start).count() << " seconds " << duration_cast<minutes>(stop - start).count() << " minutes" << endl;
 
     start = high_resolution_clock::now();
     double acc = model.transform(&test);
     stop = high_resolution_clock::now();
-    cout << "Test accuracy: " << acc << " time:" << duration_cast<seconds>(stop - start).count() << " seconds" << endl;
+    cout << "Test accuracy: " << acc << " time: " << duration_cast<seconds>(stop - start).count() << " seconds" << endl;
     return 0;
 }

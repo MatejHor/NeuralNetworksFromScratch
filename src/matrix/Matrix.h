@@ -22,7 +22,7 @@ public:
     Matrix(int rows, int columns, double **other);
     Matrix(const Matrix &other);
     Matrix(Matrix *other, int batchSize);
-    Matrix(Matrix *other, int batchSize, vector<int> arrayOfIndexes);
+    Matrix(Matrix *other, int batchSize, int offSet);
     Matrix();
 
     ~Matrix()
@@ -49,17 +49,20 @@ public:
     {
         return matrix;
     }
+    double **copyMatrix(double** _matrix, int length);
+    double **copyMatrixRandom(double** _matrix, int length, int offSet);
 
     bool operator==(const Matrix &other) const;
     bool operator!=(const Matrix &other) const;
-    double **copyMatrix(double** _matrix, int length);
     void setMatrix(double **_matrix);
+    Matrix *T();
+    
     void print();
     void print(string name);
     void printParams();
     void printParams(string name);
-    Matrix *T();
-    double **copyMatrixRandom(double** _matrix, int length, vector<int> arrayOfIndexes);
+
+    
 };
 
 #endif

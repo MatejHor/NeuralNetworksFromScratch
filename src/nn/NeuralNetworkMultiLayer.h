@@ -5,14 +5,13 @@
 #include "../operation/MatrixOperation.h"
 #include "../dataset/Dataset.h"
 
-// SIZE of double[]
-#include <bits/stdc++.h>
+// MEAN for LOSS
+#include <numeric>
 
-#include <iostream>
-#include <fstream>
-#include <string.h>
 #include <vector>
 #include <map>
+
+#include <iostream>
 #include <algorithm>
 #include <random>
 
@@ -39,9 +38,9 @@ public:
     double costCrossEntropy(Matrix* AL, Matrix* yBatch);
     void backPropagation(Matrix *xBatch, Matrix *yBatch, double m_batch);
 
-    void fit(Dataset* train);
+    void fit(Dataset* train, Dataset *test);
     double transform(Dataset* test);
-    void clearCache();
+    void clearCache(bool clearGrads);
 
     ~NeuralNetworkMultiLayer() {
         params["W1"]->~Matrix();
