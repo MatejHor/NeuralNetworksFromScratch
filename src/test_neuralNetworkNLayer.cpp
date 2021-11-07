@@ -37,7 +37,7 @@ int main()
     start = high_resolution_clock::now();
     model.fit(&train, &test);
     stop = high_resolution_clock::now();
-    cout << "Train time: " << duration_cast<seconds>(stop - start).count() << " seconds " << duration_cast<minutes>(stop - start).count() << " minutes" << endl;
+    cout << "Train time: " << duration_cast<seconds>(stop - start).count() << " seconds (" << duration_cast<minutes>(stop - start).count() << " minutes)" << endl;
 
     start = high_resolution_clock::now();
     double acc = model.transform(&test);
