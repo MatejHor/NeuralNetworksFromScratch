@@ -139,7 +139,7 @@ void NeuralNetworkMultiLayer::fit(Dataset *train, Dataset *test)
         auto stop = high_resolution_clock::now();
             
         double cost = std::accumulate(costs.begin(), costs.end(), 0.0) / costs.size();    
-        cout << "Epoch [" << epoch << "] training cost: " << cost << " training time:" << duration_cast<milliseconds>(stop - start).count() << " milliseconds" << endl;
+        cout << "Epoch [" << epoch << "] training cost: " << cost << " training time: " << duration_cast<seconds>(stop - start).count() << " seconds" << endl;
 
         // double previous_acc = acc;
         // acc = this->transform(test);
