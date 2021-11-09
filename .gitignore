@@ -38,14 +38,11 @@ data/fashion_mnist_test_vectors.csv
 # IDE
 .vscode
 .idea
-src/weights.txt
-src/bias.txt
-doc/result.csv
 *.pyc
-paramsb1
-paramsb2
-paramsW1
-paramsW2
+
+# DATA
 prediction.csv
 trainPredictions
 actualTestPredictions
+src/weights.txt
+src/bias.txt
