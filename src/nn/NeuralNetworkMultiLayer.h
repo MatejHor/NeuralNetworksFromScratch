@@ -39,7 +39,7 @@ public:
     void backPropagation(Matrix *xBatch, Matrix *yBatch, double m_batch);
 
     void fit(Dataset* train, Dataset *test);
-    double transform(Dataset* test);
+    double transform(Dataset *test, string fileName);
     void clearCache(bool clearGrads);
 
     ~NeuralNetworkMultiLayer() {
