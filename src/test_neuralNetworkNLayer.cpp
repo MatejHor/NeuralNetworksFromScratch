@@ -1,7 +1,7 @@
-#include "./matrix/Matrix.cpp"
-#include "./dataset/Dataset.cpp"
-#include "./operation/MatrixOperation.cpp"
-#include "./nn/NeuralNetworkMultiLayer.cpp"
+#include "./src/matrix/Matrix.cpp"
+#include "./src/dataset/Dataset.cpp"
+#include "./src/operation/MatrixOperation.cpp"
+#include "./src/nn/NeuralNetworkMultiLayer.cpp"
 
 int main()
 {
@@ -9,8 +9,8 @@ int main()
 
     auto start = high_resolution_clock::now();
     Dataset train = Dataset(
-        "../data/fashion_mnist_train_vectors.csv",
-        "../data/fashion_mnist_train_labels.csv",
+        "./data/fashion_mnist_train_vectors.csv",
+        "./data/fashion_mnist_train_labels.csv",
         60000, // size of train dataset
         VERBOSE);
     auto stop = high_resolution_clock::now();
@@ -18,8 +18,8 @@ int main()
 
     start = high_resolution_clock::now();
     Dataset test = Dataset(
-        "../data/fashion_mnist_test_vectors.csv",
-        "../data/fashion_mnist_test_labels.csv",
+        "./data/fashion_mnist_test_vectors.csv",
+        "./data/fashion_mnist_test_labels.csv",
         10000, // size of test dataset
         VERBOSE);
     stop = high_resolution_clock::now();
@@ -40,12 +40,12 @@ int main()
     cout << "Train time: " << duration_cast<seconds>(stop - start).count() << " seconds (" << duration_cast<minutes>(stop - start).count() << " minutes)" << endl;
 
     start = high_resolution_clock::now();
-    double acc = model.transform(&train, "../trainPredictions");
+    double acc = model.transform(&train, "./trainPredictions");
     stop = high_resolution_clock::now();
     cout << "Train accuracy: " << acc << " Time: " << duration_cast<seconds>(stop - start).count() << " seconds" << endl;
     
     start = high_resolution_clock::now();
-    acc = model.transform(&test, "../actualTestPredictions");
+    acc = model.transform(&test, "./actualTestPredictions");
     stop = high_resolution_clock::now();
     cout << "Test accuracy: " << acc << " Time: " << duration_cast<seconds>(stop - start).count() << " seconds" << endl;
     return 0;
