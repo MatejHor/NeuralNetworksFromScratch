@@ -1,7 +1,7 @@
-#include "./src/matrix/Matrix.cpp"
-#include "./src/dataset/Dataset.cpp"
-#include "./src/operation/MatrixOperation.cpp"
-#include "./src/nn/NeuralNetworkMultiLayer.cpp"
+#include "./matrix/Matrix.cpp"
+#include "./dataset/Dataset.cpp"
+#include "./operation/MatrixOperation.cpp"
+#include "./nn/NeuralNetworkMultiLayer.cpp"
 
 int main()
 {
