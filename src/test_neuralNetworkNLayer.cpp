@@ -28,7 +28,7 @@ int main()
     vector<int> layer = {784, 256, 10};
     NeuralNetworkMultiLayer model = NeuralNetworkMultiLayer(
         layer, // layers
-        10, //epochs
+        1, //epochs
         256, //batchSize
         0.2, //learning_rate
         0.9 //beta
@@ -40,7 +40,12 @@ int main()
     cout << "Train time: " << duration_cast<seconds>(stop - start).count() << " seconds (" << duration_cast<minutes>(stop - start).count() << " minutes)" << endl;
 
     start = high_resolution_clock::now();
-    double acc = model.transform(&test);
+    double acc = model.transform(&train, "../trainPredictions");
+    stop = high_resolution_clock::now();
+    cout << "Train accuracy: " << acc << " Time: " << duration_cast<seconds>(stop - start).count() << " seconds" << endl;
+    
+    start = high_resolution_clock::now();
+    acc = model.transform(&test, "../actualTestPredictions");
     stop = high_resolution_clock::now();
     cout << "Test accuracy: " << acc << " Time: " << duration_cast<seconds>(stop - start).count() << " seconds" << endl;
     return 0;

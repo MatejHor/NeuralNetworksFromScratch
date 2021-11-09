@@ -38,6 +38,7 @@ public:
     static Matrix *reLuDerivation(Matrix *x);
 
     // UPDATE PRED MATRIX
+    void savePrediction(string fileName, Matrix* data, string mode);
     static Matrix *squeeze(Matrix *Y, string func);
     static double accuracy(Matrix *AL, Matrix *Y);
 };

@@ -76,6 +76,8 @@ void NeuralNetworkMultiLayer::clearCache(bool clearGrads)
     }
 }
 
+
+
 void NeuralNetworkMultiLayer::fit(Dataset *train, Dataset *test)
 {
     vector<Matrix *> X;
@@ -133,24 +135,20 @@ void NeuralNetworkMultiLayer::fit(Dataset *train, Dataset *test)
                 this->params["b" + to_string(layer)] = momentumUpdate(this->params["b" + to_string(layer)], this->params["V_db" + to_string(layer)], this->learningRate);
             }
             costs.push_back(costCrossEntropy(this->cache["A" + to_string(this->layer.size() - 1)], yBatch));
-            
+
             this->clearCache(true);
         }
         auto stop = high_resolution_clock::now();
-            
+
         double cost = std::accumulate(costs.begin(), costs.end(), 0.0) / costs.size();    
         cout << "Epoch [" << epoch << "] training cost: " << cost << " training time: " << duration_cast<seconds>(stop - start).count() << " seconds" << endl;
-
-        // double previous_acc = acc;
-        // acc = this->transform(test);
-        // cout << " Accuracy: " << acc << endl;
     }
 }
 
-double NeuralNetworkMultiLayer::transform(Dataset *test)
+double NeuralNetworkMultiLayer::transform(Dataset *test, string fileName)
 {
     this->forwardPropagation(test->getX());
-    double acc = accuracy(this->cache["A" + to_string(this->layer.size() - 1)], test->getY());
+    double acc = accuracy(this->cache["A" + to_string(this->layer.size() - 1)], test->getY(), fileName);
     this->clearCache(false);
     return acc;
 }

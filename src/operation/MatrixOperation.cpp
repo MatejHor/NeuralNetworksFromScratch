@@ -565,21 +565,32 @@ static Matrix *squeeze(Matrix *Y, string func)
     return new_Y;
 }
 
-static double accuracy(Matrix *AL, Matrix *Y)
+void savePrediction(string fileName, Matrix* data, string mode) {
+    ofstream file;
+    if (mode.compare("append") == 0)
+        file.open(fileName, std::ios_base::app);
+    else 
+        file.open(fileName);
+
+    for (int row = 0; row < data->getRows(); row++)
+         for (int column = 0; column < data->getColumns(); column++)
+            file << data->getMatrix()[row][column] << "\n";
+
+    file.close();
+}
+
+static double accuracy(Matrix *AL, Matrix *Y, string fileName)
 {
     Matrix *transponseAL = AL->T();
     Matrix *transponseY = Y->T();
     Matrix *AL_squeeze = squeeze(transponseAL, "max");
     Matrix *Y_squeeze = squeeze(transponseY, "category");
 
-    // AL->printParams("AL");
-    // Y->printParams("Y");
+    savePrediction(fileName, AL_squeeze, "create");
 
     double **al = AL_squeeze->getMatrix();
     double **y = Y_squeeze->getMatrix();
 
-    // AL_squeeze->print("AL_squeeze");
-    // Y_squeeze->print("Y_squeeze");
 
     double TP = 0;
 

@@ -47,3 +47,5 @@ paramsb2
 paramsW1
 paramsW2
 prediction.csv
+trainPredictions
+actualTestPredictions
