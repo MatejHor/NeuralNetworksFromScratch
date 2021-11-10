@@ -4,7 +4,7 @@ echo "#################"
 echo "    COMPILING    "
 echo "#################"
 
-g++ -Wall -std=c++11 -O3 src/main.cpp src/file2 -o network
+g++ -std=c++11 -O3 src/test_neuralNetworkNLayer.cpp -o network
 
 echo "#################"
 echo "     RUNNING     "
