@@ -1,4 +1,4 @@
-# PV021 project | Deep Learning from Scratch
+# PV021 project | Neural network from Scratch
 
 ## [DEADLINE]
 Monday - 6th December 2021 (8 weeks)
