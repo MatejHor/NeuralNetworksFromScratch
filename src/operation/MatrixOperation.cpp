@@ -1,6 +1,13 @@
 #include "MatrixOperation.h"
 #include <math.h>
 
+/**
+ * @brief sum operation for two matrix (ordinaly sum of matrix)
+ * 
+ * @param m1 first matrix to sum
+ * @param m2 second matrix to sum
+ * @return new summed Matrix* 
+ */
 static Matrix *sum(Matrix *m1, Matrix *m2)
 {
     if ((m1->getRows() != m2->getRows()) || (m1->getColumns() != m2->getColumns()))
@@ -25,17 +32,25 @@ static Matrix *sum(Matrix *m1, Matrix *m2)
     return summed;
 }
 
-static Matrix *sumVector(Matrix *m, Matrix *vector)
+
+/**
+ * @brief Sum matrix and vector, it must have the same shape of row
+ * 
+ * @param matrix
+ * @param vector
+ * @return new summed Matrix* 
+ */
+static Matrix *sumVector(Matrix *matrix, Matrix *vector)
 {
-    if ((m->getRows() != vector->getRows()))
+    if ((matrix->getRows() != vector->getRows()))
     {
-        cout << "[-] CAN NOT SUM VECTOR(NOT HAVE SHAPE TO SUM) m&=" << (m) << " vector&=" << (vector) << endl;
-        cout << "Shape(m_rows=" << m->getRows() << ", vector_columns=" << vector->getRows() << endl;
+        cout << "[-] CAN NOT SUM VECTOR AND MATRIX(NOT HAVE SHAPE TO SUM) m&=" << (matrix) << " vector&=" << (vector) << endl;
+        cout << "Shape(m_rows=" << matrix->getRows() << ", vector_columns=" << vector->getRows() << endl;
         return NULL;
     }
 
-    int rows = m->getRows();
-    int columns = m->getColumns();
+    int rows = matrix->getRows();
+    int columns = matrix->getColumns();
 
     Matrix *summed = new Matrix(rows, columns);
 
@@ -43,13 +58,20 @@ static Matrix *sumVector(Matrix *m, Matrix *vector)
     {
         for (int column = 0; column < columns; column++)
         {
-            summed->getMatrix()[row][column] = m->getMatrix()[row][column] + vector->getMatrix()[row][0];
+            summed->getMatrix()[row][column] = matrix->getMatrix()[row][column] + vector->getMatrix()[row][0];
         }
     }
 
     return summed;
 }
 
+/**
+ * @brief subtrack operation for two matrix (ordinaly subtrack of matrix)
+ * 
+ * @param m1 first matrix to subtrack
+ * @param m2 second matrix to subtrack
+ * @return new subtracked Matrix* 
+ */
 static Matrix *subtrack(Matrix *m1, Matrix *m2)
 {
     if ((m1->getRows() != m2->getRows()) && (m1->getColumns() != m2->getColumns()))
@@ -76,10 +98,17 @@ static Matrix *subtrack(Matrix *m1, Matrix *m2)
     return summed;
 }
 
-static Matrix *sum(Matrix *m, double x)
+/**
+ * @brief Sum every item in matrix with value @param x
+ * 
+ * @param matrix 
+ * @param x value to sum
+ * @return new Matrix* 
+ */
+static Matrix *sum(Matrix *matrix, double x)
 {
-    int rows = m->getRows();
-    int columns = m->getColumns();
+    int rows = matrix->getRows();
+    int columns = matrix->getColumns();
 
     Matrix *summed = new Matrix(rows, columns);
 
@@ -87,17 +116,24 @@ static Matrix *sum(Matrix *m, double x)
     {
         for (int column = 0; column < columns; column++)
         {
-            summed->getMatrix()[row][column] = m->getMatrix()[row][column] + x;
+            summed->getMatrix()[row][column] = matrix->getMatrix()[row][column] + x;
         }
     }
 
     return summed;
 }
 
-static Matrix *subtrack(double x, Matrix *m)
+/**
+ * @brief Subtract every item in matrix with value @param x
+ * 
+ * @param matrix 
+ * @param x value to subtract
+ * @return new Matrix* 
+ */
+static Matrix *subtrack(double x, Matrix *matrix)
 {
-    int rows = m->getRows();
-    int columns = m->getColumns();
+    int rows = matrix->getRows();
+    int columns = matrix->getColumns();
 
     Matrix *summed = new Matrix(rows, columns);
 
@@ -105,44 +141,63 @@ static Matrix *subtrack(double x, Matrix *m)
     {
         for (int column = 0; column < columns; column++)
         {
-            summed->getMatrix()[row][column] = x - m->getMatrix()[row][column];
+            summed->getMatrix()[row][column] = x - matrix->getMatrix()[row][column];
         }
     }
 
     return summed;
 }
 
-static Matrix *sumDimension(Matrix *m)
+/**
+ * @brief Sum dimension in Matrix form NxM matrix create Nx1 Matrix
+ * 
+ * @param matrix 
+ * @return new Nx1 Matrix* 
+ */
+static Matrix *sumDimension(Matrix *matrix)
 {
-    double **new_matrix = new double *[m->getRows()];
-    double **_matrix = m->getMatrix();
+    double **new_matrix = new double *[matrix->getRows()];
+    double **_matrix = matrix->getMatrix();
 
-    for (int row = 0; row < m->getRows(); row++)
+    for (int row = 0; row < matrix->getRows(); row++)
     {
         new_matrix[row] = new double[1];
         double sum = 0;
-        for (int column = 0; column < m->getColumns(); column++)
+        for (int column = 0; column < matrix->getColumns(); column++)
             sum += _matrix[row][column];
         *new_matrix[row] = sum;
     }
 
-    return new Matrix(m->getRows(), 1, new_matrix);
+    return new Matrix(matrix->getRows(), 1, new_matrix);
 }
 
-static double sumMatrix(Matrix *m)
+/**
+ * @brief Sum Matrix into value
+ * 
+ * @param matrix 
+ * @return sum of item in matrix (double)
+ */
+static double sumMatrix(Matrix *matrix)
 {
-    double **_matrix = m->getMatrix();
+    double **_matrix = matrix->getMatrix();
     double sum = 0;
 
-    for (int row = 0; row < m->getRows(); row++)
+    for (int row = 0; row < matrix->getRows(); row++)
     {
-        for (int column = 0; column < m->getColumns(); column++)
+        for (int column = 0; column < matrix->getColumns(); column++)
             sum += _matrix[row][column];
     }
 
     return sum;
 }
 
+/**
+ * @brief Create matrix as dot product of m1 and m2 matrices (ordinaly multiply 2 matrices)
+ * 
+ * @param m1 
+ * @param m2 
+ * @return new Matrix* 
+ */
 static Matrix *dot(Matrix *m1, Matrix *m2)
 {
     if ((m1->getColumns() != m2->getRows()))
@@ -175,6 +230,13 @@ static Matrix *dot(Matrix *m1, Matrix *m2)
     return multi;
 }
 
+/**
+ * @brief Multiply 2 matrices (not dot product) multiply every item with the item in same place in second matrix
+ * 
+ * @param m1 
+ * @param m2 
+ * @return new Matrix* 
+ */
 static Matrix *multiply(Matrix *m1, Matrix *m2)
 {
     if ((m1->getRows() != m2->getRows()) && (m1->getColumns() != m2->getColumns()))
@@ -199,6 +261,13 @@ static Matrix *multiply(Matrix *m1, Matrix *m2)
     return new Matrix(rows, columns, new_matrix);
 }
 
+/**
+ * @brief Divide 2 matrices (not dot product) divide every item with the item in same place in second matrix
+ * 
+ * @param m1 
+ * @param m2 
+ * @return new Matrix* 
+ */
 static Matrix *divide(Matrix *m1, Matrix *m2)
 {
     if ((m1->getRows() != m2->getRows()) && (m1->getColumns() != m2->getColumns()))
@@ -223,12 +292,19 @@ static Matrix *divide(Matrix *m1, Matrix *m2)
     return new Matrix(rows, columns, new_matrix);
 }
 
-static Matrix *multiply(Matrix *m, double x)
+/**
+ * @brief Multiply every item in matrix with value @param x
+ * 
+ * @param matrix 
+ * @param x 
+ * @return new mutliply Matrix* 
+ */
+static Matrix *multiply(Matrix *matrix, double x)
 {
-    int rows = m->getRows();
-    int columns = m->getColumns();
+    int rows = matrix->getRows();
+    int columns = matrix->getColumns();
     double **new_matrix = new double *[rows];
-    double **matrix_1 = m->getMatrix();
+    double **matrix_1 = matrix->getMatrix();
 
     for (int row = 0; row < rows; row++)
     {
@@ -240,23 +316,35 @@ static Matrix *multiply(Matrix *m, double x)
     return new Matrix(rows, columns, new_matrix);
 }
 
-static Matrix *log(Matrix *m)
+/**
+ * @brief applyed log function for every item in Matrix
+ * 
+ * @param matrix 
+ * @return new logged Matrix* 
+ */
+static Matrix *log(Matrix *matrix)
 {
-    double **new_matrix = new double *[m->getRows()];
-    double **_matrix = m->getMatrix();
+    double **new_matrix = new double *[matrix->getRows()];
+    double **_matrix = matrix->getMatrix();
 
-    for (int row = 0; row < m->getRows(); row++)
+    for (int row = 0; row < matrix->getRows(); row++)
     {
-        new_matrix[row] = new double[m->getColumns()];
-        for (int column = 0; column < m->getColumns(); column++)
+        new_matrix[row] = new double[matrix->getColumns()];
+        for (int column = 0; column < matrix->getColumns(); column++)
             new_matrix[row][column] = log(_matrix[row][column]);
     }
 
-    return new Matrix(m->getRows(), m->getColumns(), new_matrix);
+    return new Matrix(matrix->getRows(), matrix->getColumns(), new_matrix);
 }
 
 // NEURAL NETWORK OPERATIONS
-
+/**
+ * @brief Sum matrices into value and before it multiply 2 matrices
+ * 
+ * @param m1 
+ * @param m2 
+ * @return sum of multipled matrices (double)
+ */
 static double crossEntropySum(Matrix *m1, Matrix *m2)
 {
     double sum = 0;
@@ -270,6 +358,14 @@ static double crossEntropySum(Matrix *m1, Matrix *m2)
     return sum;
 }
 
+/**
+ * @brief Dot product of 2 matrices and after that add item in same row from vector to it
+ * 
+ * @param m1 
+ * @param m2 
+ * @param vector 
+ * @return new Matrix* 
+ */
 static Matrix *forwardDot(Matrix *m1, Matrix *m2, Matrix *vector)
 {
 
@@ -296,6 +392,14 @@ static Matrix *forwardDot(Matrix *m1, Matrix *m2, Matrix *vector)
     return multi;
 }
 
+/**
+ * @brief Dot product of 2 matrices and after that multiply with value @param multiplicator
+ * 
+ * @param m1 
+ * @param m2 
+ * @param vector 
+ * @return new dot product Matrix* with multiply it with multiplicator
+ */
 static Matrix *backwardDotDW(Matrix *m1, Matrix *m2, double multiplicator)
 {
     int rows = m1->getRows();
@@ -321,6 +425,15 @@ static Matrix *backwardDotDW(Matrix *m1, Matrix *m2, double multiplicator)
     return multi;
 }
 
+
+/**
+ * @brief Dot product of 2 matrices and after that multiply with matrix derivateSigmoid of @param multiply
+ * 
+ * @param m1 
+ * @param m2 
+ * @param vector 
+ * @return new dot product Matrix* with multiply it with derivativeSigmoid matrix
+ */
 static Matrix *backwardDotDZSigmoid(Matrix *m1, Matrix *m2, Matrix *multiply)
 {
     int rows = m1->getColumns();
@@ -348,35 +461,48 @@ static Matrix *backwardDotDZSigmoid(Matrix *m1, Matrix *m2, Matrix *multiply)
     return multi;
 }
 
-static Matrix *backwardSumDimension(Matrix *m, double multiplicator)
+/**
+ * @brief Sum matrix dimension into value and multiply it with @param multiplicator
+ * 
+ * @param matrix 
+ * @param multiplicator 
+ * @return new Matrix* of shape Nx1 with multiply it with multiplicator
+ */
+static Matrix *backwardSumDimension(Matrix *matrix, double multiplicator)
 {
-    double **new_matrix = new double *[m->getRows()];
-    double **_matrix = m->getMatrix();
+    double **new_matrix = new double *[matrix->getRows()];
+    double **_matrix = matrix->getMatrix();
 
-    for (int row = 0; row < m->getRows(); row++)
+    for (int row = 0; row < matrix->getRows(); row++)
     {
         new_matrix[row] = new double[1];
         double sum = 0;
-        for (int column = 0; column < m->getColumns(); column++)
+        for (int column = 0; column < matrix->getColumns(); column++)
             sum += _matrix[row][column];
         *new_matrix[row] = sum * multiplicator;
     }
 
-    return new Matrix(m->getRows(), 1, new_matrix);
+    return new Matrix(matrix->getRows(), 1, new_matrix);
 }
 
+/**
+ * @brief Update momentum with momentum * beta + derivate of weights * (1 - beta) 
+ * 
+ * @param m1 momentum params (weight or bias)
+ * @param multiplicator1 beta
+ * @param m2 grads param (weight or bias)
+ * @param multiplicator2 1 - beta
+ * @return updated momentum Matrix* ! NOT CREATE NEW MATRICES !
+ */
 static Matrix *momentumSum(Matrix *m1, double multiplicator1, Matrix *m2, double multiplicator2)
 {
     int rows = m1->getRows();
     int columns = m1->getColumns();
 
-    // Matrix *summed = new Matrix(rows, columns);
-
     for (int row = 0; row < rows; row++)
     {
         for (int column = 0; column < columns; column++)
         {
-            // summed->getMatrix()[row][column] = (m1->getMatrix()[row][column] * multiplicator1) + (m2->getMatrix()[row][column] * multiplicator1);
             m1->getMatrix()[row][column] = (m1->getMatrix()[row][column] * multiplicator1) + (m2->getMatrix()[row][column] * multiplicator1);
         }
     }
@@ -384,18 +510,23 @@ static Matrix *momentumSum(Matrix *m1, double multiplicator1, Matrix *m2, double
     return m1;
 }
 
+/**
+ * @brief Update params (only one at time) with previous params - momentum params * learning rate
+ * 
+ * @param m1 old weight or bias
+ * @param multiplicator learning rate
+ * @param m2 momentum value (momentum of weight or bias)
+ * @return updated params Matrix* ! NOT CREATE NEW MATRICES !
+ */
 static Matrix *momentumUpdate(Matrix *m1, Matrix *m2, double multiplicator)
 {
     int rows = m1->getRows();
     int columns = m1->getColumns();
 
-    // Matrix *summed = new Matrix(rows, columns);
-
     for (int row = 0; row < rows; row++)
     {
         for (int column = 0; column < columns; column++)
         {
-            // summed->getMatrix()[row][column] = m1->getMatrix()[row][column] - (m2->getMatrix()[row][column] * multiplicator);
             m1->getMatrix()[row][column] = m1->getMatrix()[row][column] - (m2->getMatrix()[row][column] * multiplicator);
         }
     }

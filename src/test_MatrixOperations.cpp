@@ -1,6 +1,11 @@
 #include "./matrix/Matrix.cpp"
 #include "./operation/MatrixOperation.cpp"
 
+/**
+ * @brief Tests for MatrixOperation class
+ * 
+ * @return int 
+ */
 int main() {
     // std::cout << "hello wrld! juice world is dead Sad UwU." << "\n";
     std::cout << "Testing Matrix" << "\n";

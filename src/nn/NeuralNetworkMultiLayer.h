@@ -7,51 +7,62 @@
 
 // MEAN for LOSS
 #include <numeric>
+// FILE
+#include <iostream>
+// SHUFFLE Batches
+#include <algorithm>
+// TIME
+#include <chrono>
 
 #include <vector>
 #include <map>
-
-#include <iostream>
-#include <algorithm>
 #include <random>
-
-// TIME
-#include <chrono>
 using namespace chrono;
 
 class NeuralNetworkMultiLayer
 {
 private:
+    // Number of epoch which will be network trained
     int epoch = 20;
+    // Size of batch for data
     int batchSize = 256;
+    // Learning rate for update weight and bias
     double learningRate = 4.0;
+    // Beta parameter for momentum
     double beta = 0.9;
+
+    // Hierarchy of network, number of neurons in layer
     vector<int> layer;
-    map<string, Matrix*> cache;
-    map<string, Matrix*> grads;
-    map<string, Matrix*> params;
+    // Hash map for saving Matrices from ForwardPropagation
+    map<string, Matrix *> cache;
+    // Hash map for saving Matrices from BackPropagation
+    map<string, Matrix *> grads;
+    // Hash map for saving Weights, Biases and Momentum
+    map<string, Matrix *> params;
+
 public:
     NeuralNetworkMultiLayer(vector<int> layer, int epochs, int batchSize, double learningRate, double beta);
 
     void initialize();
-    void forwardPropagation(Matrix* xBatch);
-    double costCrossEntropy(Matrix* AL, Matrix* yBatch);
-    void backPropagation(Matrix *xBatch, Matrix *yBatch, double m_batch);
+    void forwardPropagation(Matrix *xBatch);
+    double costCrossEntropy(Matrix *AL, Matrix *yBatch);
+    void backPropagation(Matrix *yBatch, double m_batch);
 
-    void fit(Dataset* train, Dataset *test);
+    void fit(Dataset *train);
     double transform(Dataset *test, string fileName);
     void clearCache(bool clearGrads);
 
-    ~NeuralNetworkMultiLayer() {
-        params["W1"]->~Matrix();
-        params["b1"]->~Matrix();
-        params["W2"]->~Matrix();
-        params["b2"]->~Matrix();
+    // Dealocate params
+    ~NeuralNetworkMultiLayer()
+    {
+        for (int layer = 1; layer < (this->layer.size()); layer++)
+        {
+            params["W" + to_string(layer)]->~Matrix();
+            params["b" + to_string(layer)]->~Matrix();
 
-        params["V_dW1"]->~Matrix();
-        params["V_db1"]->~Matrix();
-        params["V_dW2"]->~Matrix();
-        params["V_db2"]->~Matrix();
+            params["V_dW" + to_string(layer)]->~Matrix();
+            params["V_db" + to_string(layer)]->~Matrix();
+        }
     }
 };
 

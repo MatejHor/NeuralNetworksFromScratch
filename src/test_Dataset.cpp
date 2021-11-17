@@ -5,6 +5,11 @@
 #include <chrono>
 #include <random>
 
+/**
+ * @brief Tests for Dataset class
+ * 
+ * @return int 
+ */
 int main()
 {
     std::string xFileName = "../data/fashion_mnist_sample_vectors.csv";

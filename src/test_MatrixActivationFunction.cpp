@@ -1,6 +1,11 @@
 #include "./matrix/Matrix.cpp"
 #include "./operation/MatrixOperation.cpp"
 
+/**
+ * @brief Tests for MatrixOperatian class only for activation function
+ * 
+ * @return int 
+ */
 int main() {
     int rows = 3;
     int cols = 2;
