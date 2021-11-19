@@ -1,5 +1,11 @@
 #include "Matrix.h"
 
+/**
+ * @brief Construct a new Matrix:: Matrix object, alocation of dynamic 2D array
+ * 
+ * @param rows number of rows for the matrix
+ * @param columns number of columns for the matrix
+ */
 Matrix::Matrix(int rows, int columns) : rows(rows), columns(columns)
 {
     double** new_matrix = new double*[rows];
@@ -12,11 +18,22 @@ Matrix::Matrix(int rows, int columns) : rows(rows), columns(columns)
     // cout << "Creating Matrix(rows, columns)(row=" << rows << ", column=" << columns << ", &=" << (this) << ")" << endl;
 }
 
+/**
+ * @brief Construct a new Matrix:: Matrix object
+ * 
+ */
 Matrix::Matrix()
 {
     // cout << "Creating Matrix()" << endl;
 }
 
+/**
+ * @brief Construct a new Matrix:: Matrix object, matrix filled with random data or zeros, when seed = 0.
+ * 
+ * @param rows number of rows for the matrix
+ * @param columns number of columns for the matrix
+ * @param seed modifier of the generated numbers, provides zero values in matrix when value 0.
+ */
 Matrix::Matrix(int rows, int columns, double seed): rows(rows), columns(columns)
 {
     random_device rd{};
@@ -40,12 +57,24 @@ Matrix::Matrix(int rows, int columns, double seed): rows(rows), columns(columns)
     // cout << "Creating Matrix(rows, columns, seed)(row=" << rows << ", column=" << columns << ", &=" << (this) << ")" << endl;
 }
 
+/**
+ * @brief Construct a new Matrix:: Matrix object, gets 2D array of values
+ * 
+ * @param rows number of rows for the matrix
+ * @param columns number of columns for the matrix
+ * @param other 2D array of values
+ */
 Matrix::Matrix(int rows, int columns, double **other) : rows(rows), columns(columns)
 {
     matrix = other;
     // cout << "Creating Matrix(rows, columns, other)(row=" << rows << ", column=" << columns << ", &=" << (this) << ")" << endl;
 }
 
+/**
+ * @brief Construct a new Matrix:: Matrix object, copies given Matrix
+ * 
+ * @param other Matrix object we want to copy
+ */
 Matrix::Matrix(const Matrix &other)
 {
     rows = other.getRows();
@@ -54,6 +83,12 @@ Matrix::Matrix(const Matrix &other)
     // cout << "Creating Matrix(rows, columns, other)(row=" << rows << ", column=" << columns << ", &=" << (this) << ")" << endl;
 }
 
+/**
+ * @brief Construct a new Matrix:: Matrix object, copies given Matrix with batch size, constructs "submatrix"
+ * 
+ * @param other Matrix object we want to copy
+ * @param batchSize limiter for number of columns we want to copy
+ */
 Matrix::Matrix(Matrix *other, int batchSize)
 {
     rows = other->getRows();
@@ -62,6 +97,13 @@ Matrix::Matrix(Matrix *other, int batchSize)
     // cout << "Creating Matrix(other, batchSize)(row=" << rows << ", column=" << columns << ", &=" << (this) << ")" << endl;
 }
 
+/**
+ * @brief Construct a new Matrix:: Matrix object, copies given Matrix with batch size and offset, constructs "submatrix"
+ * 
+ * @param other Matrix object we want to copy
+ * @param batchSize limiter for number of columns we want to copy
+ * @param offSet index of columns from where we want to copy content of the given Matrix
+ */
 Matrix::Matrix(Matrix *other, int batchSize, int offSet)
 {
     rows = other->getRows();
@@ -70,6 +112,13 @@ Matrix::Matrix(Matrix *other, int batchSize, int offSet)
     // cout << "Creating Matrix(other, batchSize)(row=" << rows << ", column=" << columns << ", &=" << (this) << ")" << endl;
 }
 
+/**
+ * @brief operator for equality of two Matrix objects
+ * 
+ * @param other second matrix with which the first one will be compared
+ * @return true if the two Matrices are equal
+ * @return false of the two matrixes are not equal
+ */
 bool Matrix::operator==(const Matrix &other) const
 {
     if ((rows == other.rows) && (columns == other.columns))
@@ -88,6 +137,13 @@ bool Matrix::operator==(const Matrix &other) const
     return true;
 }
 
+/**
+ * @brief operator for inequality of two Matrix objects
+ * 
+ * @param other second matrix with which the first one will be compared
+ * @return true if the two Matrices are not equal
+ * @return false of the two matrixes are equal
+ */
 bool Matrix::operator!=(const Matrix &other) const
 {
     if ((rows == other.rows) && (columns == other.columns))
@@ -116,6 +172,10 @@ bool Matrix::operator!=(const Matrix &other) const
 //     this->setMatrix(other.getMatrix());
 // }
 
+/**
+ * @brief prints content of matrix object in structured form
+ * 
+ */
 void Matrix::print()
 {
     cout << "Matrix(rows=" << rows << ", columns=" << columns << ", &=" << (this) << ")" << endl << "[\n";
@@ -135,6 +195,11 @@ void Matrix::print()
     cout << "]" << endl;
 }
 
+/**
+ * @brief prints content of matrix object in structured form plus the additional information about the Matrix
+ * 
+ * @param name additional info about Matrix to print
+ */
 void Matrix::print(string name)
 {
     cout << name << " Matrix(rows=" << rows << ", columns=" << columns << ", &=" << (this) << ")" << endl << "[\n";
@@ -159,20 +224,39 @@ void Matrix::print(string name)
     cout << "]" << endl;
 }
 
+/**
+ * @brief print parameters of Matrix, consisting of number of rows, columns and its address
+ * 
+ */
 void Matrix::printParams()
 {
     cout << "Matrix(rows=" << rows << ", columns=" << columns << ", &=" << (this) << ")" << endl;
 }
 
+/**
+ * @brief print parameters of Matrix, consisting of number of rows, columns and its address plus additional information about the Matrix
+ * 
+ * @param name additional info about Matrix to print
+ */
 void Matrix::printParams(string name)
 {
     cout << name << " Matrix(rows=" << rows << ", columns=" << columns << ", &=" << (this) << ")" << endl;
 }
 
+/**
+ * @brief sets Matrix matrix 2D array
+ * 
+ * @param _matrix 2D array with values
+ */
 void Matrix::setMatrix(double** _matrix) {
     matrix = this->copyMatrix(_matrix, this->getColumns());
 }
 
+/**
+ * @brief standard transposition of the Matrix
+ * 
+ * @return Matrix* transposed Matrix
+ */
 Matrix* Matrix::T()
 {
     Matrix* transposition = new Matrix(columns, rows);
@@ -187,6 +271,13 @@ Matrix* Matrix::T()
     return transposition;
 }
 
+/**
+ * @brief creates new dynamic 2D array and copies the values from given one
+ * 
+ * @param _matrix 2D array which values we want to copy
+ * @param length number of columns we want to copy
+ * @return double** newly created 2D array with copied values
+ */
 double** Matrix::copyMatrix(double** _matrix, int length)
 {
     double** new_matrix = new double*[rows];
@@ -200,6 +291,14 @@ double** Matrix::copyMatrix(double** _matrix, int length)
     return new_matrix;
 } 
 
+/**
+ * @brief creates new dynamic 2D array and copies subset of values from given one
+ * 
+ * @param _matrix 2D array from which values we want to copy values
+ * @param length number of columns we want to copy
+ * @param offSet index of columns from where we want to copy content of the given Matrix
+ * @return double** newly created 2D array with copied values
+ */
 double** Matrix::copyMatrixRandom(double** _matrix, int length, int offSet)
 {
     double** new_matrix = new double*[rows];

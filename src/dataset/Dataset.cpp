@@ -1,5 +1,13 @@
 #include "Dataset.h"
 
+/**
+ * @brief Construct a new Dataset:: Dataset object
+ * 
+ * @param xFileName file name/path of the file with vectors
+ * @param yFileName file name/path of the file with labels
+ * @param maxRow number of rows to read from the files
+ * @param verbose flag for printing the datasets, for debugging purposes etc.
+ */
 Dataset::Dataset(string xFileName, string yFileName, int maxRow, bool verbose): maxRow(maxRow)
 {
     int rows = (maxRow != -1) ? maxRow : getRows(xFileName);
@@ -18,6 +26,12 @@ Dataset::Dataset(string xFileName, string yFileName, int maxRow, bool verbose): 
     }
 }
 
+/**
+ * @brief iterate throw whole file and gets the number of rows in this specific file
+ * 
+ * @param file file name/path of the file
+ * @return int number of rows in the file
+ */
 int Dataset::getRows(string file)
 {
     ifstream my_file(file);
@@ -35,6 +49,12 @@ int Dataset::getRows(string file)
     return count_rows;
 }
 
+/**
+ * @brief gets number of columns in the file
+ * 
+ * @param file file name/path of the file
+ * @return int number of columns in the file
+ */
 int Dataset::getColumns(string file)
 {
     ifstream my_file(file);
@@ -55,6 +75,15 @@ int Dataset::getColumns(string file)
     return count_values;
 }
 
+/**
+ * @brief reads data from given file, used for loading datasets
+ * 
+ * @param file file name/path of the file
+ * @param rows number of rows to read
+ * @param columns number of columns to read
+ * @param X binary flag, when true, vectors are read, when false, labels
+ * @return double** 2D array representation of matrix with dataset data
+ */
 double **Dataset::readData(string file, int rows, int columns, bool X)
 {
     ifstream read_vectors(file);
@@ -96,6 +125,11 @@ double **Dataset::readData(string file, int rows, int columns, bool X)
     return _matrix;
 }
 
+/**
+ * @brief prints the dataset object, the number of printed rows must be specified
+ * 
+ * @param limit number of printed rows of the dataset object
+ */
 void Dataset::print(int limit)
 {
     cout << "Dataset x rows=" << X->getRows() << ", columns=" << X->getColumns() << ", &=" << (this) << ")" << endl;

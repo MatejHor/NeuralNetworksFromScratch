@@ -12,8 +12,11 @@ using namespace std;
 class Matrix
 {
 private:
+    // dynamic 2D array holding Matrix values
     double **matrix;
+    // number of rows of the Matrix
     int rows;
+    // number of columns of the Matrix
     int columns;
 
 public:

@@ -317,7 +317,7 @@ static Matrix *multiply(Matrix *matrix, double x)
 }
 
 /**
- * @brief applyed log function for every item in Matrix
+ * @brief applied log function for every item in Matrix
  * 
  * @param matrix 
  * @return new logged Matrix* 
@@ -534,7 +534,14 @@ static Matrix *momentumUpdate(Matrix *m1, Matrix *m2, double multiplicator)
     return m1;
 }
 
-// ACTIVACNE FUNKCIE
+// ACTIVATION FUNCTIONS
+
+/**
+ * @brief sigmoid activation function
+ * 
+ * @param x Matrix on which the sigmoid will be computed
+ * @return Matrix* Matrix filled with values computed with sigmoid
+ */
 static Matrix *sigmoid(Matrix *x)
 {
     double **matrix = new double *[x->getRows()];
@@ -552,6 +559,12 @@ static Matrix *sigmoid(Matrix *x)
     return new Matrix(x->getRows(), x->getColumns(), matrix);
 }
 
+/**
+ * @brief derivation of sigmoid activation function
+ * 
+ * @param x Matrix on which the derivation of sigmoid will be computed
+ * @return Matrix* Matrix filled with values computed with sigmoid derivation
+ */
 static Matrix *sigmoidDerivative(Matrix *x)
 {
     double **matrix = new double *[x->getRows()];
@@ -570,6 +583,12 @@ static Matrix *sigmoidDerivative(Matrix *x)
     return new Matrix(x->getRows(), x->getColumns(), matrix);
 }
 
+/**
+ * @brief softmax activation function
+ * 
+ * @param x Matrix on which the softmax will be computed
+ * @return Matrix* Matrix filled with values computed with softmax
+ */
 static Matrix *softmax(Matrix *x)
 {
     double **matrix = new double *[x->getRows()];
@@ -598,6 +617,12 @@ static Matrix *softmax(Matrix *x)
     return new Matrix(x->getRows(), x->getColumns(), matrix);
 }
 
+/**
+ * @brief derivation of softmax activation function
+ * 
+ * @param x Matrix on which the derivation of softmax will be computed
+ * @return Matrix* Matrix filled with values computed with softmax derivation
+ */
 static Matrix *softmaxDerivation(Matrix *x)
 {
     double **matrix = new double *[x->getRows()];
@@ -626,6 +651,12 @@ static Matrix *softmaxDerivation(Matrix *x)
     return new Matrix(x->getRows(), x->getColumns(), matrix);
 }
 
+/**
+ * @brief reLu activation function
+ * 
+ * @param x Matrix on which the reLu will be computed
+ * @return Matrix* Matrix filled with values computed with reLu
+ */
 static Matrix *reLu(Matrix *x)
 {
     double **matrix = new double *[x->getRows()];
@@ -649,6 +680,12 @@ static Matrix *reLu(Matrix *x)
     return new Matrix(x->getRows(), x->getColumns(), matrix);
 }
 
+/**
+ * @brief derivation of reLu activation function
+ * 
+ * @param x Matrix on which the derivation of reLu will be computed
+ * @return Matrix* Matrix filled with values computed with reLu derivation
+ */
 static Matrix *reLuDerivation(Matrix *x)
 {
     double **matrix = new double *[x->getRows()];
@@ -672,6 +709,17 @@ static Matrix *reLuDerivation(Matrix *x)
     return new Matrix(x->getRows(), x->getColumns(), matrix);
 }
 
+/**
+ * @brief squeezes Matrix from n x m Matrix to n x 1 Matrix, used to get predicted categories etc.
+ * extracts category for every row based on its values
+ * have two modes "max" and "category"
+ * "max" extracts category (index of column) value based on max value for every row
+ * "category" extracts category (index of column) based on value 1.0
+ * 
+ * @param Y Matrix which we want to squeeze
+ * @param func string value if we want to perform "max" or "category" mode of the function
+ * @return Matrix* new squeezed Matrix with only one value indicating category per row
+ */
 static Matrix *squeeze(Matrix *Y, string func)
 {
     Matrix *new_Y = new Matrix(Y->getRows(), 1);
@@ -696,6 +744,13 @@ static Matrix *squeeze(Matrix *Y, string func)
     return new_Y;
 }
 
+/**
+ * @brief saves model predictions for vectors into specified file
+ * 
+ * @param fileName name of file where we want to save our predictions
+ * @param data Matrix which contains the predicted labels for given data
+ * @param mode specifies if the file will be rewriten or appended
+ */
 void savePrediction(string fileName, Matrix* data, string mode) {
     ofstream file;
     if (mode.compare("append") == 0)
@@ -710,6 +765,14 @@ void savePrediction(string fileName, Matrix* data, string mode) {
     file.close();
 }
 
+/**
+ * @brief computes accuracy of our prediction with comparing known labels with the ones predicted from our model
+ * 
+ * @param AL predicted labels from our model
+ * @param Y given correct labels
+ * @param fileName name of the file where the predictions will be saved - uses previous function
+ * @return double accuracy obtained on given data
+ */
 static double accuracy(Matrix *AL, Matrix *Y, string fileName)
 {
     Matrix *transponseAL = AL->T();

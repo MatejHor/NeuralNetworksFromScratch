@@ -10,8 +10,11 @@
 class Dataset
 {
 private:
+    // Matrix for values representing vectors
     Matrix *X;
+    // Matrix for values representing labels
     Matrix *Y;
+    // number of rows
     int maxRow;
 
 public:

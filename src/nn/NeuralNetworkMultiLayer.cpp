@@ -20,7 +20,7 @@ NeuralNetworkMultiLayer::NeuralNetworkMultiLayer(vector<int> layer, int epochs, 
 
 /**
  * @brief Create matrix for weights, bias and momentum. 
- * Weiths and bias initialize with random value multiply by sqrt(1 / previous layer), Momentum initialize with 0.
+ * Weights and bias initialize with random value multiply by sqrt(1 / previous layer), Momentum initialize with 0.
  */
 void NeuralNetworkMultiLayer::initialize()
 {
@@ -103,7 +103,7 @@ void NeuralNetworkMultiLayer::backPropagation(Matrix *yBatch, double m_batch)
 /**
  * @brief Dealocate Matrices in cache and if requeired ( @param clearGrads ) also dealocate Matrix in grads
  * 
- * @param clearGrads True if is requeired to dealocate grads data (not needed in transform)
+ * @param clearGrads True if is required to dealocate grads data (not needed in transform)
  */
 void NeuralNetworkMultiLayer::clearCache(bool clearGrads)
 {
@@ -169,9 +169,9 @@ void NeuralNetworkMultiLayer::fit(Dataset *train)
 
             int batchLength = xBatch->getColumns();
 
-            // Forward batch to get predtion
+            // Forward batch to get prediction
             this->forwardPropagation(xBatch);
-            // Get derivative from predtion
+            // Get derivative from prediction
             this->backPropagation(yBatch, batchLength);
 
             // Update momentum params
