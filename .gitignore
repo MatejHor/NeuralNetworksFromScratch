@@ -46,3 +46,4 @@ trainPredictions
 actualTestPredictions
 src/weights.txt
 src/bias.txt
+NN_from_scratch.zip

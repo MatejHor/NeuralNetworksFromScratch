@@ -31,7 +31,7 @@ int main()
     vector<int> layer = {784, 256, 10};
     NeuralNetworkMultiLayer model = NeuralNetworkMultiLayer(
         layer, // layers
-        10,    //epochs
+        30,    //epochs
         256,   //batchSize
         0.2,   //learning_rate
         0.9    //beta

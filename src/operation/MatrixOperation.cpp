@@ -711,10 +711,9 @@ static Matrix *reLuDerivation(Matrix *x)
 
 /**
  * @brief squeezes Matrix from n x m Matrix to n x 1 Matrix, used to get predicted categories etc.
- * extracts category for every row based on its values
- * have two modes "max" and "category"
- * "max" extracts category (index of column) value based on max value for every row
- * "category" extracts category (index of column) based on value 1.0
+ * extracts category for every row based on its values have two modes "max" and "category":
+ * 1. "max" extracts category (index of column) value based on max value for every row
+ * 2. "category" extracts category (index of column) based on value 1.0
  * 
  * @param Y Matrix which we want to squeeze
  * @param func string value if we want to perform "max" or "category" mode of the function
@@ -767,6 +766,7 @@ void savePrediction(string fileName, Matrix* data, string mode) {
 
 /**
  * @brief computes accuracy of our prediction with comparing known labels with the ones predicted from our model
+ * and save prediction into file with name @param fileName
  * 
  * @param AL predicted labels from our model
  * @param Y given correct labels
