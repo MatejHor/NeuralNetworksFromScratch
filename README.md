@@ -2,8 +2,8 @@
 Implementation of a feed-forward neural network in C/C++.
 Trained it on a Fashion-MNIST dataset using a backpropagation algorithm.
 
-## [REQUIREMENTS]
-Solution must met ALL of the following requirements:
+## Requirements
+Solution met ALL of the following requirements:
 1. Your solution must be compilable and runnable on the AISA server.
 2. Your solution achieves at least 88% accuracy.
 3. Your solution must finish within 30 minutes. 
@@ -21,7 +21,7 @@ Solution must met ALL of the following requirements:
       be on i-th line in the associated output file.
     - Each prediction is a single integer 0 - 9.
 
-## [DATASET]
+## Dataset
 Fashion MNIST (https://arxiv.org/pdf/1708.07747.pdf) a modern version of a
 well-known MNIST (http://yann.lecun.com/exdb/mnist/). It is a dataset of
 Zalando's article images ‒ consisting of a training set of 60,000 examples
