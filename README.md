@@ -1,5 +1,5 @@
 # Neural network from Scratch
-Implementation of a feed-forward neural network in C/C++.
+Implementation of a feed-forward neural network in C/C++.  
 Trained it on a Fashion-MNIST dataset using a backpropagation algorithm.
 
 ## Requirements
